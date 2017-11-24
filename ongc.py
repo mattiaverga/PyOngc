@@ -43,7 +43,7 @@ class Dso(object):
                         raise TypeError('Wrong type as parameter. A string type was expected.')
                 
                 # Make sure object name is written in correct form
-                nameParts = re.match(r'((?:NGC|IC)\s?)(\d{1,4})(\s?(NED)(\d{1,2})|\s?[A-Z])?',name.upper())
+                nameParts = re.match(r'((?:NGC|IC)\s?)(\d{1,4})(\s?(NED)(\d{1,2})|\s?[A-Z]+)?',name.upper())
                 if nameParts is None :
                         raise ValueError('Wrong object name. Please insert a valid NGC or IC object name.')
                 
