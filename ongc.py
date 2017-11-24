@@ -23,6 +23,7 @@
 
 """Provides classes and functions to access OpenNGC database."""
 
+from math import acos, cos, degrees, radians, sin
 import re
 import sqlite3
 import sys
@@ -360,6 +361,45 @@ def _queryObject(name):
                 db.close()
         
         return objectData
+
+def getSeparation(obj1, obj2, style="raw"):
+        """Finds the apparent angular separation between two objects.
+        
+        :param obj1, obj2: two NGC/IC objects or string identifiers
+        :param opt string style: use "text" to return a string with degrees, minutes and seconds
+        :returns: (int: angular separation, string: difference in A.R, string: difference in Dec)
+        :returns: string DD° MMm SS.SSs
+        """
+        
+        if not isinstance(obj1, Dso):
+                if isinstance(obj1, str):
+                        obj1 = Dso(obj1)
+                else:
+                        raise TypeError('Wrong type obj1. Either a Dso or string type was expected.')
+        if not isinstance(obj2, Dso):
+                if isinstance(obj2, str):
+                        obj2 = Dso(obj2)
+                else:
+                        raise TypeError('Wrong type obj2. Either a Dso or string type was expected.')
+        
+        coordsObj1 = obj1.getCoords()
+        coordsObj2 = obj2.getCoords()
+        
+        a1 = radians(coordsObj1[0][0]*15 + coordsObj1[0][1]/4 + coordsObj1[0][2]/240)
+        a2 = radians(coordsObj2[0][0]*15 + coordsObj2[0][1]/4 + coordsObj2[0][2]/240)
+        d1 = radians(coordsObj1[1][0] + coordsObj1[1][1]/60 + coordsObj1[1][2]/3600)
+        d2 = radians(coordsObj2[1][0] + coordsObj2[1][1]/60 + coordsObj2[1][2]/3600)
+        
+        separation = acos(sin(d1)*sin(d2) + cos(d1)*cos(d2)*cos(a1-a2))
+        
+        if style == "text":
+                d = int(degrees(separation))
+                md = abs(degrees(separation) - d) * 60
+                m = int(md)
+                s = (md - m) * 60
+                return str(d) + "° " + str(m) + "m " + "{:.2f}".format(s) + "s"
+        else:
+                return degrees(separation), degrees(a2-a1), degrees(d2-d1)
 
 def printDetails(dso):
         """Prints a detailed description of the object in a formatted output.
