@@ -37,7 +37,11 @@ class Dso(object):
                 :param string name: identifier of the NGC or IC object
                 """
                 
-                # Make sure object name is write in correct form
+                # Make sure user passed a string as parameter
+                if not isinstance(name, str):
+                        raise TypeError('Wrong type as parameter. A string type was expected.')
+                
+                # Make sure object name is written in correct form
                 nameParts = re.match(r'((?:NGC|IC)\s?)(\d{1,4})(\s?(NED)(\d{1,2})|\s?[A-Z])?',name.upper())
                 if nameParts is None :
                         raise ValueError('Wrong object name. Please insert a valid NGC or IC object name.')
@@ -102,9 +106,8 @@ class Dso(object):
         def __str__(self):
                 """Returns basic data of the object as a formatted string."""
                 
-                return ('''{:25}{}\n{:23}{:23}{}'''
-                .format("Name: " + self._name, "Type: " + self._type,
-                        "R.A.: " + self._ra, "Dec.: " + self._dec, "Constellation: " + self._const)
+                return ('''{:20}{:38}{}'''
+                        .format("Name: " + self._name, "Type: " + self._type, "Constellation: " + self._const)
                 )
                 
         def getConstellation(self):
@@ -333,6 +336,10 @@ def _queryObject(name):
         :param string name: identifier of the NGC or IC object
         """
         
+        # Make sure user passed a string as parameter
+        if not isinstance(name, str):
+                raise TypeError('Wrong type as parameter. A string type was expected.')
+        
         try:
                 db = sqlite3.connect('ongc.db')
                 cursor = db.cursor()
@@ -353,3 +360,123 @@ def _queryObject(name):
                 db.close()
         
         return objectData
+
+def printDetails(dso):
+        """Prints a detailed description of the object in a formatted output.
+        
+        :param dso: a Dso object or a string with the NGC/IC identifier
+        """
+        
+        def _justifyText(text):
+                """Prints the text on multiple lines if length is more than 73 chars.
+                
+                :param string text: text to be printed
+                """
+                chunks = text.split()
+                line = []
+                lineLength = 0
+                for chunk in chunks:
+                        lineLength += len(chunk) + 1
+                        if lineLength <= 73:
+                                line.append(chunk)
+                                continue
+                        else:
+                                print('''{:5}{:73}{}'''.format("|", " ".join(line), "|"))
+                                del line[:]
+                                line.append(chunk)
+                                lineLength = len(chunk) + 1
+                print('''{:5}{:73}{}'''.format("|", " ".join(line), "|"))
+        
+        if not isinstance(dso, Dso):
+                if isinstance(dso, str):
+                        dso = Dso(dso)
+                else:
+                        raise TypeError('Wrong type as parameter. Either a Dso or string type was expected.')
+        
+        objType = dso.getType()
+        print("+" + "-"*77 + "+")
+        print('''{:2}{:14}{:24}{:38}{}'''.format("|", "Id: " + str(dso.getId()), "Name: " + dso.getName(),
+                                                 "Type: " + objType, "|"))
+        print('''{:2}{:23}{:23}{:30}{}'''.format("|", "R.A.: " + dso.getRA(), "Dec.: " + dso.getDec(),
+                                                 "Constellation: " + dso.getConstellation(), "|"))
+        
+        identifiers = dso.getIdentifiers()
+        if (identifiers[0] != None) or (identifiers[1] != None) or (identifiers[2] != None):
+                print('''{:2}{:76}{}'''.format("|", "Also known as: ", "|"))
+                knownAs = []
+                if identifiers[0] != None:
+                        knownAs.append(identifiers[0])
+                if identifiers[1] != None:
+                        knownAs.extend(identifiers[1])
+                if identifiers[2] != None:
+                        knownAs.extend(identifiers[2])
+                _justifyText(", ".join(knownAs))
+        
+        if identifiers[3] != None:
+                print('''{:2}{:76}{}'''.format("|", "Common names: ", "|"))
+                _justifyText(", ".join(identifiers[3]))
+        print("+" + "-"*77 + "+")
+        
+        dimensions = []
+        for i in range(0,2):
+                if dso.getDimensions()[i] is None:
+                        dimensions.append("N/A")
+                else:
+                        dimensions.append(str(dso.getDimensions()[i]) + "'")
+        if dso.getDimensions()[2] is None:
+                dimensions.append("N/A")
+        else:
+                dimensions.append(str(dso.getDimensions()[2]) + "°")
+        print('''{:2}{:23}{:23}{:30}{}'''.format("|", "Major axis: " + dimensions[0],
+                                                 "Minor axis: " + dimensions[1],
+                                                 "Position angle: " + dimensions[2], "|"))
+        
+        magnitudes = []
+        for bandValue in dso.getMagnitudes():
+                if bandValue is None:
+                        magnitudes.append("N/A")
+                else:
+                        magnitudes.append(str(bandValue))
+        print('''{:2}{:15}{:15}{:15}{:15}{:16}{}'''.format("|", "B-mag: " + magnitudes[0],
+                                                           "V-mag: " + magnitudes[1], "J-mag: " + magnitudes[2],
+                                                           "H-mag: " + magnitudes[3], "K-mag: " + magnitudes[4],
+                                                           "|"))
+        print("|" + " "*77 + "|")
+        
+        if objType == "Galaxy":
+                print('''{:2}{:30}{:46}{}'''.format("|", "Surface brightness: " + str(dso.getSurfaceBrightness()),
+                                                    "Hubble classification: " + dso.getHubble(), "|"))
+        
+        if objType == "Planetary Nebula":
+                centralStar = dso.getCStarData()
+                if centralStar[0] != None:
+                        print('''{:2}{:76}{}'''.format("|", "Central star identifiers: ", "|"))
+                        print('''{:5}{:73}{}'''.format("|", ", ".join(centralStar[0]), "|"))
+                        print("|" + " "*77 + "|")
+                cStarMagnitudes = []
+                for i in range(1,4):
+                        if centralStar[i] is None:
+                                cStarMagnitudes.append("N/A")
+                        else:
+                                cStarMagnitudes.append(str(centralStar[i]))
+                print('''{:2}{:76}{}'''.format("|", "Central star magnitudes: ", "|"))
+                print('''{:5}{:24}{:24}{:25}{}'''.format("|", "U-mag: " + cStarMagnitudes[0],
+                                           "B-mag: " + cStarMagnitudes[1],
+                                           "V-mag: " + cStarMagnitudes[2], "|"))
+        print("+" + "-"*77 + "+")
+        
+        if identifiers[4] != None:
+                print('''{:2}{:76}{}'''.format("|", "Other identifiers: ", "|"))
+                _justifyText(", ".join(identifiers[4]))
+                print("+" + "-"*77 + "+")
+        
+        notes = dso.getNotes()
+        if notes[0] != "":
+                print('''{:2}{:76}{}'''.format("|", "NED notes: ", "|"))
+                _justifyText(notes[0])
+                print("+" + "-"*77 + "+")
+        
+        if notes[1] != "":
+                print('''{:2}{:76}{}'''.format("|", "OpenNGC notes: ", "|"))
+                _justifyText(notes[1])
+                print("+" + "-"*77 + "+")

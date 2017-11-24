@@ -28,15 +28,19 @@
 
 """A command line browser for OpenNGC database."""
 
-from ongc import Dso
+import ongc
 import argparse
 
+if __name__ == '__main__':
+        # Parse command line arguments
+        parser = argparse.ArgumentParser(description='Show info about OpenNGC object.')
+        parser.add_argument('objectname', metavar='NGCxxxx/ICxxxx', help='an object identifier')
+        parser.add_argument('-D', '--details', help='show all object details', action='store_true')
 
-# Parse command line arguments
-parser = argparse.ArgumentParser(description='Show info about OpenNGC object.')
-parser.add_argument('objectname', metavar='NGCxxxx/ICxxxx', help='an object identifier')
+        args = parser.parse_args()
 
-args = parser.parse_args()
-
-oggetto = Dso(args.objectname)
-print(oggetto)
+        oggetto = ongc.Dso(args.objectname)
+        if args.details == True:
+                ongc.printDetails(oggetto)
+        else:
+                print(oggetto)
