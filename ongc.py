@@ -120,13 +120,13 @@ class Dso(object):
                 
                 The value is espressed as a tuple of tuples 
                 with numerical values espressed as int or float:
-                ((HH,MM,SS.SS),(+/-,DD,MM,SS.SS))
+                ((HH,MM,SS.SS),(DD,MM,SS.SS))
                 """
                 
                 ra = self._ra.split(":")
                 dec = self._dec.split(":")
                 raTuple = (int(ra[0]), int(ra[1]), float(ra[2]))
-                decTuple = (dec[0][0], int(dec[0][1:]), int(dec[1]), float(dec[2]))
+                decTuple = (int(dec[0]), int(dec[1]), float(dec[2]))
                 return raTuple, decTuple
         
         def getCStarData(self):
