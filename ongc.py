@@ -65,6 +65,9 @@ class Dso(object):
                 
                 objectData = _queryObject(objectname)
                 
+                if objectData is None:
+                        raise ValueError('Object named ' + objectname +' not found in the database.')
+                
                 # If object is a duplicate then return the main object
                 if objectData[1] == "Dup":
                         if objectData[20] != "":
@@ -124,6 +127,8 @@ class Dso(object):
                 ((HH,MM,SS.SS),(DD,MM,SS.SS))
                 """
                 
+                if self._ra == "" or self._dec == "":
+                        raise ValueError('Object named ' + objectname +' has no coordinates in database.')
                 ra = self._ra.split(":")
                 dec = self._dec.split(":")
                 raTuple = (int(ra[0]), int(ra[1]), float(ra[2]))
