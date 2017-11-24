@@ -392,8 +392,12 @@ def getSeparation(obj1, obj2, style="raw"):
         
         a1 = radians(coordsObj1[0][0]*15 + coordsObj1[0][1]/4 + coordsObj1[0][2]/240)
         a2 = radians(coordsObj2[0][0]*15 + coordsObj2[0][1]/4 + coordsObj2[0][2]/240)
-        d1 = radians(coordsObj1[1][0] + coordsObj1[1][1]/60 + coordsObj1[1][2]/3600)
-        d2 = radians(coordsObj2[1][0] + coordsObj2[1][1]/60 + coordsObj2[1][2]/3600)
+        d1 = radians(coordsObj1[1][1] + coordsObj1[1][2]/60 + coordsObj1[1][3]/3600)
+        if coordsObj1[1][0] == "-":
+                d1 = 0 - d1
+        d2 = radians(coordsObj2[1][1] + coordsObj2[1][2]/60 + coordsObj2[1][3]/3600)
+        if coordsObj2[1][0] == "-":
+                d2 = 0 - d2
         
         separation = acos(sin(d1)*sin(d2) + cos(d1)*cos(d2)*cos(a1-a2))
         
