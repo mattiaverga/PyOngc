@@ -28,6 +28,7 @@ import re
 import sqlite3
 import sys
 
+DBDATE = 20171125 #Version of database data
 
 class Dso(object):
         """Defines a single Deep Sky Object from ONGC database."""
@@ -63,7 +64,12 @@ class Dso(object):
                 else :
                         objectname = nameParts.group(1).strip() + '{:0>4}'.format(nameParts.group(2))
                 
-                objectData = _queryObject(objectname)
+                selectWhat = '''objects.id, objects.type, objTypes.typedesc, ra, dec, const, majax, minax, 
+                                pa, bmag, vmag, jmag,hmag, kmag, sbrightn, hubble, cstarumag, cstarbmag, cstarvmag, messier, 
+                                ngc, ic, cstarnames,identifiers, commonnames, nednotes, ongcnotes'''
+                fromWhere = 'objects JOIN objTypes ON objects.type = objTypes.type'
+                constraint = 'name="' + objectname + '"'
+                objectData = _queryFetchOne("ongc.db", selectWhat, fromWhere, constraint)
                 
                 if objectData is None:
                         raise ValueError('Object named ' + objectname +' not found in the database.')
@@ -336,27 +342,54 @@ def _assignValue(value):
         else:
                 return value
 
-def _queryObject(name):
-        """Retrieve object data from database.
+def _queryFetchOne(dbFileName, selectWhat, fromWhere, constraint):
+        """Search one row in database.
         
-        :param string name: identifier of the NGC or IC object
+        :param string dbFileName: sqlite3 database file name
+        :param string selectWhat: the SELECT field of the query
+        :param string fromWhere: the FROM field of the query
+        :param string constraint: the WHERE field of the query
+        :return list or None: a single row from the database
         """
         
-        # Make sure user passed a string as parameter
-        if not isinstance(name, str):
-                raise TypeError('Wrong type as parameter. A string type was expected.')
-        
         try:
-                db = sqlite3.connect('ongc.db')
+                db = sqlite3.connect(dbFileName)
                 cursor = db.cursor()
                 
-                cursor.execute('''SELECT objects.id, objects.type, objTypes.typedesc, ra, dec, const, majax, minax, 
-                        pa, bmag, vmag, jmag,hmag, kmag, sbrightn, hubble, cstarumag, cstarbmag, cstarvmag, messier, 
-                        ngc, ic, cstarnames,identifiers, commonnames, nednotes, ongcnotes 
-                        FROM objects JOIN objTypes ON objects.type = objTypes.type 
-                        WHERE name=?
-                        ''',(name,))
+                cursor.execute('SELECT ' + selectWhat 
+                        + ' FROM ' + fromWhere 
+                        + ' WHERE ' + constraint
+                        )
                 objectData = cursor.fetchone()
+                
+        except Exception as e:
+                db.rollback()
+                raise e
+        
+        finally:
+                db.close()
+        
+        return objectData
+
+def _queryFetchAll(dbFileName, selectWhat, fromWhere, constraint):
+        """Search many rows in database.
+        
+        :param string dbFileName: sqlite3 database file name
+        :param string selectWhat: the SELECT field of the query
+        :param string fromWhere: the FROM field of the query
+        :param string constraint: the WHERE field of the query
+        :return list of lists or None: many rows from the database
+        """
+        
+        try:
+                db = sqlite3.connect(dbFileName)
+                cursor = db.cursor()
+                
+                cursor.execute('SELECT ' + selectWhat 
+                        + ' FROM ' + fromWhere 
+                        + ' WHERE ' + constraint
+                        )
+                objectData = cursor.fetchall()
                 
         except Exception as e:
                 db.rollback()
@@ -383,22 +416,11 @@ def getNeighbors(obj, separation):
         if not (isinstance(separation, int) or isinstance(separation, float)):
                 raise TypeError('Wrong type separation. Either a int or float type was expected.')
         
-        try:
-                db = sqlite3.connect('ongc.db')
-                cursor = db.cursor()
-                
-                cursor.execute('''SELECT objects.name FROM objects
-                               WHERE type != "Dup" AND ra != "" AND dec != "" AND name != ?''',
-                               (obj.getName(),))
-                objectList = cursor.fetchall()
-                
-        except Exception as e:
-                db.rollback()
-                raise e
-        
-        finally:
-                db.close()
-        
+        selectWhat = 'objects.name'
+        fromWhere = 'objects'
+        constraint = 'type != "Dup" AND ra != "" AND dec != "" AND name !="' + obj.getName() + '"'
+        objectList = _queryFetchAll("ongc.db", selectWhat, fromWhere, constraint)
+
         neighbors = []
         for possibleNeighbor in objectList:
                 possibleNeighbor = Dso(possibleNeighbor[0])
