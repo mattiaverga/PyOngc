@@ -367,6 +367,47 @@ def _queryObject(name):
         
         return objectData
 
+def getNeighbors(obj, separation):
+        """Find all neighbors of a object within a user selected range
+        
+        :param object: a Dso object or a string which identifies the object
+        :param float separation: maximum distance from the object expressed in arcmin
+        :returns: list of Dso objects within limits ordered by distance
+        """
+        
+        if not isinstance(obj, Dso):
+                if isinstance(obj, str):
+                        obj = Dso(obj)
+                else:
+                        raise TypeError('Wrong type obj. Either a Dso or string type was expected.')
+        if not (isinstance(separation, int) or isinstance(separation, float)):
+                raise TypeError('Wrong type separation. Either a int or float type was expected.')
+        
+        try:
+                db = sqlite3.connect('ongc.db')
+                cursor = db.cursor()
+                
+                cursor.execute('''SELECT objects.name FROM objects
+                               WHERE type != "Dup" AND ra != "" AND dec != "" AND name != ?''',
+                               (obj.getName(),))
+                objectList = cursor.fetchall()
+                
+        except Exception as e:
+                db.rollback()
+                raise e
+        
+        finally:
+                db.close()
+        
+        neighbors = []
+        for possibleNeighbor in objectList:
+                possibleNeighbor = Dso(possibleNeighbor[0])
+                distance = getSeparation(obj, possibleNeighbor)
+                if distance[0] <= (separation / 60):
+                        neighbors.append((possibleNeighbor, distance[0]))
+        
+        return sorted(neighbors, key=lambda neighbor: neighbor[1])
+
 def getSeparation(obj1, obj2, style="raw"):
         """Finds the apparent angular separation between two objects.
         
