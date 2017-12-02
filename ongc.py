@@ -23,6 +23,7 @@
 
 """Provides classes and functions to access OpenNGC database."""
 
+from decimal import Decimal
 from math import acos, cos, degrees, radians, sin
 import re
 import sqlite3
@@ -401,11 +402,12 @@ def _queryFetchAll(dbFileName, selectWhat, fromWhere, constraint):
         
         return objectData
 
-def getNeighbors(obj, separation):
+def getNeighbors(obj, separation, filter="all"):
         """Find all neighbors of a object within a user selected range
         
         :param object: a Dso object or a string which identifies the object
         :param float separation: maximum distance from the object expressed in arcmin
+        :param optional string filter: filter for "NGC" or "IC" objects - default is all
         :returns: list of Dso objects within limits ordered by distance
         """
         
@@ -420,6 +422,10 @@ def getNeighbors(obj, separation):
         selectWhat = 'objects.name'
         fromWhere = 'objects'
         constraint = 'type != "Dup" AND ra != "" AND dec != "" AND name !="' + obj.getName() + '"'
+        if filter.upper() == "NGC":
+                constraint += " AND name LIKE 'NGC%'"
+        elif filter.upper() == "IC":
+                constraint += " AND name LIKE 'IC%'"
         objectList = _queryFetchAll("ongc.db", selectWhat, fromWhere, constraint)
 
         neighbors = []
