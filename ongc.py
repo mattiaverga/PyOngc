@@ -80,7 +80,8 @@ class Dso(object):
                                 objectname = "NGC" + str(objectData[20])
                         else:
                                 objectname = "IC" + str(objectData[21])
-                        objectData = _queryObject(objectname)
+                        constraint = 'name="' + objectname + '"'
+                        objectData = _queryFetchOne("ongc.db", selectWhat, fromWhere, constraint)
                 
                 # Assign object properties
                 self._id = objectData[0]
@@ -134,7 +135,7 @@ class Dso(object):
                 """
                 
                 if self._ra == "" or self._dec == "":
-                        raise ValueError('Object named ' + objectname +' has no coordinates in database.')
+                        raise ValueError('Object named ' + self._name +' has no coordinates in database.')
                 ra = self._ra.split(":")
                 dec = self._dec.split(":")
                 raTuple = (int(ra[0]), int(ra[1]), float(ra[2]))
