@@ -23,7 +23,6 @@
 
 """Provides classes and functions to access OpenNGC database."""
 
-from decimal import Decimal
 from math import acos, cos, degrees, radians, sin
 import re
 import sqlite3
@@ -322,7 +321,7 @@ class Dso(object):
                 #Field 7: Dimensions
                 dimensions = []
                 #Xephem format wants axes espressed in arcsec, we have arcmin
-                for value in (self.getDimensions()[0],self.getDimensions()[0]):
+                for value in (self.getDimensions()[0],self.getDimensions()[1]):
                         if value is not None:
                                 dimensions.append(str(value*60))
                         else:
@@ -427,7 +426,7 @@ def getNeighbors(obj, separation, filter="all"):
         elif filter.upper() == "IC":
                 constraint += " AND name LIKE 'IC%'"
         objectList = _queryFetchAll("ongc.db", selectWhat, fromWhere, constraint)
-
+        
         neighbors = []
         for possibleNeighbor in objectList:
                 possibleNeighbor = Dso(possibleNeighbor[0])
