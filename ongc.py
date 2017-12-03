@@ -260,8 +260,7 @@ class Dso(object):
                 
                 line = []
                 #Field 1: names
-                names = []
-                names.append(self.getName())
+                names = [self.getName()]
                 identifiers = self.getIdentifiers()
                 if identifiers[0] is not None:
                         names.append(identifiers[0])
