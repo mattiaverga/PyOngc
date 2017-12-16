@@ -27,6 +27,8 @@ from math import acos, cos, degrees, radians, sin
 import re
 import sqlite3
 import sys
+import time
+
 
 DBDATE = 20171125 #Version of database data
 
@@ -371,14 +373,14 @@ def _queryFetchOne(dbFileName, selectWhat, fromWhere, constraint):
         
         return objectData
 
-def _queryFetchAll(dbFileName, selectWhat, fromWhere, constraint):
+def _queryFetchMany(dbFileName, selectWhat, fromWhere, constraint):
         """Search many rows in database.
         
         :param string dbFileName: sqlite3 database file name
         :param string selectWhat: the SELECT field of the query
         :param string fromWhere: the FROM field of the query
         :param string constraint: the WHERE field of the query
-        :return list of lists or None: many rows from the database
+        :return generator object yielding Dso objects
         """
         
         try:
@@ -389,7 +391,11 @@ def _queryFetchAll(dbFileName, selectWhat, fromWhere, constraint):
                         + ' FROM ' + fromWhere 
                         + ' WHERE ' + constraint
                         )
-                objectData = cursor.fetchall()
+                while True:
+                        objectData = cursor.fetchmany()
+                        if objectData == []:
+                                break
+                        yield Dso(objectData[0][0])
                 
         except Exception as e:
                 db.rollback()
@@ -398,7 +404,6 @@ def _queryFetchAll(dbFileName, selectWhat, fromWhere, constraint):
         finally:
                 db.close()
         
-        return objectData
 
 def getNeighbors(obj, separation, filter="all"):
         """Find all neighbors of a object within a user selected range
@@ -424,14 +429,13 @@ def getNeighbors(obj, separation, filter="all"):
                 constraint += " AND name LIKE 'NGC%'"
         elif filter.upper() == "IC":
                 constraint += " AND name LIKE 'IC%'"
-        objectList = _queryFetchAll("ongc.db", selectWhat, fromWhere, constraint)
+        objectList = _queryFetchMany("ongc.db", selectWhat, fromWhere, constraint)
         
         neighbors = []
         for possibleNeighbor in objectList:
-                possibleNeighbor = Dso(possibleNeighbor[0])
-                distance = getSeparation(obj, possibleNeighbor)
-                if distance[0] <= (separation / 60):
-                        neighbors.append((possibleNeighbor, distance[0]))
+                distance = getSeparation(obj, possibleNeighbor)[0]
+                if distance <= (separation / 60):
+                        neighbors.append((possibleNeighbor, distance))
         
         return sorted(neighbors, key=lambda neighbor: neighbor[1])
 
