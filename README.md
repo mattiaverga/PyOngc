@@ -21,6 +21,7 @@ of NGC/IC objects. See the documentation about ongc.xephemFormat method.
         ((20, 59, 17.14), ('+', 44, 31, 43.6))
 
 Object data is easily available from command line also:
+
         $ ongcbrowse --details NGC7000
         +-----------------------------------------------------------------------------+
         | Id: 13055     Name: NGC7000           Type: HII Ionized region              |
