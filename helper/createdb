@@ -1,3 +1,7 @@
+#!/usr/bin/python3
+# -*- coding:utf-8 -*-
+#
+#
 # MIT License
 #
 # Copyright (c) 2017 Mattia Verga <mattia.verga@tiscali.it>
@@ -21,7 +25,11 @@
 # SOFTWARE.
 #
 
-"""Creates sqlite3 database from csv OpenNGC file."""
+"""Creates sqlite3 database from csv OpenNGC file.
+The first line of the csv file, which contains the headers, must be removed.
+
+        Usage: createdb.py
+"""
 
 import os
 import csv
@@ -29,6 +37,7 @@ import sqlite3
 
 csvFile = open("NGC.csv", 'r')
 reader = csv.reader(csvFile, delimiter=";")
+outputFile = os.path.join(os.path.dirname(__file__), os.pardir, 'pyongc', 'ongc.db')
 
 # Dictionaries
 objectTypes = {'*':'Star',
@@ -55,7 +64,7 @@ objectTypes = {'*':'Star',
 
 # Create db
 try:
-        db = sqlite3.connect('ongc.db')
+        db = sqlite3.connect(outputFile)
         cursor = db.cursor()
         
         # Create objects types table
