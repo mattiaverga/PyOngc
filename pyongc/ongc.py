@@ -99,7 +99,7 @@ class Dso(object):
                                 ngc, ic, cstarnames,identifiers, commonnames, nednotes, ongcnotes'''
                 fromWhere = 'objects JOIN objTypes ON objects.type = objTypes.type'
                 constraint = 'name="' + objectname + '"'
-                objectData = _queryFetchOne(DBPATH, selectWhat, fromWhere, constraint)
+                objectData = _queryFetchOne(selectWhat, fromWhere, constraint)
                 
                 if objectData is None:
                         raise ValueError('Object named ' + objectname +' not found in the database.')
@@ -111,7 +111,7 @@ class Dso(object):
                         else:
                                 objectname = "IC" + str(objectData[21])
                         constraint = 'name="' + objectname + '"'
-                        objectData = _queryFetchOne(DBPATH, selectWhat, fromWhere, constraint)
+                        objectData = _queryFetchOne(selectWhat, fromWhere, constraint)
                 
                 # Assign object properties
                 self._id = objectData[0]
@@ -466,10 +466,9 @@ class Dso(object):
                 return ",".join(line)
 
 
-def _queryFetchOne(dbFileName, selectWhat, fromWhere, constraint):
+def _queryFetchOne(selectWhat, fromWhere, constraint):
         """Search one row in database.
         
-        :param string dbFileName: sqlite3 database file name
         :param string selectWhat: the SELECT field of the query
         :param string fromWhere: the FROM field of the query
         :param string constraint: the WHERE field of the query
@@ -477,7 +476,7 @@ def _queryFetchOne(dbFileName, selectWhat, fromWhere, constraint):
         """
         
         try:
-                db = sqlite3.connect(dbFileName)
+                db = sqlite3.connect(DBPATH)
                 cursor = db.cursor()
                 
                 cursor.execute('SELECT ' + selectWhat 
@@ -495,18 +494,17 @@ def _queryFetchOne(dbFileName, selectWhat, fromWhere, constraint):
         
         return objectData
 
-def _queryFetchMany(dbFileName, selectWhat, fromWhere, constraint):
+def _queryFetchMany(selectWhat, fromWhere, constraint):
         """Search many rows in database.
         
-        :param string dbFileName: sqlite3 database file name
         :param string selectWhat: the SELECT field of the query
         :param string fromWhere: the FROM field of the query
         :param string constraint: the WHERE field of the query
-        :return generator object yielding Dso objects
+        :return generator object yielding DSObjects
         """
         
         try:
-                db = sqlite3.connect(dbFileName)
+                db = sqlite3.connect(DBPATH)
                 cursor = db.cursor()
                 
                 cursor.execute('SELECT ' + selectWhat 
@@ -570,7 +568,7 @@ def getNeighbors(obj, separation, filter="all"):
                 constraint += " AND name LIKE 'NGC%'"
         elif filter.upper() == "IC":
                 constraint += " AND name LIKE 'IC%'"
-        objectList = _queryFetchMany(DBPATH, selectWhat, fromWhere, constraint)
+        objectList = _queryFetchMany(selectWhat, fromWhere, constraint)
         
         neighbors = []
         for possibleNeighbor in objectList:
@@ -848,7 +846,7 @@ def searchAltId(name):
                 constraint = 'identifiers LIKE "%MWSC ' + "{:0>4}".format(nameParts[2]) + '%"'
         elif nameParts[1] == 'LBN': # 3 digits format
                 constraint = 'identifiers LIKE "%LBN ' + "{:0>3}".format(nameParts[2]) + '%"'
-        objectData = _queryFetchOne(DBPATH, selectWhat, fromWhere, constraint)
+        objectData = _queryFetchOne(selectWhat, fromWhere, constraint)
         
         if objectData is not None:
                 return Dso(objectData[0])
