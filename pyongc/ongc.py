@@ -122,19 +122,19 @@ class Dso(object):
                 self._const = str(objectData[5])
                 
                 # These properties may be empty
-                self._majax = _assignValue(objectData[6])
-                self._minax = _assignValue(objectData[7])
-                self._pa = _assignValue(objectData[8])
-                self._bmag = _assignValue(objectData[9])
-                self._vmag = _assignValue(objectData[10])
-                self._jmag = _assignValue(objectData[11])
-                self._hmag = _assignValue(objectData[12])
-                self._kmag = _assignValue(objectData[13])
-                self._sbrightn = _assignValue(objectData[14])
+                self._majax = Dso._assignValue(objectData[6])
+                self._minax = Dso._assignValue(objectData[7])
+                self._pa = Dso._assignValue(objectData[8])
+                self._bmag = Dso._assignValue(objectData[9])
+                self._vmag = Dso._assignValue(objectData[10])
+                self._jmag = Dso._assignValue(objectData[11])
+                self._hmag = Dso._assignValue(objectData[12])
+                self._kmag = Dso._assignValue(objectData[13])
+                self._sbrightn = Dso._assignValue(objectData[14])
                 self._hubble = str(objectData[15])
-                self._cstarumag = _assignValue(objectData[16])
-                self._cstarbmag = _assignValue(objectData[17])
-                self._cstarvmag = _assignValue(objectData[18])
+                self._cstarumag = Dso._assignValue(objectData[16])
+                self._cstarbmag = Dso._assignValue(objectData[17])
+                self._cstarvmag = Dso._assignValue(objectData[18])
                 self._messier = str(objectData[19])
                 self._ngc = str(objectData[20])
                 self._ic = str(objectData[21])
@@ -150,7 +150,16 @@ class Dso(object):
                 return ('''{:20}{:38}{}'''
                         .format("Name: " + self._name, "Type: " + self._type, "Constellation: " + self._const)
                 )
+        
+        @staticmethod
+        def _assignValue(value):
+                """ Returns value or None type if value is an empty string."""
                 
+                if value == "":
+                        return None
+                else:
+                        return value
+        
         def getConstellation(self):
                 """Returns the constellation where the object is located (string).
                 
@@ -456,14 +465,6 @@ class Dso(object):
                 
                 return ",".join(line)
 
-
-def _assignValue(value):
-        """ Returns value or None type if value is an empty string."""
-        
-        if value == "":
-                return None
-        else:
-                return value
 
 def _queryFetchOne(dbFileName, selectWhat, fromWhere, constraint):
         """Search one row in database.
