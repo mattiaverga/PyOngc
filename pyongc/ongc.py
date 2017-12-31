@@ -64,10 +64,11 @@ DBPATH = os.path.join(os.path.dirname(__file__), 'ongc.db')
 class Dso(object):
         """Defines a single Deep Sky Object from ONGC database."""
         
-        def __init__(self, name) :
+        def __init__(self, name, returnDup=False) :
                 """Object constructor.
                 
                 :param string name: identifier of the NGC or IC object
+                :optional param returnDup: if True don't resolve Dup objects
                 """
                 
                 # Make sure user passed a string as parameter
@@ -106,7 +107,7 @@ class Dso(object):
                         raise ValueError('Object named ' + objectname +' not found in the database.')
                 
                 # If object is a duplicate then return the main object
-                if objectData[1] == "Dup":
+                if objectData[1] == "Dup" and not returnDup:
                         if objectData[20] != "":
                                 objectname = "NGC" + str(objectData[20])
                         else:
