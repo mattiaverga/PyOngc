@@ -46,6 +46,7 @@ Classes provided:
 Methods provided:
         getNeighbors: Find all neighbors of a object within a user selected range.
         getSeparation: Calculate the apparent angular separation between two objects.
+        listObjects: Query DB for DSObjects with specific parameters.
         printDetails: Prints a detailed description of the object in a formatted output.
         searchAltId: Search a object in the database using an alternative identifier.
 """
@@ -94,12 +95,12 @@ class Dso(object):
                 else :
                         objectname = nameParts.group(1).strip() + '{:0>4}'.format(nameParts.group(2))
                 
-                selectWhat = '''objects.id, objects.type, objTypes.typedesc, ra, dec, const, majax, minax, 
+                cols = '''objects.id, objects.type, objTypes.typedesc, ra, dec, const, majax, minax, 
                                 pa, bmag, vmag, jmag,hmag, kmag, sbrightn, hubble, cstarumag, cstarbmag, cstarvmag, messier, 
                                 ngc, ic, cstarnames,identifiers, commonnames, nednotes, ongcnotes'''
-                fromWhere = 'objects JOIN objTypes ON objects.type = objTypes.type'
-                constraint = 'name="' + objectname + '"'
-                objectData = _queryFetchOne(selectWhat, fromWhere, constraint)
+                tables = 'objects JOIN objTypes ON objects.type = objTypes.type'
+                params = 'name="' + objectname + '"'
+                objectData = _queryFetchOne(cols, tables, params)
                 
                 if objectData is None:
                         raise ValueError('Object named ' + objectname +' not found in the database.')
@@ -110,8 +111,8 @@ class Dso(object):
                                 objectname = "NGC" + str(objectData[20])
                         else:
                                 objectname = "IC" + str(objectData[21])
-                        constraint = 'name="' + objectname + '"'
-                        objectData = _queryFetchOne(selectWhat, fromWhere, constraint)
+                        params = 'name="' + objectname + '"'
+                        objectData = _queryFetchOne(cols, tables, params)
                 
                 # Assign object properties
                 self._id = objectData[0]
@@ -466,12 +467,12 @@ class Dso(object):
                 return ",".join(line)
 
 
-def _queryFetchOne(selectWhat, fromWhere, constraint):
+def _queryFetchOne(cols, tables, params):
         """Search one row in database.
         
-        :param string selectWhat: the SELECT field of the query
-        :param string fromWhere: the FROM field of the query
-        :param string constraint: the WHERE field of the query
+        :param string cols: the SELECT field of the query
+        :param string tables: the FROM field of the query
+        :param string params: the WHERE field of the query
         :return list or None: a single row from the database
         """
         
@@ -479,9 +480,9 @@ def _queryFetchOne(selectWhat, fromWhere, constraint):
                 db = sqlite3.connect(DBPATH)
                 cursor = db.cursor()
                 
-                cursor.execute('SELECT ' + selectWhat 
-                        + ' FROM ' + fromWhere 
-                        + ' WHERE ' + constraint
+                cursor.execute('SELECT ' + cols 
+                        + ' FROM ' + tables 
+                        + ' WHERE ' + params
                         )
                 objectData = cursor.fetchone()
                 
@@ -494,28 +495,29 @@ def _queryFetchOne(selectWhat, fromWhere, constraint):
         
         return objectData
 
-def _queryFetchMany(selectWhat, fromWhere, constraint):
+def _queryFetchMany(cols, tables, params):
         """Search many rows in database.
         
-        :param string selectWhat: the SELECT field of the query
-        :param string fromWhere: the FROM field of the query
-        :param string constraint: the WHERE field of the query
-        :return generator object yielding DSObjects
+        :param string cols: the SELECT field of the query
+        :param string tables: the FROM field of the query
+        :param string params: the WHERE field of the query
+        :return generator object yielding a tuple with selected row data from database
         """
         
         try:
                 db = sqlite3.connect(DBPATH)
                 cursor = db.cursor()
                 
-                cursor.execute('SELECT ' + selectWhat 
-                        + ' FROM ' + fromWhere 
-                        + ' WHERE ' + constraint
+                cursor.execute('SELECT ' + cols 
+                        + ' FROM ' + tables 
+                        + ' WHERE ' + params
                         )
+                
                 while True:
-                        objectData = cursor.fetchmany()
-                        if objectData == []:
+                        objectList = cursor.fetchmany()
+                        if objectList == []:
                                 break
-                        yield Dso(objectData[0][0])
+                        yield objectList[0]
                 
         except Exception as e:
                 db.rollback()
@@ -561,17 +563,17 @@ def getNeighbors(obj, separation, filter="all"):
         if not (isinstance(separation, int) or isinstance(separation, float)):
                 raise TypeError('Wrong type separation. Either a int or float type was expected.')
         
-        selectWhat = 'objects.name'
-        fromWhere = 'objects'
-        constraint = 'type != "Dup" AND ra != "" AND dec != "" AND name !="' + obj.getName() + '"'
+        cols = 'objects.name'
+        tables = 'objects'
+        params = 'type != "Dup" AND ra != "" AND dec != "" AND name !="' + obj.getName() + '"'
         if filter.upper() == "NGC":
-                constraint += " AND name LIKE 'NGC%'"
+                params += " AND name LIKE 'NGC%'"
         elif filter.upper() == "IC":
-                constraint += " AND name LIKE 'IC%'"
-        objectList = _queryFetchMany(selectWhat, fromWhere, constraint)
+                params += " AND name LIKE 'IC%'"
         
         neighbors = []
-        for possibleNeighbor in objectList:
+        for item in _queryFetchMany(cols, tables, params):
+                possibleNeighbor = Dso(item[0])
                 distance = getSeparation(obj, possibleNeighbor)[0]
                 if distance <= (separation / 60):
                         neighbors.append((possibleNeighbor, distance))
@@ -646,6 +648,24 @@ def getSeparation(obj1, obj2, style="raw"):
                 return str(d) + "° " + str(m) + "m " + "{:.2f}".format(s) + "s"
         else:
                 return degrees(separation), degrees(a2-a1), degrees(d2-d1)
+
+def listObjects(**kwargs):
+        """Query the database for DSObjects with specific parameters.
+        
+        name: NGC/IC/Messier
+        type: 
+        constellation:
+        MajAx:
+        BMag:
+        VMag:
+        
+        This function returns a generator with a list of all DSObjects that match user
+        defined parameters.
+        If no argument is passed to the function, it returns all the objects from the database.
+        
+        """
+        
+        
 
 def printDetails(dso):
         """Prints a detailed description of the object in a formatted output.
