@@ -58,7 +58,7 @@ import sqlite3
 import sys
 
 
-DBDATE = 20171125 #Version of database data
+DBDATE = 20171231 #Version of database data
 DBPATH = os.path.join(os.path.dirname(__file__), 'ongc.db')
 
 class Dso(object):
@@ -513,7 +513,7 @@ def _queryFetchMany(cols, tables, params):
                         + ' FROM ' + tables 
                         + ' WHERE ' + params
                         )
-                
+                #print(params)
                 while True:
                         objectList = cursor.fetchmany()
                         if objectList == []:
@@ -653,20 +653,71 @@ def getSeparation(obj1, obj2, style="raw"):
 def listObjects(**kwargs):
         """Query the database for DSObjects with specific parameters.
         
-        name: NGC/IC/Messier
-        type: 
-        constellation:
-        MajAx:
-        BMag:
-        VMag:
+        :param optional string catalog: filter for catalog. [NGC|IC|M]
+        :param optional string type: filter for object type. See OpenNGC types list.
+        :param optional string constellation: filter for constellation (three letter latin form - e.g. "And")
+        :param optional float minSize: filter for objects with MajAx >= minSize(arcmin)
+        :param optional float maxSize: filter for objects with MajAx < maxSize(arcmin) OR MajAx not available
+        :param optional float upToBMag: filter for objects with B-Mag brighter than value
+        :param optional float upToVMag: filter for objects with V-Mag brighter than value
         
-        This function returns a generator with a list of all DSObjects that match user
-        defined parameters.
-        If no argument is passed to the function, it returns all the objects from the database.
+        This function returns a list of all DSObjects that match user defined parameters.
+        If no argument is passed to the function, it returns all the objects from the database:
+        
+                >>> objectList = listObjects()
+                >>> len(objectList)
+                13954
+        
+        Filters are combined with "AND" in the query; only one value for filter is allowed:
+        
+                >>> objectList = listObjects(catalog="NGC", constellation="Boo")
+                >>> len(objectList)
+                281
+        
+        Duplicated objects are not resolved to main objects:
+        
+                >>> objectList = listObjects(type="Dup")
+                >>> print(objectList[0])
+                Name: IC0011        Type: Duplicated record               Constellation: Cas
+        
+        The maxSize filter will include objects with no size recorded in database:
+        
+                >>> objectList = listObjects(maxSize=0)
+                >>> len(objectList)
+                2015
         
         """
         
+        cols = 'objects.name'
+        tables = 'objects'
         
+        if kwargs == {}:
+                params = '1'
+                return [Dso(item[0], returnDup=True) for item in _queryFetchMany(cols, tables, params)]
+        
+        paramslist = []
+        if "catalog" in kwargs:
+                if kwargs["catalog"].upper() == "NGC" or kwargs["catalog"].upper() == "IC":
+                        paramslist.append('name LIKE "' + kwargs["catalog"].upper() + '%"')
+                elif kwargs["catalog"].upper() == "M":
+                        paramslist.append('messier != ""')
+                else:
+                        raise ValueError('Wrong value for catalog filter. [NGC|IC|M]')
+        if "type" in kwargs:
+                paramslist.append('type = "' + kwargs["type"] + '"')
+        if "constellation" in kwargs:
+                paramslist.append('const = "' + kwargs["constellation"].capitalize() + '"')
+        if "minSize" in kwargs:
+                paramslist.append('majax >= ' + str(kwargs["minSize"]))
+        if "maxSize" in kwargs:
+                paramslist.append('majax < ' + str(kwargs["maxSize"]) + ' OR majax = ""')
+        if "upToBMag" in kwargs:
+                paramslist.append('bmag <= ' + str(kwargs["upToBMag"]))
+        if "upToVMag" in kwargs:
+                paramslist.append('vmag <= ' + str(kwargs["upToVMag"]))
+        
+        params = " AND ".join(paramslist)
+        return [Dso(item[0], returnDup=True) for item in _queryFetchMany(cols, tables, params)]
 
 def printDetails(dso):
         """Prints a detailed description of the object in a formatted output.
