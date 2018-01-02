@@ -172,7 +172,9 @@ class Dso(object):
                         return value
         
         def getConstellation(self):
-                """Returns the constellation where the object is located (string).
+                """Returns the constellation where the object is located.
+                
+                :returns: 'constellation'
                 
                         >>> s = Dso("ngc1")
                         >>> s.getConstellation()
