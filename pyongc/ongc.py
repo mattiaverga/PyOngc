@@ -24,31 +24,14 @@
 """Provides classes and functions to access OpenNGC database.
 
 Classes provided:
-        Dso: the main class which describe a single row (object) from OpenNGC database.
-                This class has the following methods:
-                __str__: Returns basic data of the object as a formatted string.
-                getConstellation: Returns the constellation where the object is located.
-                getCoords: Returns the coordinates of the object in J2000 Epoch.
-                getCStarData: Returns data about central star of planetary nebulaes.
-                getDec: Returns the Declination in J2000 Epoch.
-                getDimensions: Returns object axes dimensions and position angle.
-                getHubble: Returns the Hubble classification of the galaxy.
-                getId: Returns the database Id of the object.
-                getIdentifiers: Returns the alternative identifiers of the object.
-                getMagnitudes: Returns the magnitudes of the object.
-                getName: Returns the main identifier of the object.
-                getNotes: Returns notes from NED and from ONGC author.
-                getSurfaceBrightness: Returns the surface brightness value of the galaxy.
-                getType: Returns the type of the object.
-                getRA: Returns the Right Ascension in J2000 Epoch.
-                xephemFormat: Returns object data in Xephem format.
+        * Dso: the main class which describe a single row (object) from OpenNGC database.
 
 Methods provided:
-        getNeighbors: Find all neighbors of a object within a user selected range.
-        getSeparation: Calculate the apparent angular separation between two objects.
-        listObjects: Query DB for DSObjects with specific parameters.
-        printDetails: Prints a detailed description of the object in a formatted output.
-        searchAltId: Search a object in the database using an alternative identifier.
+        * getNeighbors: Find all neighbors of a object within a user selected range.
+        * getSeparation: Calculate the apparent angular separation between two objects.
+        * listObjects: Query DB for DSObjects with specific parameters.
+        * printDetails: Prints a detailed description of the object in a formatted output.
+        * searchAltId: Search a object in the database using an alternative identifier.
 """
 
 from math import acos, cos, degrees, radians, sin
@@ -62,7 +45,30 @@ DBDATE = 20171231 #Version of database data
 DBPATH = os.path.join(os.path.dirname(__file__), 'ongc.db')
 
 class Dso(object):
-        """Defines a single Deep Sky Object from ONGC database."""
+        """Defines a single Deep Sky Object from ONGC database.
+        
+        A DSO object represents a single row from OpenNGC database, which corresponds to
+        a Deep Sky Object from NGC or IC catalogs.
+        
+        The class provides the following methods to access object data:
+                * __init__: Object constructor.
+                * __str__: Returns basic data of the object as a formatted string.
+                * getConstellation: Returns the constellation where the object is located.
+                * getCoords: Returns the coordinates of the object in J2000 Epoch.
+                * getCStarData: Returns data about central star of planetary nebulaes.
+                * getDec: Returns the Declination in J2000 Epoch.
+                * getDimensions: Returns object axes dimensions and position angle.
+                * getHubble: Returns the Hubble classification of the galaxy.
+                * getId: Returns the database Id of the object.
+                * getIdentifiers: Returns the alternative identifiers of the object.
+                * getMagnitudes: Returns the magnitudes of the object.
+                * getName: Returns the main identifier of the object.
+                * getNotes: Returns notes from NED and from ONGC author.
+                * getSurfaceBrightness: Returns the surface brightness value of the galaxy.
+                * getType: Returns the type of the object.
+                * getRA: Returns the Right Ascension in J2000 Epoch.
+                * xephemFormat: Returns object data in Xephem format.
+        """
         
         def __init__(self, name, returnDup=False) :
                 """Object constructor.
@@ -70,7 +76,6 @@ class Dso(object):
                 :param string name: identifier of the NGC or IC object
                 :optional param returnDup: if True don't resolve Dup objects
                 """
-                
                 # Make sure user passed a string as parameter
                 if not isinstance(name, str):
                         raise TypeError('Wrong type as parameter. A string type was expected.')
@@ -147,8 +152,13 @@ class Dso(object):
                 self._ongcnotes = str(objectData[26])
         
         def __str__(self):
-                """Returns basic data of the object as a formatted string."""
+                """Returns basic data of the object as a formatted string.
                 
+                        >>> s = Dso("ngc1")
+                        >>> print(s)
+                        Name: NGC0001       Type: Galaxy                          Constellation: Peg
+                
+                """
                 return ('''{:20}{:38}{}'''
                         .format("Name: " + self._name, "Type: " + self._type, "Constellation: " + self._const)
                 )
@@ -156,7 +166,6 @@ class Dso(object):
         @staticmethod
         def _assignValue(value):
                 """ Returns value or None type if value is an empty string."""
-                
                 if value == "":
                         return None
                 else:
@@ -170,22 +179,21 @@ class Dso(object):
                         'Peg'
                 
                 """
-                
                 return self._const
         
         def getCoords(self):
                 """Returns the coordinates of the object in J2000 Epoch.
                 
+                :returns: ((HH,MM,SS.SS),(+/-,DD,MM,SS.SS))
+                
                 The value is espressed as a tuple of tuples 
                 with numerical values espressed as int or float:
-                ((HH,MM,SS.SS),(+/-,DD,MM,SS.SS))
                 
                         >>> s = Dso("ngc1")
                         >>> s.getCoords()
                         ((0, 7, 15.84), ('+', 27, 42, 29.1))
                 
                 """
-                
                 if self._ra == "" or self._dec == "":
                         raise ValueError('Object named ' + self._name +' has no coordinates in database.')
                 ra = self._ra.split(":")
@@ -195,11 +203,12 @@ class Dso(object):
                 return raTuple, decTuple
         
         def getCStarData(self):
-                """Returns a tuple with data about central star of planetary nebulaes.
+                """Returns data about central star of planetary nebulaes.
                 
-                ([cstar identifiers], cstar UMag, cstar BMag, cstar VMag)
-                cstar identifiers: list of names.
-                cstar UMag, cstar BMag, cstar VMag: floats or None.
+                :returns: ([cstar identifiers], cstar UMag, cstar BMag, cstar VMag)
+                
+                If the DSO object is a Planetary Nebulae, this method will return a tuple with
+                the central star identifiers and its magnitudes in U-B-V bands:
                 
                         >>> s = Dso("ngc1535")
                         >>> s.getCStarData()
@@ -212,7 +221,6 @@ class Dso(object):
                         (None, None, None, None)
                 
                 """
-                
                 if self._cstarnames != "":
                         identifiers = list(map(str.strip, self._cstarnames.split(",")))
                 else:
@@ -221,65 +229,67 @@ class Dso(object):
                 return identifiers, self._cstarumag, self._cstarbmag, self._cstarvmag
         
         def getDec(self):
-                """Returns the Declination in J2000 Epoch (string +/-DD:MM:SS.SS).
+                """Returns the Declination in J2000 Epoch.
+                
+                :returns: '+/-DD:MM:SS.SS'
                 
                         >>> s = Dso("ngc1")
                         >>> s.getDec()
                         '+27:42:29.1'
                 
                 """
-                
                 return self._dec
         
         def getDimensions(self):
                 """Returns a tuple with object axes dimensions (float) and position angle (int).
                 
+                :returns: (MajAx, MinAx, P.A.)
+                
                 Where values are not available a None type is returned.
-                (MajAx, MinAx, P.A.)
                 
                         >>> s = Dso("ngc1")
                         >>> s.getDimensions()
                         (1.57, 1.07, 112)
                 
                 """
-                
                 return self._majax, self._minax, self._pa
         
         def getHubble(self):
-                """Returns the Hubble classification of the object (string).
+                """Returns the Hubble classification of the object.
+                
+                :returns: string
                 
                         >>> s = Dso("ngc1")
                         >>> s.getHubble()
                         'Sb'
                 
                 """
-                
                 return self._hubble
         
         def getId(self):
-                """Returns the database Id of the object (int).
+                """Returns the database Id of the object.
+                
+                :returns: int
                 
                         >>> s = Dso("ngc1")
                         >>> s.getId()
                         5612
                 
                 """
-                
                 return self._id
         
         def getIdentifiers(self):
                 """Returns a tuple of alternative identifiers of the object.
                 
-                (Messier, NGC, IC, common names, other)
-                Messier: string or None
-                NGC, IC, common names, other: list of strings or None
+                :returns: ('Messier', [NGC], [IC], [common names], [other])
+                
+                If a field is empty a None type is returned:
                 
                         >>> s = Dso("ngc1")
                         >>> s.getIdentifiers()
                         (None, None, None, None, ['2MASX J00071582+2742291', 'IRAS 00047+2725', 'MCG +04-01-025', 'PGC 000564', 'UGC 00057'])
                 
                 """
-                
                 if self._messier == "":
                         messier = None
                 else:
@@ -312,76 +322,81 @@ class Dso(object):
         def getMagnitudes(self):
                 """Returns the magnitudes of the object as a tuple of floats.
                 
-                Where values are not available a None type is returned.
-                (Bmag, Vmag, Jmag, Hmag, Kmag)
+                :returns: (Bmag, Vmag, Jmag, Hmag, Kmag)
+                
+                Where values are not available a None type is returned:
                 
                         >>> s = Dso("ngc1")
                         >>> s.getMagnitudes()
                         (13.4, None, 10.78, 10.02, 9.76)
                                 
                 """
-                
                 return self._bmag, self._vmag, self._jmag, self._hmag, self._kmag
         
         def getName(self):
-                """Returns the main identifier of the object (string).
+                """Returns the main identifier of the object.
+                
+                :returns: string
                 
                         >>> s = Dso("ngc1")
                         >>> s.getName()
                         'NGC0001'
                 
                 """
-                
                 return self._name
         
         def getNotes(self):
-                """Returns notes from NED and from ONGC author (tuple of strings).
+                """Returns notes from NED and from ONGC author.
                 
-                (nednotes, ongcnotes)
+                :returns: ('nednotes', 'ongcnotes')
                 
                         >>> s = Dso("ngc6543")
                         >>> s.getNotes()
                         ('Additional radio sources may contribute to the WMAP flux.', 'Dimensions taken from LEDA')
                 
                 """
-                
                 return self._nednotes, self._ongcnotes
         
         def getSurfaceBrightness(self):
-                """Returns the surface brightness value of the object (float or None).
+                """Returns the surface brightness value of the object.
+                
+                :returns: float or None
                 
                         >>> s = Dso("ngc1")
                         >>> s.getSurfaceBrightness()
                         23.13
                 
                 """
-                
                 return self._sbrightn
         
         def getType(self):
-                """Returns the type of the object (string).
+                """Returns the type of the object.
+                
+                :returns: string
                 
                         >>> s = Dso("ngc1")
                         >>> s.getType()
                         'Galaxy'
                 
                 """
-                
                 return self._type
         
         def getRA(self):
-                """Returns the Right Ascension in J2000 Epoch (string HH:MM:SS.SS).
+                """Returns the Right Ascension in J2000 Epoch.
+                
+                :returns: 'HH:MM:SS.SS'
                 
                         >>> s = Dso("ngc1")
                         >>> s.getRA()
                         '00:07:15.84'
                 
                 """
-                
                 return self._ra
         
         def xephemFormat(self):
                 """Returns object data in Xephem format.
+                
+                :returns: string
                 
                 This function will produce a string containing information about the object suitable to be imported
                 in other software that accept Xephem format (for example: PyEphem).
@@ -391,7 +406,6 @@ class Dso(object):
                         'NGC0001,f|G,00:07:15.84,+27:42:29.1,13.4,,94.2|64.2|1.07'
                 
                 """
-                
                 line = []
                 #Field 1: names
                 names = [self.getName()]
@@ -474,9 +488,8 @@ def _queryFetchOne(cols, tables, params):
         :param string cols: the SELECT field of the query
         :param string tables: the FROM field of the query
         :param string params: the WHERE field of the query
-        :return list or None: a single row from the database
+        :returns: tuple with selected row data from database
         """
-        
         try:
                 db = sqlite3.connect(DBPATH)
                 cursor = db.cursor()
@@ -502,9 +515,8 @@ def _queryFetchMany(cols, tables, params):
         :param string cols: the SELECT field of the query
         :param string tables: the FROM field of the query
         :param string params: the WHERE field of the query
-        :return generator object yielding a tuple with selected row data from database
+        :returns: generator object yielding a tuple with selected row data from database
         """
-        
         try:
                 db = sqlite3.connect(DBPATH)
                 cursor = db.cursor()
@@ -533,7 +545,7 @@ def getNeighbors(obj, separation, filter="all"):
         :param object: a Dso object or a string which identifies the object
         :param float separation: maximum distance from the object expressed in arcmin
         :param optional string filter: filter for "NGC" or "IC" objects - default is all
-        :returns: list of Dso objects within limits ordered by distance
+        :returns: list of Dso objects within limits ordered by distance [(Dso, separation),]
         
         This function is used to find all objects within a specified range from a given object.
         It requires an object as the starting point of the search (either a string containing the name or
@@ -542,20 +554,19 @@ def getNeighbors(obj, separation, filter="all"):
         It returns a list of of tuples with the Dso objects found in range and its distance, or an empty list 
         if no object is found:
         
-        >>> s1 = Dso("ngc521")
-        >>> getNeighbors(s1, 15) #doctest: +ELLIPSIS
-        [(<__main__.Dso object at 0x...>, 0.13726168561986588), (<__main__.Dso object at 0x...>, 0.2414024394257306)]
-        
-        >>> getNeighbors("ngc521", 1)
-        []
+                >>> s1 = Dso("ngc521")
+                >>> getNeighbors(s1, 15) #doctest: +ELLIPSIS
+                [(<__main__.Dso object at 0x...>, 0.13726168561986588), (<__main__.Dso object at 0x...>, 0.2414024394257306)]
+                
+                >>> getNeighbors("ngc521", 1)
+                []
         
         The optional "filter" parameter can be used to filter the search to only NGC or IC objects:
         
-        >>> getNeighbors("ngc521", 15, filter="NGC") #doctest: +ELLIPSIS
-        [(<__main__.Dso object at 0x...>, 0.2414024394257306)]
+                >>> getNeighbors("ngc521", 15, filter="NGC") #doctest: +ELLIPSIS
+                [(<__main__.Dso object at 0x...>, 0.2414024394257306)]
         
         """
-        
         if not isinstance(obj, Dso):
                 if isinstance(obj, str):
                         obj = Dso(obj)
@@ -584,10 +595,11 @@ def getNeighbors(obj, separation, filter="all"):
 def getSeparation(obj1, obj2, style="raw"):
         """Finds the apparent angular separation between two objects.
         
-        :param obj1, obj2: two NGC/IC objects or string identifiers
+        :param obj1: first Dso object or string identifier
+        :param obj2: second Dso object or string identifier
         :param opt string style: use "text" to return a string with degrees, minutes and seconds
-        :if style="raw" returns: (float: angular separation, float: difference in A.R, float: difference in Dec)
-        :if style="text" returns: string DD° MMm SS.SSs
+        :returns: if style="raw": (float: angular separation, float: difference in A.R, float: difference in Dec)
+        :returns: if style="text": 'DD° MMm SS.SSs'
         
         This function will compute the apparent angular separation between two objects, either identified with
         their names as strings or directly as Dso type.
@@ -615,7 +627,6 @@ def getSeparation(obj1, obj2, style="raw"):
                 ValueError: Object named NGC0001A not found in the database.
         
         """
-        
         if not isinstance(obj1, Dso):
                 if isinstance(obj1, str):
                         obj1 = Dso(obj1)
@@ -660,6 +671,7 @@ def listObjects(**kwargs):
         :param optional float maxSize: filter for objects with MajAx < maxSize(arcmin) OR MajAx not available
         :param optional float upToBMag: filter for objects with B-Mag brighter than value
         :param optional float upToVMag: filter for objects with V-Mag brighter than value
+        :returns: [Dso,]
         
         This function returns a list of all DSObjects that match user defined parameters.
         If no argument is passed to the function, it returns all the objects from the database:
@@ -687,13 +699,12 @@ def listObjects(**kwargs):
                 2015
         
         """
-        
         cols = 'objects.name'
         tables = 'objects'
         
         if kwargs == {}:
                 params = '1'
-                return [Dso(item[0], returnDup=True) for item in _queryFetchMany(cols, tables, params)]
+                return [Dso(item[0], True) for item in _queryFetchMany(cols, tables, params)]
         
         paramslist = []
         if "catalog" in kwargs:
@@ -717,12 +728,13 @@ def listObjects(**kwargs):
                 paramslist.append('vmag <= ' + str(kwargs["upToVMag"]))
         
         params = " AND ".join(paramslist)
-        return [Dso(item[0], returnDup=True) for item in _queryFetchMany(cols, tables, params)]
+        return [Dso(item[0], True) for item in _queryFetchMany(cols, tables, params)]
 
 def printDetails(dso):
         """Prints a detailed description of the object in a formatted output.
         
         :param dso: a Dso object or a string with the NGC/IC identifier
+        :returns: string
         
         This function prints all the available details of the object, formatted in a way to fit 
         a 80cols display.
@@ -751,7 +763,6 @@ def printDetails(dso):
                 ValueError: Object named NGC0001A not found in the database.
         
         """
-        
         def _justifyText(text):
                 """Prints the text on multiple lines if length is more than 73 chars.
                 
@@ -870,7 +881,7 @@ def searchAltId(name):
         """Search in the database using an alternative identifier.
         
         :param string name: alternative identifier to search for
-        :return Dso object
+        :returns: Dso object
         
         This function searches the name passed as parameter in the "alternative identifiers" field
         of the database.
@@ -892,7 +903,6 @@ def searchAltId(name):
                 'Object not found.'
         
         """
-        
         # Make sure user passed a string as parameter
         if not isinstance(name, str):
                 raise TypeError('Wrong type as parameter. A string type was expected.')
