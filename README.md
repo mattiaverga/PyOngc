@@ -22,7 +22,7 @@ of NGC/IC objects. See the documentation about ongc.xephemFormat method.
 
 Object data is easily available from command line also:
 
-        $ ongcbrowse --details NGC7000
+        $ ongcbrowse -n NGC7000 --details
         +-----------------------------------------------------------------------------+
         | Id: 13055     Name: NGC7000           Type: HII Ionized region              |
         | R.A.: 20:59:17.14      Dec.: +44:31:43.6      Constellation: Cyg            |
