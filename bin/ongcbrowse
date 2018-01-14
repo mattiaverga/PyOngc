@@ -28,7 +28,7 @@
 
 """A command line browser for OpenNGC database.
 
-        Usage: ongcbrowse.py [-h] [-D|--details] <objectname>
+        Usage: ongcbrowse [-h] [-n NGCxxxx/ICxxxx] [-D] [--stats] [--version]
 """
 
 from pyongc import ongc
@@ -36,14 +36,29 @@ import argparse
 
 if __name__ == '__main__':
         # Parse command line arguments
-        parser = argparse.ArgumentParser(description='Show info about OpenNGC object.')
-        parser.add_argument('objectname', metavar='NGCxxxx/ICxxxx', help='an object identifier')
+        parser = argparse.ArgumentParser(prog='ongcbrowse', description='Show info about OpenNGC object.')
+        parser.add_argument('-n', dest='objectname', metavar='NGCxxxx/ICxxxx', help='an object identifier')
         parser.add_argument('-D', '--details', help='show all object details', action='store_true')
+        parser.add_argument('--stats', help='show version and database informations', action='store_true')
+        parser.add_argument('--version', action='version', version='%(prog)s ' + ongc.__version__)
 
         args = parser.parse_args()
-
-        oggetto = ongc.Dso(args.objectname)
-        if args.details == True:
-                ongc.printDetails(oggetto)
+        
+        if args.stats != True:
+                if not args.objectname:
+                        parser.print_help()
+                        exit()
+                oggetto = ongc.Dso(args.objectname)
+        
+                if args.details == True:
+                        ongc.printDetails(oggetto)
+                else:
+                        print(oggetto)
         else:
-                print(oggetto)
+                informations = ongc.stats()
+                print('PyONGC version: ' + ongc.__version__)
+                print('Database version: ' + str(informations[1]))
+                print('Total number of objects in database: ' + str(informations[2]))
+                print('Object types statistics:')
+                for objType, objCount in informations[3]:
+                        print('{:29}'.format(objType) + '-> ' + str(objCount))

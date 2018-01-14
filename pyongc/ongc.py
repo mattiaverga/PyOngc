@@ -1,3 +1,5 @@
+# -*- coding:utf-8 -*-
+#
 # MIT License
 #
 # Copyright (c) 2017 Mattia Verga <mattia.verga@tiscali.it>
@@ -40,7 +42,7 @@ import re
 import sqlite3
 import sys
 
-
+__version__ = '0.1'
 DBDATE = 20171231 #Version of database data
 DBPATH = os.path.join(os.path.dirname(__file__), 'ongc.db')
 
@@ -936,6 +938,27 @@ def searchAltId(name):
                 return Dso(objectData[0])
         else:
                 return "Object not found."
+
+def stats():
+        try:
+                db = sqlite3.connect(DBPATH)
+                cursor = db.cursor()
+                
+                cursor.execute('''SELECT objTypes.typedesc, count(*)
+                        FROM objects JOIN objTypes ON objects.type = objTypes.type
+                        GROUP BY objects.type''')
+                typesStats = cursor.fetchall()
+                
+        except Exception as e:
+                db.rollback()
+                raise e
+        
+        finally:
+                db.close()
+        
+        totalObjects = sum(objType[1] for objType in typesStats)
+        
+        return __version__, DBDATE, totalObjects, typesStats
 
 if __name__ == "__main__":
     import doctest
