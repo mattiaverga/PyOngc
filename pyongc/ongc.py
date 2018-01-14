@@ -675,6 +675,7 @@ def listObjects(**kwargs):
         :param optional float maxSize: filter for objects with MajAx < maxSize(arcmin) OR MajAx not available
         :param optional float upToBMag: filter for objects with B-Mag brighter than value
         :param optional float upToVMag: filter for objects with V-Mag brighter than value
+        :param optional bool withNames: filter for objects with common names
         :returns: [Dso,]
         
         This function returns a list of all DSObjects that match user defined parameters.
@@ -730,6 +731,11 @@ def listObjects(**kwargs):
                 paramslist.append('bmag <= ' + str(kwargs["upToBMag"]))
         if "upToVMag" in kwargs:
                 paramslist.append('vmag <= ' + str(kwargs["upToVMag"]))
+        if "withNames" in kwargs and kwargs["withNames"] == True:
+                paramslist.append('commonnames != ""')
+        
+        if paramslist == []:
+                raise ValueError("Wrong filter name.")
         
         params = " AND ".join(paramslist)
         return [Dso(item[0], True) for item in _queryFetchMany(cols, tables, params)]
