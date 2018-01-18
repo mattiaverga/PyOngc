@@ -154,16 +154,14 @@ class Dso(object):
                 self._ongcnotes = str(objectData[26])
         
         def __str__(self):
-                """Returns basic data of the object as a formatted string.
+                """Returns basic data of the object.
                 
                         >>> s = Dso("ngc1")
                         >>> print(s)
-                        Name: NGC0001       Type: Galaxy                          Constellation: Peg
+                        NGC0001, Galaxy in Peg
                 
                 """
-                return ('''{:20}{:38}{}'''
-                        .format("Name: " + self._name, "Type: " + self._type, "Constellation: " + self._const)
-                )
+                return (self._name + ", " + self._type + " in " + self._const)
         
         @staticmethod
         def _assignValue(value):
