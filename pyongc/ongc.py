@@ -43,7 +43,7 @@ import sqlite3
 import sys
 
 __version__ = '0.1'
-DBDATE = 20171231 #Version of database data
+DBDATE = 20180203 #Version of database data
 DBPATH = os.path.join(os.path.dirname(__file__), 'ongc.db')
 
 class Dso(object):
@@ -707,7 +707,7 @@ def listObjects(**kwargs):
         
         if kwargs == {}:
                 params = '1'
-                return [Dso(item[0], True) for item in _queryFetchMany(cols, tables, params)]
+                return [Dso(str(item[0]), True) for item in _queryFetchMany(cols, tables, params)]
         
         paramslist = []
         if "catalog" in kwargs:
