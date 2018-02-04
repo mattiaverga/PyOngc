@@ -37,14 +37,15 @@ Methods provided:
 """
 
 from math import acos, cos, degrees, radians, sin
+from pkg_resources import resource_filename
 import os
 import re
 import sqlite3
 import sys
 
-__version__ = '0.1'
+__version__ = '0.1.1'
 DBDATE = 20180203 #Version of database data
-DBPATH = os.path.join(os.path.dirname(__file__), 'ongc.db')
+DBPATH = resource_filename(__name__, 'ongc.db')
 
 class Dso(object):
         """Defines a single Deep Sky Object from ONGC database.
