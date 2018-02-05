@@ -1,6 +1,10 @@
 # PyOngc
 A python interface for accessing OpenNGC database data
 
+[![PyPI](https://img.shields.io/pypi/v/PyOngc.svg)](https://pypi.python.org/pypi/PyOngc)
+[![PyPI](https://img.shields.io/pypi/status/PyOngc.svg)]()
+[![PyPI](https://img.shields.io/pypi/pyversions/PyOngc.svg)]()
+
 ## Description
 PyOngc provides a python module to access astronomical data about NGC and
 IC objects.
