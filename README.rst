@@ -7,9 +7,9 @@ A python interface for accessing OpenNGC database data
 .. image:: https://img.shields.io/pypi/v/PyOngc.svg
    :target: https://pypi.python.org/pypi/PyOngc
 .. image:: https://img.shields.io/pypi/status/PyOngc.svg
-   :target: 
+
 .. image:: https://img.shields.io/pypi/pyversions/PyOngc.svg
-   :target: 
+
    
 .. image:: https://travis-ci.org/scivision/PyOngc.svg?branch=master
    :target: https://travis-ci.org/scivision/PyOngc
