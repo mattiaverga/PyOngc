@@ -1,30 +1,53 @@
-# PyOngc
+
+PyOngc
+======
+
 A python interface for accessing OpenNGC database data
 
-[![PyPI](https://img.shields.io/pypi/v/PyOngc.svg)](https://pypi.python.org/pypi/PyOngc)
-[![PyPI](https://img.shields.io/pypi/status/PyOngc.svg)]()
-[![PyPI](https://img.shields.io/pypi/pyversions/PyOngc.svg)]()
+.. image:: https://img.shields.io/pypi/v/PyOngc.svg
+   :target: https://pypi.python.org/pypi/PyOngc
+.. image:: https://img.shields.io/pypi/status/PyOngc.svg
+   :target: 
+.. image:: https://img.shields.io/pypi/pyversions/PyOngc.svg
+   :target: 
+   
+.. image:: https://travis-ci.org/scivision/PyOngc.svg?branch=master
+   :target: https://travis-ci.org/scivision/PyOngc
+.. image:: https://coveralls.io/repos/github/scivision/PyOngc/badge.svg?branch=master
+   :target: https://coveralls.io/github/scivision/PyOngc?branch=master
+.. image:: https://ci.appveyor.com/api/projects/status/f8xueh6knxym2mby?svg=true
+   :target: https://ci.appveyor.com/project/scivision/pyongc
+   
 
-## Description
-PyOngc provides a python module to access astronomical data about NGC and
-IC objects.
+Description
+-----------
+
+PyOngc provides a python module to access astronomical data about NGC
+and IC objects.
 
 The data is based on OpenNGC database
-<https://github.com/mattiaverga/OpenNGC>.
+https://github.com/mattiaverga/OpenNGC.
 
 It is composed by a main module and a command line utility named
 ongcbrowse which can be used to print object details in a terminal.
 
-PyOngc data can provide data to PyEphem in a simple way to get ephemerides
-of NGC/IC objects. See the documentation about ongc.xephemFormat method.
+PyOngc data can provide data to PyEphem in a simple way to get
+ephemerides of NGC/IC objects. See the documentation about
+ongc.xephemFormat method.
 
-## Usage
+Usage
+-----
+
+::
+
         >>> from pyongc import ongc
         >>> DSOobject = ongc.Dso("NGC7000")
         >>> DSOobject.getCoords()
         ((20, 59, 17.14), ('+', 44, 31, 43.6))
 
 Object data is easily available from command line also:
+
+::
 
         $ ongcbrowse -n NGC7000 --details
         +-----------------------------------------------------------------------------+
@@ -44,5 +67,9 @@ Object data is easily available from command line also:
         |    B-Mag taken from LEDA                                                    |
         +-----------------------------------------------------------------------------+
 
-## License
+License
+-------
+
 PyOngc is licensed under MIT.
+
+

@@ -1,4 +1,6 @@
-from distutils.core import setup
+from setuptools import setup, find_packages
+
+TESTS_REQUIRE=['pytest','nose','coveralls']
 
 CLASSIFIERS = [
     'Development Status :: 2 - Pre-Alpha',
@@ -13,7 +15,7 @@ CLASSIFIERS = [
     'Topic :: Scientific/Engineering :: Astronomy'
 ]
 
-LONG_DESCRIPTION = open('README').read()
+LONG_DESCRIPTION = open('README.rst').read()
 
 setup(
     name='PyOngc',
@@ -21,11 +23,15 @@ setup(
     author='Mattia Verga',
     author_email='mattia.verga@tiscali.it',
     url='https://github.com/mattiaverga/PyOngc',
-    packages=['pyongc',],
+    packages=find_packages(),
     package_data={'pyongc': ['ongc.db',],},
     scripts=['bin/ongcbrowse',],
     license='MIT',
     description='Python interface to OpenNGC database data.',
     long_description=LONG_DESCRIPTION,
     classifiers=CLASSIFIERS,
+    install_requires=[],
+    tests_require=TESTS_REQUIRE,
+    extras_require={'tests':TESTS_REQUIRE},
+    python_requires=">=2.7",
 )
