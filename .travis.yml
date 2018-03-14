@@ -11,12 +11,21 @@ os:
 git:
   depth: 3
 
-install: pip -q install -e .[tests]
+install:
+  - pip -q install -e .[tests]
+  - if [[ $TRAVIS_PYTHON_VERSION == 3.6* ]]; then
+    pip install flake8;
+    fi
 
-script: pytest -v
+script:
+  - if [[ $TRAVIS_PYTHON_VERSION == 3.6* ]]; then
+    flake8 .;
+    fi
+  - pytest -v
 
 after_success:
   - if [[ $TRAVIS_PYTHON_VERSION == 3.6* ]]; then
     coverage run tests/test_ongc.py;
+    coverage report;
     coveralls;
     fi
