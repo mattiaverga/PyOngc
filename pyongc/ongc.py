@@ -712,7 +712,7 @@ def listObjects(**kwargs):
 
             >>> objectList = listObjects(type="Dup")
             >>> print(objectList[0])
-            Name: IC0011        Type: Duplicated record               Constellation: Cas
+            IC0011, Duplicated record in Cas
 
     The maxSize filter will include objects with no size recorded in database:
 
