@@ -2,6 +2,6 @@
 
 :license: MIT, see LICENSE for more details.
 """
-__all__ = ['ongc',]
+__all__ = ['ongc', ]
 
 from pyongc.ongc import *

@@ -36,11 +36,22 @@ import argparse
 
 if __name__ == '__main__':
     # Parse command line arguments
-    parser = argparse.ArgumentParser(prog='ongcbrowse', description='Show info about OpenNGC object.')
-    parser.add_argument('-n', dest='objectname', metavar='NGCxxxx/ICxxxx', help='an object identifier')
-    parser.add_argument('-D', '--details', help='show all object details', action='store_true')
-    parser.add_argument('--stats', help='show version and database informations', action='store_true')
-    parser.add_argument('--version', action='version', version='%(prog)s ' + ongc.__version__)
+    parser = argparse.ArgumentParser(prog='ongcbrowse',
+                                     description='Show info about OpenNGC object.')
+    parser.add_argument('-n',
+                        dest='objectname',
+                        metavar='NGCxxxx/ICxxxx',
+                        help='an object identifier')
+    parser.add_argument('-D',
+                        '--details',
+                        help='show all object details',
+                        action='store_true')
+    parser.add_argument('--stats',
+                        help='show version and database informations',
+                        action='store_true')
+    parser.add_argument('--version',
+                        action='version',
+                        version='%(prog)s ' + ongc.__version__)
 
     args = parser.parse_args()
 
