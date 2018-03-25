@@ -30,3 +30,7 @@ after_success:
   - if [[ $TRAVIS_PYTHON_VERSION == 3.6* ]]; then
     coveralls;
     fi
+
+matrix:
+  allow_failures:
+    python: 2.7
