@@ -5,6 +5,11 @@ python:
   - 2.7
   - 3.6
 
+matrix:
+  fast_finish: true
+  allow_failures:
+    python: 2.7
+
 os:
   - linux
 
@@ -31,6 +36,3 @@ after_success:
     coveralls;
     fi
 
-matrix:
-  allow_failures:
-    python: 2.7

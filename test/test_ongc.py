@@ -282,7 +282,7 @@ class TestDsoMethods(unittest.TestCase):
         self.assertEqual(obj_details, expected)
 
     def test_print_details_obj_nebula(self):
-        """Test that printDetails() output is formatted in the right way for PNs."""
+        """Test that printDetails() output is formatted in the right way for nebulae."""
         obj_details = ongc.printDetails('NGC6523')
         expected = (
             "+-----------------------------------------------------------------------------+\n"
