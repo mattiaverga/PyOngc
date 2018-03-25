@@ -1,20 +1,13 @@
 language: python
-fast_finish: true
-
+cache: pip
 python:
-  - 2.7
-  - 3.6
+  - "2.7"
+  - "3.6"
 
 matrix:
   fast_finish: true
   allow_failures:
-    python: 2.7
-
-os:
-  - linux
-
-git:
-  depth: 3
+    python: "2.7"
 
 install:
   - pip -q install -e .[tests]
