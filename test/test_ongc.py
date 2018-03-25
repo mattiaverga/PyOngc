@@ -31,7 +31,7 @@ class TestDsoClass(unittest.TestCase):
     """Test that Dso objects are created in the right way and that data
     is retrieved correctly.
     """
-    def test_nameRecognition(self):
+    def test_name_recognition(self):
         """Test the regex used to convert the name of the object inputted by the user
         to the correct form.
         """
@@ -42,12 +42,12 @@ class TestDsoClass(unittest.TestCase):
         self.assertRaisesRegex(ValueError, 'Wrong object name', ongc.Dso, 'M15')
         self.assertRaisesRegex(ValueError, 'not found in the database', ongc.Dso, 'NGC0001A')
 
-    def test_duplicateResolving(self):
+    def test_duplicate_resolving(self):
         """Test that a duplicated object is returned as himself when asked to do so."""
         self.assertEqual(ongc.Dso('ngc20')._name, 'NGC0006')
         self.assertEqual(ongc.Dso('ngc20', returndup=True)._name, 'NGC0020')
 
-    def test_objectPrint(self):
+    def test_object_print(self):
         """Test basic object data representation."""
         obj = ongc.Dso('NGC1')
 
@@ -55,14 +55,14 @@ class TestDsoClass(unittest.TestCase):
         actual = str(obj)
         self.assertEqual(actual, expected)
 
-    def test_successfulGetCoordinates(self):
+    def test_get_coordinates_successful(self):
         """Test succesful getCoords() method."""
         obj = ongc.Dso('NGC1')
 
         expected = ((0, 7, 15.84), ('+', 27, 42, 29.1))
         self.assertEqual(obj.getCoords(), expected)
 
-    def test_nonexistentGetCoordinates(self):
+    def test_get_coordinates_nonexistent(self):
         """Test getCoords() on a Nonexistent object which doesn't have coords."""
         obj = ongc.Dso('IC1064')
 
@@ -70,14 +70,14 @@ class TestDsoClass(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, expected):
             obj.getCoords()
 
-    def test_getPNcentralStarData(self):
+    def test_get_PN_central_star_data(self):
         """Test retrieving Planetary Nebulaes central star data."""
         obj = ongc.Dso('NGC1535')
 
         expected = (['BD -13 842', 'HD 26847'], None, 12.19, 12.18)
         self.assertEqual(obj.getCStarData(), expected)
 
-    def test_getObjectIdentifiers(self):
+    def test_get_object_identifiers(self):
         """Test getIdentifiers() method."""
         obj = ongc.Dso('NGC650')
 
@@ -86,21 +86,21 @@ class TestDsoClass(unittest.TestCase):
                     'PN G130.9-10.5'])
         self.assertEqual(obj.getIdentifiers(), expected)
 
-    def test_getMagnitudes(self):
+    def test_get_magnitudes(self):
         """Test getMagnitudes() method."""
         obj = ongc.Dso('NGC1')
 
         expected = (13.4, None, 10.78, 10.02, 9.76)
         self.assertEqual(obj.getMagnitudes(), expected)
 
-    def test_getMainIdentifier(self):
+    def test_get_main_identifier(self):
         """Test getName() method."""
         obj = ongc.Dso('NGC1')
 
         expected = 'NGC0001'
         self.assertEqual(obj.getName(), expected)
 
-    def test_getObjectNotes(self):
+    def test_get_object_notes(self):
         """Test getNotes() method."""
         obj = ongc.Dso('NGC6543')
 
@@ -108,7 +108,7 @@ class TestDsoClass(unittest.TestCase):
                     'Dimensions taken from LEDA')
         self.assertEqual(obj.getNotes(), expected)
 
-    def test_xephemFormat(self):
+    def test_xephem_format(self):
         """Test object representation in XEphem format."""
         obj = ongc.Dso('NGC1')
 
@@ -118,7 +118,7 @@ class TestDsoClass(unittest.TestCase):
 
 class TestDsoMethods(unittest.TestCase):
     """Test functions about DS Objects."""
-    def test_calculateSeparationRaw(self):
+    def test_calculate_separation_raw(self):
         """Test that the calculated apparent angular separation between two objects
         is correct and report the raw data to user.
         """
@@ -128,9 +128,9 @@ class TestDsoMethods(unittest.TestCase):
         expected = (0.030089273732482536, 0.005291666666666788, -0.02972222222221896)
         self.assertEqual(ongc.getSeparation(obj1, obj2), expected)
 
-    def test_calculateSeparationFriendly(self):
+    def test_calculate_separation_friendly(self):
         """Test that the calculated apparent angular separation between two objects
-        is correct and give a user friendly output.
+        is correct and return a user friendly output.
         """
         obj1 = ongc.Dso('NGC1')
         obj2 = ongc.Dso('NGC2')
@@ -138,7 +138,7 @@ class TestDsoMethods(unittest.TestCase):
         expected = '0° 1m 48.32s'
         self.assertEqual(ongc.getSeparation(obj1, obj2, style='text'), expected)
 
-    def test_getNeighbors(self):
+    def test_get_neighbors(self):
         """Test that neighbors are correctly found and returned."""
         obj1 = ongc.Dso('NGC521')
 
@@ -152,7 +152,7 @@ class TestDsoMethods(unittest.TestCase):
         self.assertEqual(str(neighbors[0][0]), expectedNearest)
         self.assertEqual(neighbors[0][1], expectedNearestSeparation)
 
-    def test_getNeighborsWithFilter(self):
+    def test_get_neighbors_with_filter(self):
         """Test that neighbors are correctly found and returned."""
         obj1 = ongc.Dso('NGC521')
 
@@ -166,7 +166,7 @@ class TestDsoMethods(unittest.TestCase):
         self.assertEqual(str(neighbors[0][0]), expectedNearest)
         self.assertEqual(neighbors[0][1], expectedNearestSeparation)
 
-    def test_listAllObjects(self):
+    def test_list_all_objects(self):
         """Test the listObjects() method without filters.
         It should return all objects from database.
         """
@@ -175,25 +175,25 @@ class TestDsoMethods(unittest.TestCase):
         self.assertEqual(len(objectList), 13954)
         self.assertIsInstance(objectList[0], ongc.Dso)
 
-    def test_listObjectsFilterCatalogNGC(self):
+    def test_list_objects_filter_catalog_NGC(self):
         """Test the listObjects() method with catalog filter applied."""
         objectList = ongc.listObjects(catalog='NGC')
 
         self.assertEqual(len(objectList), 8343)
 
-    def test_listObjectsFilterCatalogIC(self):
+    def test_list_objects_filter_catalog_IC(self):
         """Test the listObjects() method with catalog filter applied."""
         objectList = ongc.listObjects(catalog='IC')
 
         self.assertEqual(len(objectList), 5611)
 
-    def test_listObjectsFilterCatalogM(self):
+    def test_list_objects_filter_catalog_M(self):
         """Test the listObjects() method with catalog filter applied."""
         objectList = ongc.listObjects(catalog='M')
 
         self.assertEqual(len(objectList), 107)
 
-    def test_listObjectsFilterType(self):
+    def test_list_objects_filter_type(self):
         """Test the listObjects() method with type filter applied.
         Duplicated objects are not resolved to the main object.
         """
@@ -202,44 +202,44 @@ class TestDsoMethods(unittest.TestCase):
         self.assertEqual(len(objectList), 634)
         self.assertEqual(str(objectList[0]), 'IC0011, Duplicated record in Cas')
 
-    def test_listObjectsFilterConstellation(self):
+    def test_list_objects_filter_constellation(self):
         """Test the listObjects() method with constellation filter applied."""
         objectList = ongc.listObjects(constellation='Boo')
 
         self.assertEqual(len(objectList), 532)
 
-    def test_listObjectsFilterSize(self):
+    def test_list_objects_filter_size(self):
         """Test the listObjects() method with size filters applied."""
         objectList = ongc.listObjects(minsize=15, maxsize=20)
 
         self.assertEqual(len(objectList), 40)
 
-    def test_listObjectsWithNoSize(self):
+    def test_list_objects_with_no_size(self):
         """Test the listObjects() method to list objects without size."""
         objectList = ongc.listObjects(maxsize=0)
 
         self.assertEqual(len(objectList), 2015)
 
-    def test_listObjectsFilterMag(self):
+    def test_list_objects_filter_mag(self):
         """Test the listObjects() method with magnitudes filters applied."""
         objectList = ongc.listObjects(uptobmag=8, uptovmag=10)
 
         self.assertEqual(len(objectList), 160)
 
-    def test_listObjectsWithName(self):
+    def test_list_objects_with_name(self):
         """Test the listObjects() method to list objects with common name."""
         objectList = ongc.listObjects(withname=True)
 
         self.assertEqual(len(objectList), 121)
 
-    def test_listObjectsWrongFilter(self):
+    def test_list_objects_wrong_filter(self):
         """Test the listObjects() method when an unsupported filter is used."""
         expected = 'Wrong filter name.'
 
         with self.assertRaisesRegex(ValueError, expected):
             ongc.listObjects(catalog='NGC', name='NGC1')
 
-    def test_printDetailsGalaxy(self):
+    def test_print_details_obj_galaxy(self):
         """Test that printDetails() output is formatted in the right way for galaxies."""
         obj_details = ongc.printDetails('NGC1')
         expected = (
@@ -260,7 +260,7 @@ class TestDsoMethods(unittest.TestCase):
 
         self.assertEqual(obj_details, expected)
 
-    def test_printDetailsPN(self):
+    def test_print_details_obj_PN(self):
         """Test that printDetails() output is formatted in the right way for PNs."""
         obj_details = ongc.printDetails('NGC40')
         expected = (
@@ -286,31 +286,31 @@ class TestDsoMethods(unittest.TestCase):
 
         self.assertEqual(obj_details, expected)
 
-    def test_searchForLBN(self):
+    def test_search_for_LBN(self):
         """Test the searchAltId by passing a LBN identifier."""
         obj = ongc.searchAltId("LBN741")
 
         self.assertEqual(obj.getName(), 'NGC1333')
 
-    def test_searchForMessier(self):
+    def test_search_for_Messier(self):
         """Test the searchAltId by passing a Messier identifier."""
         obj = ongc.searchAltId("M1")
 
         self.assertEqual(obj.getName(), 'NGC1952')
 
-    def test_searchForMWSC(self):
+    def test_search_for_MWSC(self):
         """Test the searchAltId by passing a MWSC identifier."""
         obj = ongc.searchAltId("MWSC146")
 
         self.assertEqual(obj.getName(), 'IC0166')
 
-    def test_searchForPGC(self):
+    def test_search_for_PGC(self):
         """Test the searchAltId by passing a PGC identifier."""
         obj = ongc.searchAltId("PGC10540")
 
         self.assertEqual(obj.getName(), 'IC0255')
 
-    def test_searchForUGC(self):
+    def test_search_for_UGC(self):
         """Test the searchAltId by passing a UGC identifier."""
         obj = ongc.searchAltId("UGC9965")
 
@@ -319,7 +319,7 @@ class TestDsoMethods(unittest.TestCase):
 
 class TestDatabaseIntegrity(unittest.TestCase):
     """Check data integrity."""
-    def test_dataIntegrity(self):
+    def test_data_integrity(self):
         allObjects = ongc.listObjects()
         for item in allObjects:
             self.assertIsInstance(item.getId(), int)
