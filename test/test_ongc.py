@@ -45,7 +45,7 @@ class TestDsoClass(unittest.TestCase):
     def test_duplicateResolving(self):
         """Test that a duplicated object is returned as himself when asked to do so."""
         self.assertEqual(ongc.Dso('ngc20')._name, 'NGC0006')
-        self.assertEqual(ongc.Dso('ngc20', returnDup=True)._name, 'NGC0020')
+        self.assertEqual(ongc.Dso('ngc20', returndup=True)._name, 'NGC0020')
 
     def test_objectPrint(self):
         """Test basic object data representation."""
@@ -210,25 +210,25 @@ class TestDsoMethods(unittest.TestCase):
 
     def test_listObjectsFilterSize(self):
         """Test the listObjects() method with size filters applied."""
-        objectList = ongc.listObjects(minSize=15, maxSize=20)
+        objectList = ongc.listObjects(minsize=15, maxsize=20)
 
         self.assertEqual(len(objectList), 40)
 
     def test_listObjectsWithNoSize(self):
         """Test the listObjects() method to list objects without size."""
-        objectList = ongc.listObjects(maxSize=0)
+        objectList = ongc.listObjects(maxsize=0)
 
         self.assertEqual(len(objectList), 2015)
 
     def test_listObjectsFilterMag(self):
         """Test the listObjects() method with magnitudes filters applied."""
-        objectList = ongc.listObjects(upToBMag=8, upToVMag=10)
+        objectList = ongc.listObjects(uptobmag=8, uptovmag=10)
 
         self.assertEqual(len(objectList), 160)
 
     def test_listObjectsWithName(self):
         """Test the listObjects() method to list objects with common name."""
-        objectList = ongc.listObjects(withNames=True)
+        objectList = ongc.listObjects(withname=True)
 
         self.assertEqual(len(objectList), 121)
 

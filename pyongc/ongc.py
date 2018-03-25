@@ -72,11 +72,11 @@ class Dso(object):
         * xephemFormat: Returns object data in Xephem format.
     """
 
-    def __init__(self, name, returnDup=False):
+    def __init__(self, name, returndup=False):
         """Object constructor.
 
         :param string name: identifier of the NGC or IC object
-        :optional param returnDup: if True don't resolve Dup objects
+        :optional param returndup: if True don't resolve Dup objects
         """
         # Make sure user passed a string as parameter
         if not isinstance(name, str):
@@ -121,7 +121,7 @@ class Dso(object):
             raise ValueError('Object named ' + objectname + ' not found in the database.')
 
         # If object is a duplicate then return the main object
-        if objectData[1] == "Dup" and not returnDup:
+        if objectData[1] == "Dup" and not returndup:
             if objectData[20] != "":
                 objectname = "NGC" + str(objectData[20])
             else:
@@ -679,12 +679,12 @@ def listObjects(**kwargs):
     :param optional string type: filter for object type. See OpenNGC types list.
     :param optional string constellation: filter for constellation
                                           (three letter latin form - e.g. "And")
-    :param optional float minSize: filter for objects with MajAx >= minSize(arcmin)
-    :param optional float maxSize: filter for objects with MajAx < maxSize(arcmin)
+    :param optional float minsize: filter for objects with MajAx >= minSize(arcmin)
+    :param optional float maxsize: filter for objects with MajAx < maxSize(arcmin)
                                    OR MajAx not available
-    :param optional float upToBMag: filter for objects with B-Mag brighter than value
-    :param optional float upToVMag: filter for objects with V-Mag brighter than value
-    :param optional bool withNames: filter for objects with common names
+    :param optional float uptobmag: filter for objects with B-Mag brighter than value
+    :param optional float uptovmag: filter for objects with V-Mag brighter than value
+    :param optional bool withname: filter for objects with common names
     :returns: [Dso,]
 
     This function returns a list of all DSObjects that match user defined parameters.
@@ -708,7 +708,7 @@ def listObjects(**kwargs):
 
     The maxSize filter will include objects with no size recorded in database:
 
-            >>> objectList = listObjects(maxSize=0)
+            >>> objectList = listObjects(maxsize=0)
             >>> len(objectList)
             2015
 
@@ -716,11 +716,11 @@ def listObjects(**kwargs):
     available_filters = ['catalog',
                          'type',
                          'constellation',
-                         'minSize',
-                         'maxSize',
-                         'upToBMag',
-                         'upToVMag',
-                         'withNames']
+                         'minsize',
+                         'maxsize',
+                         'uptobmag',
+                         'uptovmag',
+                         'withname']
     cols = 'objects.name'
     tables = 'objects'
 
@@ -743,15 +743,15 @@ def listObjects(**kwargs):
         paramslist.append('type = "' + kwargs["type"] + '"')
     if "constellation" in kwargs:
         paramslist.append('const = "' + kwargs["constellation"].capitalize() + '"')
-    if "minSize" in kwargs:
-        paramslist.append('majax >= ' + str(kwargs["minSize"]))
-    if "maxSize" in kwargs:
-        paramslist.append('(majax < ' + str(kwargs["maxSize"]) + ' OR majax is NULL)')
-    if "upToBMag" in kwargs:
-        paramslist.append('bmag <= ' + str(kwargs["upToBMag"]))
-    if "upToVMag" in kwargs:
-        paramslist.append('vmag <= ' + str(kwargs["upToVMag"]))
-    if "withNames" in kwargs and kwargs["withNames"] is True:
+    if "minsize" in kwargs:
+        paramslist.append('majax >= ' + str(kwargs["minsize"]))
+    if "maxsize" in kwargs:
+        paramslist.append('(majax < ' + str(kwargs["maxsize"]) + ' OR majax is NULL)')
+    if "uptobmag" in kwargs:
+        paramslist.append('bmag <= ' + str(kwargs["uptobmag"]))
+    if "uptovmag" in kwargs:
+        paramslist.append('vmag <= ' + str(kwargs["uptovmag"]))
+    if "withname" in kwargs and kwargs["withname"] is True:
         paramslist.append('commonnames != ""')
 
     params = " AND ".join(paramslist)
