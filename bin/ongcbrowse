@@ -61,7 +61,7 @@ if __name__ == '__main__':
         oggetto = ongc.Dso(args.objectname)
 
         if args.details:
-            ongc.printDetails(oggetto)
+            print(ongc.printDetails(oggetto))
         else:
             print(oggetto)
     else:

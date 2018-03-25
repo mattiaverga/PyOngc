@@ -239,8 +239,8 @@ class TestDsoMethods(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, expected):
             objectList = ongc.listObjects(catalog = 'NGC', name = 'NGC1')
 
-    def test_printDetails(self):
-        """Test that printDetails() output is formatted in the right way."""
+    def test_printDetailsGalaxy(self):
+        """Test that printDetails() output is formatted in the right way for galaxies."""
         obj_details = ongc.printDetails('NGC1')
         expected = (
             "+-----------------------------------------------------------------------------+\n"
@@ -255,6 +255,32 @@ class TestDsoMethods(unittest.TestCase):
             "| Other identifiers:                                                          |\n"
             "|    2MASX J00071582+2742291, IRAS 00047+2725, MCG +04-01-025, PGC 000564,    |\n"
             "|    UGC 00057                                                                |\n"
+            "+-----------------------------------------------------------------------------+\n"
+            )
+
+        self.assertEqual(obj_details, expected)
+
+    def test_printDetailsPN(self):
+        """Test that printDetails() output is formatted in the right way for PNs."""
+        obj_details = ongc.printDetails('NGC40')
+        expected = (
+            "+-----------------------------------------------------------------------------+\n"
+            "| Id: 5651      Name: NGC0040           Type: Planetary Nebula                |\n"
+            "| R.A.: 00:13:01.03      Dec.: +72:31:19.0      Constellation: Cep            |\n"
+            "| Common names:                                                               |\n"
+            "|    Bow-Tie nebula                                                           |\n"
+            "+-----------------------------------------------------------------------------+\n"
+            "| Major axis: 0.8'       Minor axis: N/A        Position angle: N/A           |\n"
+            "| B-mag: 11.27   V-mag: N/A     J-mag: N/A     H-mag: N/A     K-mag: N/A      |\n"
+            "|                                                                             |\n"
+            "| Central star identifiers:                                                   |\n"
+            "|    HD 000826, HIP 001041, TYC 4302-01297-1                                  |\n"
+            "|                                                                             |\n"
+            "| Central star magnitudes:                                                    |\n"
+            "|    U-mag: 11.14            B-mag: 11.82            V-mag: 11.58             |\n"
+            "+-----------------------------------------------------------------------------+\n"
+            "| Other identifiers:                                                          |\n"
+            "|    C2, IRAS 00102+7214, PN G120.0+09.8                                      |\n"
             "+-----------------------------------------------------------------------------+\n"
             )
 
