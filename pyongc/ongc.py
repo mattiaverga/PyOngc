@@ -42,7 +42,7 @@ import re
 import sqlite3
 
 __version__ = '0.1.1'
-DBDATE = 20180203  # Version of database data
+DBDATE = 20180325  # Version of database data
 DBPATH = resource_filename(__name__, 'ongc.db')
 
 
@@ -138,19 +138,19 @@ class Dso(object):
         self._const = str(objectData[5])
 
         # These properties may be empty
-        self._majax = Dso._assignValue(objectData[6])
-        self._minax = Dso._assignValue(objectData[7])
-        self._pa = Dso._assignValue(objectData[8])
-        self._bmag = Dso._assignValue(objectData[9])
-        self._vmag = Dso._assignValue(objectData[10])
-        self._jmag = Dso._assignValue(objectData[11])
-        self._hmag = Dso._assignValue(objectData[12])
-        self._kmag = Dso._assignValue(objectData[13])
-        self._sbrightn = Dso._assignValue(objectData[14])
+        self._majax = objectData[6]
+        self._minax = objectData[7]
+        self._pa = objectData[8]
+        self._bmag = objectData[9]
+        self._vmag = objectData[10]
+        self._jmag = objectData[11]
+        self._hmag = objectData[12]
+        self._kmag = objectData[13]
+        self._sbrightn = objectData[14]
         self._hubble = str(objectData[15])
-        self._cstarumag = Dso._assignValue(objectData[16])
-        self._cstarbmag = Dso._assignValue(objectData[17])
-        self._cstarvmag = Dso._assignValue(objectData[18])
+        self._cstarumag = objectData[16]
+        self._cstarbmag = objectData[17]
+        self._cstarvmag = objectData[18]
         self._messier = str(objectData[19])
         self._ngc = str(objectData[20])
         self._ic = str(objectData[21])
@@ -743,7 +743,7 @@ def listObjects(**kwargs):
     if "minSize" in kwargs:
         paramslist.append('majax >= ' + str(kwargs["minSize"]))
     if "maxSize" in kwargs:
-        paramslist.append('majax < ' + str(kwargs["maxSize"]) + ' OR majax = ""')
+        paramslist.append('(majax < ' + str(kwargs["maxSize"]) + ' OR majax is NULL)')
     if "upToBMag" in kwargs:
         paramslist.append('bmag <= ' + str(kwargs["upToBMag"]))
     if "upToVMag" in kwargs:

@@ -95,7 +95,7 @@ try:
                    'cstarumag REAL, '
                    'cstarbmag REAL, '
                    'cstarvmag REAL, '
-                   'messier INTEGER, '
+                   'messier TEXT, '
                    'ngc TEXT, '
                    'ic TEXT, '
                    'cstarnames TEXT, '
@@ -104,9 +104,15 @@ try:
                    'nednotes TEXT, '
                    'ongcnotes TEXT)')
 
-    with open("NGC.csv", 'r') as csvFile:
-        reader = csv.reader(csvFile, delimiter=";")
+    with open('NGC.csv', 'r') as csvFile:
+        reader = csv.reader(csvFile, delimiter=';')
+        # List of columns that are not text and should be transformed in NULL if empty
+        columns_maybe_null = [5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 16, 17]
         for line in reader:
+            for column in columns_maybe_null:
+                if line[column] == '':
+                    line[column] = None
+
             cursor.execute('INSERT INTO objects(name,type,ra,dec,const,majax,minax,pa,bmag,vmag,'
                            'jmag,hmag,kmag,sbrightn,hubble,cstarumag,cstarbmag,cstarvmag,messier,'
                            'ngc,ic,cstarnames,identifiers,commonnames,nednotes,ongcnotes) '
