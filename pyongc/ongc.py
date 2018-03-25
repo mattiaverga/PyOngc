@@ -41,7 +41,7 @@ from pkg_resources import resource_filename
 import re
 import sqlite3
 
-__version__ = '0.1.1'
+__version__ = '0.2.0'
 DBDATE = 20180325  # Version of database data
 DBPATH = resource_filename(__name__, 'ongc.db')
 
