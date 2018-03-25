@@ -132,10 +132,10 @@ class Dso(object):
         # Assign object properties
         self._id = objectData[0]
         self._name = objectname
-        self._type = str(objectData[2])
-        self._ra = str(objectData[3])
-        self._dec = str(objectData[4])
-        self._const = str(objectData[5])
+        self._type = objectData[2]
+        self._ra = objectData[3]
+        self._dec = objectData[4]
+        self._const = objectData[5]
 
         # These properties may be empty
         self._majax = objectData[6]
@@ -147,18 +147,18 @@ class Dso(object):
         self._hmag = objectData[12]
         self._kmag = objectData[13]
         self._sbrightn = objectData[14]
-        self._hubble = str(objectData[15])
+        self._hubble = objectData[15]
         self._cstarumag = objectData[16]
         self._cstarbmag = objectData[17]
         self._cstarvmag = objectData[18]
-        self._messier = str(objectData[19])
-        self._ngc = str(objectData[20])
-        self._ic = str(objectData[21])
-        self._cstarnames = str(objectData[22])
-        self._identifiers = str(objectData[23])
-        self._commonnames = str(objectData[24])
-        self._nednotes = str(objectData[25])
-        self._ongcnotes = str(objectData[26])
+        self._messier = objectData[19]
+        self._ngc = objectData[20]
+        self._ic = objectData[21]
+        self._cstarnames = objectData[22]
+        self._identifiers = objectData[23]
+        self._commonnames = objectData[24]
+        self._nednotes = objectData[25]
+        self._ongcnotes = objectData[26]
 
     def __str__(self):
         """Returns basic data of the object.
@@ -169,14 +169,6 @@ class Dso(object):
 
         """
         return (self._name + ", " + self._type + " in " + self._const)
-
-    @staticmethod
-    def _assignValue(value):
-        """ Returns value or None type if value is an empty string."""
-        if value == "":
-            return None
-        else:
-            return value
 
     def getConstellation(self):
         """Returns the constellation where the object is located.
