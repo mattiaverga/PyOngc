@@ -1,3 +1,28 @@
+# -*- coding:utf-8 -*-
+#
+# MIT License
+#
+# Copyright (c) 2017 Mattia Verga <mattia.verga@tiscali.it>
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+
 import unittest
 from pyongc import ongc
 
@@ -56,7 +81,7 @@ class TestDsoClass(unittest.TestCase):
         """Test getIdentifiers() method."""
         obj = ongc.Dso('NGC650')
 
-        expected = ('M76', ['NGC0651'], None, ['Barbell Nebula', 'Cork Nebula',
+        expected = ('M076', ['NGC0651'], None, ['Barbell Nebula', 'Cork Nebula',
                     'Little Dumbbell Nebula'], ['2MASX J01421808+5134243', 'IRAS 01391+5119',
                     'PN G130.9-10.5'])
         self.assertEqual(obj.getIdentifiers(), expected)
@@ -112,6 +137,158 @@ class TestDsoMethods(unittest.TestCase):
 
         expected = '0° 1m 48.32s'
         self.assertEqual(ongc.getSeparation(obj1, obj2, style='text'), expected)
+
+    def test_getNeighbors(self):
+        """Test that neighbors are correctly found and returned."""
+        obj1 = ongc.Dso('NGC521')
+
+        neighbors = ongc.getNeighbors(obj1, 15)
+        expectedListLength = 2
+        expectedNearest = 'IC1694, Galaxy in Cet'
+        expectedNearestSeparation = 0.13726168561986588
+
+        self.assertIsInstance(neighbors, list)
+        self.assertEqual(len(neighbors), expectedListLength)
+        self.assertEqual(str(neighbors[0][0]), expectedNearest)
+        self.assertEqual(neighbors[0][1], expectedNearestSeparation)
+
+    def test_getNeighborsWithFilter(self):
+        """Test that neighbors are correctly found and returned."""
+        obj1 = ongc.Dso('NGC521')
+
+        neighbors = ongc.getNeighbors(obj1, 15, filter = 'NGC')
+        expectedListLength = 1
+        expectedNearest = 'NGC0533, Galaxy in Cet'
+        expectedNearestSeparation = 0.2414024394257306
+
+        self.assertIsInstance(neighbors, list)
+        self.assertEqual(len(neighbors), expectedListLength)
+        self.assertEqual(str(neighbors[0][0]), expectedNearest)
+        self.assertEqual(neighbors[0][1], expectedNearestSeparation)
+
+    def test_listAllObjects(self):
+        """Test the listObjects() method without filters.
+        It should return all objects from database.
+        """
+        objectList = ongc.listObjects()
+
+        self.assertEqual(len(objectList), 13954)
+        self.assertIsInstance(objectList[0], ongc.Dso)
+
+    def test_listObjectsFilterCatalogNGC(self):
+        """Test the listObjects() method with catalog filter applied."""
+        objectList = ongc.listObjects(catalog = 'NGC')
+
+        self.assertEqual(len(objectList), 8343)
+
+    def test_listObjectsFilterCatalogIC(self):
+        """Test the listObjects() method with catalog filter applied."""
+        objectList = ongc.listObjects(catalog = 'IC')
+
+        self.assertEqual(len(objectList), 5611)
+
+    def test_listObjectsFilterCatalogM(self):
+        """Test the listObjects() method with catalog filter applied."""
+        objectList = ongc.listObjects(catalog = 'M')
+
+        self.assertEqual(len(objectList), 107)
+
+    def test_listObjectsFilterType(self):
+        """Test the listObjects() method with type filter applied.
+        Duplicated objects are not resolved to the main object.
+        """
+        objectList = ongc.listObjects(type = 'Dup')
+
+        self.assertEqual(len(objectList), 634)
+        self.assertEqual(str(objectList[0]), 'IC0011, Duplicated record in Cas')
+
+    def test_listObjectsFilterConstellation(self):
+        """Test the listObjects() method with constellation filter applied."""
+        objectList = ongc.listObjects(constellation = 'Boo')
+
+        self.assertEqual(len(objectList), 532)
+
+    def test_listObjectsFilterSize(self):
+        """Test the listObjects() method with size filters applied."""
+        objectList = ongc.listObjects(minSize = 15, maxSize = 20)
+
+        self.assertEqual(len(objectList), 40)
+
+    def test_listObjectsWithNoSize(self):
+        """Test the listObjects() method to list objects without size."""
+        objectList = ongc.listObjects(maxSize = 0)
+
+        self.assertEqual(len(objectList), 2015)
+
+    def test_listObjectsFilterMag(self):
+        """Test the listObjects() method with magnitudes filters applied."""
+        objectList = ongc.listObjects(upToBMag = 8, upToVMag = 10)
+
+        self.assertEqual(len(objectList), 160)
+
+    def test_listObjectsWithName(self):
+        """Test the listObjects() method to list objects with common name."""
+        objectList = ongc.listObjects(withNames = True)
+
+        self.assertEqual(len(objectList), 121)
+
+    def test_listObjectsWrongFilter(self):
+        """Test the listObjects() method when an unsupported filter is used."""
+        expected = 'Wrong filter name.'
+
+        with self.assertRaisesRegex(ValueError, expected):
+            objectList = ongc.listObjects(catalog = 'NGC', name = 'NGC1')
+
+    def test_printDetails(self):
+        """Test that printDetails() output is formatted in the right way."""
+        obj_details = ongc.printDetails('NGC1')
+        expected = (
+            "+-----------------------------------------------------------------------------+\n"
+            "| Id: 5612      Name: NGC0001           Type: Galaxy                          |\n"
+            "| R.A.: 00:07:15.84      Dec.: +27:42:29.1      Constellation: Peg            |\n"
+            "+-----------------------------------------------------------------------------+\n"
+            "| Major axis: 1.57'      Minor axis: 1.07'      Position angle: 112°          |\n"
+            "| B-mag: 13.4    V-mag: N/A     J-mag: 10.78   H-mag: 10.02   K-mag: 9.76     |\n"
+            "|                                                                             |\n"
+            "| Surface brightness: 23.13     Hubble classification: Sb                     |\n"
+            "+-----------------------------------------------------------------------------+\n"
+            "| Other identifiers:                                                          |\n"
+            "|    2MASX J00071582+2742291, IRAS 00047+2725, MCG +04-01-025, PGC 000564,    |\n"
+            "|    UGC 00057                                                                |\n"
+            "+-----------------------------------------------------------------------------+\n"
+            )
+
+        self.assertEqual(obj_details, expected)
+
+    def test_searchForLBN(self):
+        """Test the searchAltId by passing a LBN identifier."""
+        obj = ongc.searchAltId("LBN741")
+
+        self.assertEqual(obj.getName(), 'NGC1333')
+
+    def test_searchForMessier(self):
+        """Test the searchAltId by passing a Messier identifier."""
+        obj = ongc.searchAltId("M1")
+
+        self.assertEqual(obj.getName(), 'NGC1952')
+
+    def test_searchForMWSC(self):
+        """Test the searchAltId by passing a MWSC identifier."""
+        obj = ongc.searchAltId("MWSC146")
+
+        self.assertEqual(obj.getName(), 'IC0166')
+
+    def test_searchForPGC(self):
+        """Test the searchAltId by passing a PGC identifier."""
+        obj = ongc.searchAltId("PGC10540")
+
+        self.assertEqual(obj.getName(), 'IC0255')
+
+    def test_searchForUGC(self):
+        """Test the searchAltId by passing a UGC identifier."""
+        obj = ongc.searchAltId("UGC9965")
+
+        self.assertEqual(obj.getName(), 'IC1132')
 
 
 class TestDatabaseIntegrity(unittest.TestCase):
