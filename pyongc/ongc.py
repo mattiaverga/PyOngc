@@ -831,16 +831,18 @@ def printDetails(dso):
     objType = dso.getType()
     separator = ("+" + "-" * 77 + "+\n")
     obj_string = separator
-    obj_string += ('{:2}{:14}{:24}{:38}{}'.format("|",
-                                         "Id: " + str(dso.getId()),
-                                         "Name: " + dso.getName(),
-                                         "Type: " + objType,
-                                         "|\n"))
-    obj_string += ('{:2}{:23}{:23}{:30}{}'.format("|",
-                                         "R.A.: " + dso.getRA(),
-                                         "Dec.: " + dso.getDec(),
-                                         "Constellation: " + dso.getConstellation(),
-                                         "|\n"))
+    obj_string += ('{:2}{:14}{:24}{:38}{}'.format(
+                                            "|",
+                                            "Id: " + str(dso.getId()),
+                                            "Name: " + dso.getName(),
+                                            "Type: " + objType,
+                                            "|\n"))
+    obj_string += ('{:2}{:23}{:23}{:30}{}'.format(
+                                            "|",
+                                            "R.A.: " + dso.getRA(),
+                                            "Dec.: " + dso.getDec(),
+                                            "Constellation: " + dso.getConstellation(),
+                                            "|\n"))
 
     identifiers = dso.getIdentifiers()
     if (identifiers[0] is not None or
@@ -871,11 +873,12 @@ def printDetails(dso):
         dimensions.append("N/A")
     else:
         dimensions.append(str(dso.getDimensions()[2]) + "°")
-    obj_string += ('{:2}{:23}{:23}{:30}{}'.format("|",
-                                         "Major axis: " + dimensions[0],
-                                         "Minor axis: " + dimensions[1],
-                                         "Position angle: " + dimensions[2],
-                                         "|\n"))
+    obj_string += ('{:2}{:23}{:23}{:30}{}'.format(
+                                            "|",
+                                            "Major axis: " + dimensions[0],
+                                            "Minor axis: " + dimensions[1],
+                                            "Position angle: " + dimensions[2],
+                                            "|\n"))
 
     magnitudes = []
     for bandValue in dso.getMagnitudes():
@@ -883,17 +886,19 @@ def printDetails(dso):
             magnitudes.append("N/A")
         else:
             magnitudes.append(str(bandValue))
-    obj_string += ('{:2}{:15}{:15}{:15}{:15}{:16}{}'.format("|",
-                                                   "B-mag: " + magnitudes[0],
-                                                   "V-mag: " + magnitudes[1],
-                                                   "J-mag: " + magnitudes[2],
-                                                   "H-mag: " + magnitudes[3],
-                                                   "K-mag: " + magnitudes[4],
-                                                   "|\n"))
+    obj_string += ('{:2}{:15}{:15}{:15}{:15}{:16}{}'.format(
+                                                        "|",
+                                                        "B-mag: " + magnitudes[0],
+                                                        "V-mag: " + magnitudes[1],
+                                                        "J-mag: " + magnitudes[2],
+                                                        "H-mag: " + magnitudes[3],
+                                                        "K-mag: " + magnitudes[4],
+                                                        "|\n"))
     obj_string += ("|" + " " * 77 + "|\n")
 
     if objType == "Galaxy":
-        obj_string += ('{:2}{:30}{:46}{}'.format("|",
+        obj_string += ('{:2}{:30}{:46}{}'.format(
+                                        "|",
                                         "Surface brightness: " + str(dso.getSurfaceBrightness()),
                                         "Hubble classification: " + dso.getHubble(),
                                         "|\n"))
@@ -911,11 +916,12 @@ def printDetails(dso):
             else:
                 cStarMagnitudes.append(str(centralStar[i]))
         obj_string += ('{:2}{:76}{}'.format("|", "Central star magnitudes: ", "|\n"))
-        obj_string += ('{:5}{:24}{:24}{:25}{}'.format("|",
-                                             "U-mag: " + cStarMagnitudes[0],
-                                             "B-mag: " + cStarMagnitudes[1],
-                                             "V-mag: " + cStarMagnitudes[2],
-                                             "|\n"))
+        obj_string += ('{:5}{:24}{:24}{:25}{}'.format(
+                                                "|",
+                                                "U-mag: " + cStarMagnitudes[0],
+                                                "B-mag: " + cStarMagnitudes[1],
+                                                "V-mag: " + cStarMagnitudes[2],
+                                                "|\n"))
     obj_string += separator
 
     if identifiers[4] is not None:

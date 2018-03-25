@@ -156,7 +156,7 @@ class TestDsoMethods(unittest.TestCase):
         """Test that neighbors are correctly found and returned."""
         obj1 = ongc.Dso('NGC521')
 
-        neighbors = ongc.getNeighbors(obj1, 15, filter = 'NGC')
+        neighbors = ongc.getNeighbors(obj1, 15, filter='NGC')
         expectedListLength = 1
         expectedNearest = 'NGC0533, Galaxy in Cet'
         expectedNearestSeparation = 0.2414024394257306
@@ -177,19 +177,19 @@ class TestDsoMethods(unittest.TestCase):
 
     def test_listObjectsFilterCatalogNGC(self):
         """Test the listObjects() method with catalog filter applied."""
-        objectList = ongc.listObjects(catalog = 'NGC')
+        objectList = ongc.listObjects(catalog='NGC')
 
         self.assertEqual(len(objectList), 8343)
 
     def test_listObjectsFilterCatalogIC(self):
         """Test the listObjects() method with catalog filter applied."""
-        objectList = ongc.listObjects(catalog = 'IC')
+        objectList = ongc.listObjects(catalog='IC')
 
         self.assertEqual(len(objectList), 5611)
 
     def test_listObjectsFilterCatalogM(self):
         """Test the listObjects() method with catalog filter applied."""
-        objectList = ongc.listObjects(catalog = 'M')
+        objectList = ongc.listObjects(catalog='M')
 
         self.assertEqual(len(objectList), 107)
 
@@ -197,38 +197,38 @@ class TestDsoMethods(unittest.TestCase):
         """Test the listObjects() method with type filter applied.
         Duplicated objects are not resolved to the main object.
         """
-        objectList = ongc.listObjects(type = 'Dup')
+        objectList = ongc.listObjects(type='Dup')
 
         self.assertEqual(len(objectList), 634)
         self.assertEqual(str(objectList[0]), 'IC0011, Duplicated record in Cas')
 
     def test_listObjectsFilterConstellation(self):
         """Test the listObjects() method with constellation filter applied."""
-        objectList = ongc.listObjects(constellation = 'Boo')
+        objectList = ongc.listObjects(constellation='Boo')
 
         self.assertEqual(len(objectList), 532)
 
     def test_listObjectsFilterSize(self):
         """Test the listObjects() method with size filters applied."""
-        objectList = ongc.listObjects(minSize = 15, maxSize = 20)
+        objectList = ongc.listObjects(minSize=15, maxSize=20)
 
         self.assertEqual(len(objectList), 40)
 
     def test_listObjectsWithNoSize(self):
         """Test the listObjects() method to list objects without size."""
-        objectList = ongc.listObjects(maxSize = 0)
+        objectList = ongc.listObjects(maxSize=0)
 
         self.assertEqual(len(objectList), 2015)
 
     def test_listObjectsFilterMag(self):
         """Test the listObjects() method with magnitudes filters applied."""
-        objectList = ongc.listObjects(upToBMag = 8, upToVMag = 10)
+        objectList = ongc.listObjects(upToBMag=8, upToVMag=10)
 
         self.assertEqual(len(objectList), 160)
 
     def test_listObjectsWithName(self):
         """Test the listObjects() method to list objects with common name."""
-        objectList = ongc.listObjects(withNames = True)
+        objectList = ongc.listObjects(withNames=True)
 
         self.assertEqual(len(objectList), 121)
 
@@ -237,7 +237,7 @@ class TestDsoMethods(unittest.TestCase):
         expected = 'Wrong filter name.'
 
         with self.assertRaisesRegex(ValueError, expected):
-            objectList = ongc.listObjects(catalog = 'NGC', name = 'NGC1')
+            ongc.listObjects(catalog='NGC', name='NGC1')
 
     def test_printDetailsGalaxy(self):
         """Test that printDetails() output is formatted in the right way for galaxies."""
