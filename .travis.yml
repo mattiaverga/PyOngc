@@ -1,15 +1,13 @@
 language: python
-fast_finish: true
-
+cache: pip
 python:
   - 2.7
   - 3.6
 
-os:
-  - linux
-
-git:
-  depth: 3
+matrix:
+  fast_finish: true
+  allow_failures:
+    - python: 2.7
 
 install:
   - pip -q install -e .[tests]
@@ -30,3 +28,4 @@ after_success:
   - if [[ $TRAVIS_PYTHON_VERSION == 3.6* ]]; then
     coveralls;
     fi
+

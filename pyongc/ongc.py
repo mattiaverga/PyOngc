@@ -42,7 +42,7 @@ import re
 import sqlite3
 
 __version__ = '0.1.1'
-DBDATE = 20180203  # Version of database data
+DBDATE = 20180325  # Version of database data
 DBPATH = resource_filename(__name__, 'ongc.db')
 
 
@@ -72,11 +72,11 @@ class Dso(object):
         * xephemFormat: Returns object data in Xephem format.
     """
 
-    def __init__(self, name, returnDup=False):
+    def __init__(self, name, returndup=False):
         """Object constructor.
 
         :param string name: identifier of the NGC or IC object
-        :optional param returnDup: if True don't resolve Dup objects
+        :optional param returndup: if True don't resolve Dup objects
         """
         # Make sure user passed a string as parameter
         if not isinstance(name, str):
@@ -121,7 +121,7 @@ class Dso(object):
             raise ValueError('Object named ' + objectname + ' not found in the database.')
 
         # If object is a duplicate then return the main object
-        if objectData[1] == "Dup" and not returnDup:
+        if objectData[1] == "Dup" and not returndup:
             if objectData[20] != "":
                 objectname = "NGC" + str(objectData[20])
             else:
@@ -132,33 +132,33 @@ class Dso(object):
         # Assign object properties
         self._id = objectData[0]
         self._name = objectname
-        self._type = str(objectData[2])
-        self._ra = str(objectData[3])
-        self._dec = str(objectData[4])
-        self._const = str(objectData[5])
+        self._type = objectData[2]
+        self._ra = objectData[3]
+        self._dec = objectData[4]
+        self._const = objectData[5]
 
         # These properties may be empty
-        self._majax = Dso._assignValue(objectData[6])
-        self._minax = Dso._assignValue(objectData[7])
-        self._pa = Dso._assignValue(objectData[8])
-        self._bmag = Dso._assignValue(objectData[9])
-        self._vmag = Dso._assignValue(objectData[10])
-        self._jmag = Dso._assignValue(objectData[11])
-        self._hmag = Dso._assignValue(objectData[12])
-        self._kmag = Dso._assignValue(objectData[13])
-        self._sbrightn = Dso._assignValue(objectData[14])
-        self._hubble = str(objectData[15])
-        self._cstarumag = Dso._assignValue(objectData[16])
-        self._cstarbmag = Dso._assignValue(objectData[17])
-        self._cstarvmag = Dso._assignValue(objectData[18])
-        self._messier = str(objectData[19])
-        self._ngc = str(objectData[20])
-        self._ic = str(objectData[21])
-        self._cstarnames = str(objectData[22])
-        self._identifiers = str(objectData[23])
-        self._commonnames = str(objectData[24])
-        self._nednotes = str(objectData[25])
-        self._ongcnotes = str(objectData[26])
+        self._majax = objectData[6]
+        self._minax = objectData[7]
+        self._pa = objectData[8]
+        self._bmag = objectData[9]
+        self._vmag = objectData[10]
+        self._jmag = objectData[11]
+        self._hmag = objectData[12]
+        self._kmag = objectData[13]
+        self._sbrightn = objectData[14]
+        self._hubble = objectData[15]
+        self._cstarumag = objectData[16]
+        self._cstarbmag = objectData[17]
+        self._cstarvmag = objectData[18]
+        self._messier = objectData[19]
+        self._ngc = objectData[20]
+        self._ic = objectData[21]
+        self._cstarnames = objectData[22]
+        self._identifiers = objectData[23]
+        self._commonnames = objectData[24]
+        self._nednotes = objectData[25]
+        self._ongcnotes = objectData[26]
 
     def __str__(self):
         """Returns basic data of the object.
@@ -169,14 +169,6 @@ class Dso(object):
 
         """
         return (self._name + ", " + self._type + " in " + self._const)
-
-    @staticmethod
-    def _assignValue(value):
-        """ Returns value or None type if value is an empty string."""
-        if value == "":
-            return None
-        else:
-            return value
 
     def getConstellation(self):
         """Returns the constellation where the object is located.
@@ -687,12 +679,12 @@ def listObjects(**kwargs):
     :param optional string type: filter for object type. See OpenNGC types list.
     :param optional string constellation: filter for constellation
                                           (three letter latin form - e.g. "And")
-    :param optional float minSize: filter for objects with MajAx >= minSize(arcmin)
-    :param optional float maxSize: filter for objects with MajAx < maxSize(arcmin)
+    :param optional float minsize: filter for objects with MajAx >= minSize(arcmin)
+    :param optional float maxsize: filter for objects with MajAx < maxSize(arcmin)
                                    OR MajAx not available
-    :param optional float upToBMag: filter for objects with B-Mag brighter than value
-    :param optional float upToVMag: filter for objects with V-Mag brighter than value
-    :param optional bool withNames: filter for objects with common names
+    :param optional float uptobmag: filter for objects with B-Mag brighter than value
+    :param optional float uptovmag: filter for objects with V-Mag brighter than value
+    :param optional bool withname: filter for objects with common names
     :returns: [Dso,]
 
     This function returns a list of all DSObjects that match user defined parameters.
@@ -716,17 +708,28 @@ def listObjects(**kwargs):
 
     The maxSize filter will include objects with no size recorded in database:
 
-            >>> objectList = listObjects(maxSize=0)
+            >>> objectList = listObjects(maxsize=0)
             >>> len(objectList)
             2015
 
     """
+    available_filters = ['catalog',
+                         'type',
+                         'constellation',
+                         'minsize',
+                         'maxsize',
+                         'uptobmag',
+                         'uptovmag',
+                         'withname']
     cols = 'objects.name'
     tables = 'objects'
 
     if kwargs == {}:
         params = '1'
         return [Dso(str(item[0]), True) for item in _queryFetchMany(cols, tables, params)]
+    for element in kwargs:
+        if element not in available_filters:
+            raise ValueError("Wrong filter name.")
 
     paramslist = []
     if "catalog" in kwargs:
@@ -740,19 +743,16 @@ def listObjects(**kwargs):
         paramslist.append('type = "' + kwargs["type"] + '"')
     if "constellation" in kwargs:
         paramslist.append('const = "' + kwargs["constellation"].capitalize() + '"')
-    if "minSize" in kwargs:
-        paramslist.append('majax >= ' + str(kwargs["minSize"]))
-    if "maxSize" in kwargs:
-        paramslist.append('majax < ' + str(kwargs["maxSize"]) + ' OR majax = ""')
-    if "upToBMag" in kwargs:
-        paramslist.append('bmag <= ' + str(kwargs["upToBMag"]))
-    if "upToVMag" in kwargs:
-        paramslist.append('vmag <= ' + str(kwargs["upToVMag"]))
-    if "withNames" in kwargs and kwargs["withNames"] is True:
+    if "minsize" in kwargs:
+        paramslist.append('majax >= ' + str(kwargs["minsize"]))
+    if "maxsize" in kwargs:
+        paramslist.append('(majax < ' + str(kwargs["maxsize"]) + ' OR majax is NULL)')
+    if "uptobmag" in kwargs:
+        paramslist.append('bmag <= ' + str(kwargs["uptobmag"]))
+    if "uptovmag" in kwargs:
+        paramslist.append('vmag <= ' + str(kwargs["uptovmag"]))
+    if "withname" in kwargs and kwargs["withname"] is True:
         paramslist.append('commonnames != ""')
-
-    if paramslist == []:
-        raise ValueError("Wrong filter name.")
 
     params = " AND ".join(paramslist)
     return [Dso(item[0], True) for item in _queryFetchMany(cols, tables, params)]
@@ -764,11 +764,11 @@ def printDetails(dso):
     :param dso: a Dso object or a string with the NGC/IC identifier
     :returns: string
 
-    This function prints all the available details of the object, formatted in a way to fit
-    a 80cols display.
+    This function returns a string with all the available details of the object,
+    formatted in a way to fit a 80cols display.
     The object can be identified by its name as a string or by a Dso type:
 
-            >>> printDetails("ngc1")
+            >>> print(printDetails("ngc1"))
             +-----------------------------------------------------------------------------+
             | Id: 5612      Name: NGC0001           Type: Galaxy                          |
             | R.A.: 00:07:15.84      Dec.: +27:42:29.1      Constellation: Peg            |
@@ -782,6 +782,7 @@ def printDetails(dso):
             |    2MASX J00071582+2742291, IRAS 00047+2725, MCG +04-01-025, PGC 000564,    |
             |    UGC 00057                                                                |
             +-----------------------------------------------------------------------------+
+            <BLANKLINE>
 
     If the object is not found in the database it returns a ValueError:
 
@@ -796,6 +797,7 @@ def printDetails(dso):
 
         :param string text: text to be printed
         """
+        text_returned = ''
         chunks = text.split()
         line = []
         lineLength = 0
@@ -805,11 +807,12 @@ def printDetails(dso):
                 line.append(chunk)
                 continue
             else:
-                print('{:5}{:73}{}'.format("|", " ".join(line), "|"))
+                text_returned += ('{:5}{:73}{}'.format("|", " ".join(line), "|\n"))
                 del line[:]
                 line.append(chunk)
                 lineLength = len(chunk) + 1
-        print('{:5}{:73}{}'.format("|", " ".join(line), "|"))
+        text_returned += ('{:5}{:73}{}'.format("|", " ".join(line), "|\n"))
+        return text_returned
 
     if not isinstance(dso, Dso):
         if isinstance(dso, str):
@@ -818,23 +821,26 @@ def printDetails(dso):
             raise TypeError('Wrong type as parameter. Either a Dso or string type was expected.')
 
     objType = dso.getType()
-    print("+" + "-" * 77 + "+")
-    print('{:2}{:14}{:24}{:38}{}'.format("|",
-                                         "Id: " + str(dso.getId()),
-                                         "Name: " + dso.getName(),
-                                         "Type: " + objType,
-                                         "|"))
-    print('{:2}{:23}{:23}{:30}{}'.format("|",
-                                         "R.A.: " + dso.getRA(),
-                                         "Dec.: " + dso.getDec(),
-                                         "Constellation: " + dso.getConstellation(),
-                                         "|"))
+    separator = ("+" + "-" * 77 + "+\n")
+    obj_string = separator
+    obj_string += ('{:2}{:14}{:24}{:38}{}'.format(
+                                            "|",
+                                            "Id: " + str(dso.getId()),
+                                            "Name: " + dso.getName(),
+                                            "Type: " + objType,
+                                            "|\n"))
+    obj_string += ('{:2}{:23}{:23}{:30}{}'.format(
+                                            "|",
+                                            "R.A.: " + dso.getRA(),
+                                            "Dec.: " + dso.getDec(),
+                                            "Constellation: " + dso.getConstellation(),
+                                            "|\n"))
 
     identifiers = dso.getIdentifiers()
     if (identifiers[0] is not None or
             identifiers[1] is not None or
             identifiers[2] is not None):
-        print('{:2}{:76}{}'.format("|", "Also known as: ", "|"))
+        obj_string += ('{:2}{:76}{}'.format("|", "Also known as: ", "|\n"))
         knownAs = []
         if identifiers[0] is not None:
             knownAs.append(identifiers[0])
@@ -842,12 +848,12 @@ def printDetails(dso):
             knownAs.extend(identifiers[1])
         if identifiers[2] is not None:
             knownAs.extend(identifiers[2])
-        _justifyText(", ".join(knownAs))
+        obj_string += _justifyText(", ".join(knownAs))
 
     if identifiers[3] is not None:
-        print('{:2}{:76}{}'.format("|", "Common names: ", "|"))
-        _justifyText(", ".join(identifiers[3]))
-    print("+" + "-" * 77 + "+")
+        obj_string += ('{:2}{:76}{}'.format("|", "Common names: ", "|\n"))
+        obj_string += _justifyText(", ".join(identifiers[3]))
+    obj_string += separator
 
     dimensions = []
     for i in range(0, 2):
@@ -859,11 +865,12 @@ def printDetails(dso):
         dimensions.append("N/A")
     else:
         dimensions.append(str(dso.getDimensions()[2]) + "°")
-    print('{:2}{:23}{:23}{:30}{}'.format("|",
-                                         "Major axis: " + dimensions[0],
-                                         "Minor axis: " + dimensions[1],
-                                         "Position angle: " + dimensions[2],
-                                         "|"))
+    obj_string += ('{:2}{:23}{:23}{:30}{}'.format(
+                                            "|",
+                                            "Major axis: " + dimensions[0],
+                                            "Minor axis: " + dimensions[1],
+                                            "Position angle: " + dimensions[2],
+                                            "|\n"))
 
     magnitudes = []
     for bandValue in dso.getMagnitudes():
@@ -871,56 +878,60 @@ def printDetails(dso):
             magnitudes.append("N/A")
         else:
             magnitudes.append(str(bandValue))
-    print('{:2}{:15}{:15}{:15}{:15}{:16}{}'.format("|",
-                                                   "B-mag: " + magnitudes[0],
-                                                   "V-mag: " + magnitudes[1],
-                                                   "J-mag: " + magnitudes[2],
-                                                   "H-mag: " + magnitudes[3],
-                                                   "K-mag: " + magnitudes[4],
-                                                   "|"))
-    print("|" + " " * 77 + "|")
+    obj_string += ('{:2}{:15}{:15}{:15}{:15}{:16}{}'.format(
+                                                        "|",
+                                                        "B-mag: " + magnitudes[0],
+                                                        "V-mag: " + magnitudes[1],
+                                                        "J-mag: " + magnitudes[2],
+                                                        "H-mag: " + magnitudes[3],
+                                                        "K-mag: " + magnitudes[4],
+                                                        "|\n"))
+    obj_string += ("|" + " " * 77 + "|\n")
 
     if objType == "Galaxy":
-        print('{:2}{:30}{:46}{}'.format("|",
+        obj_string += ('{:2}{:30}{:46}{}'.format(
+                                        "|",
                                         "Surface brightness: " + str(dso.getSurfaceBrightness()),
                                         "Hubble classification: " + dso.getHubble(),
-                                        "|"))
+                                        "|\n"))
 
     if objType == "Planetary Nebula":
         centralStar = dso.getCStarData()
         if centralStar[0] is not None:
-            print('{:2}{:76}{}'.format("|", "Central star identifiers: ", "|"))
-            print('{:5}{:73}{}'.format("|", ", ".join(centralStar[0]), "|"))
-            print("|" + " " * 77 + "|")
+            obj_string += ('{:2}{:76}{}'.format("|", "Central star identifiers: ", "|\n"))
+            obj_string += ('{:5}{:73}{}'.format("|", ", ".join(centralStar[0]), "|\n"))
+            obj_string += ("|" + " " * 77 + "|\n")
         cStarMagnitudes = []
         for i in range(1, 4):
             if centralStar[i] is None:
                 cStarMagnitudes.append("N/A")
             else:
                 cStarMagnitudes.append(str(centralStar[i]))
-        print('{:2}{:76}{}'.format("|", "Central star magnitudes: ", "|"))
-        print('{:5}{:24}{:24}{:25}{}'.format("|",
-                                             "U-mag: " + cStarMagnitudes[0],
-                                             "B-mag: " + cStarMagnitudes[1],
-                                             "V-mag: " + cStarMagnitudes[2],
-                                             "|"))
-    print("+" + "-" * 77 + "+")
+        obj_string += ('{:2}{:76}{}'.format("|", "Central star magnitudes: ", "|\n"))
+        obj_string += ('{:5}{:24}{:24}{:25}{}'.format(
+                                                "|",
+                                                "U-mag: " + cStarMagnitudes[0],
+                                                "B-mag: " + cStarMagnitudes[1],
+                                                "V-mag: " + cStarMagnitudes[2],
+                                                "|\n"))
+    obj_string += separator
 
     if identifiers[4] is not None:
-        print('{:2}{:76}{}'.format("|", "Other identifiers: ", "|"))
-        _justifyText(", ".join(identifiers[4]))
-        print("+" + "-" * 77 + "+")
+        obj_string += ('{:2}{:76}{}'.format("|", "Other identifiers: ", "|\n"))
+        obj_string += _justifyText(", ".join(identifiers[4]))
+        obj_string += separator
 
     notes = dso.getNotes()
     if notes[0] != "":
-        print('{:2}{:76}{}'.format("|", "NED notes: ", "|"))
-        _justifyText(notes[0])
-        print("+" + "-" * 77 + "+")
+        obj_string += ('{:2}{:76}{}'.format("|", "NED notes: ", "|\n"))
+        obj_string += _justifyText(notes[0])
+        obj_string += separator
 
     if notes[1] != "":
-        print('{:2}{:76}{}'.format("|", "OpenNGC notes: ", "|"))
-        _justifyText(notes[1])
-        print("+" + "-" * 77 + "+")
+        obj_string += ('{:2}{:76}{}'.format("|", "OpenNGC notes: ", "|\n"))
+        obj_string += _justifyText(notes[1])
+        obj_string += separator
+    return obj_string
 
 
 def searchAltId(name):
@@ -967,7 +978,7 @@ MWSC or UGC catalogs.
         if nameParts[2] == "102":
             constraint = 'messier="101"'
         else:
-            constraint = 'messier="' + nameParts[2] + '"'
+            constraint = 'messier="' + "{:0>3}".format(nameParts[2]) + '"'
     elif nameParts[1] == 'PGC':  # 6 digits format
         constraint = 'identifiers LIKE "%PGC ' + "{:0>6}".format(nameParts[2]) + '%"'
     elif nameParts[1] == 'UGC':  # 5 digits format
