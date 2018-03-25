@@ -132,11 +132,8 @@ class TestDsoMethods(unittest.TestCase):
         """Test that the calculated apparent angular separation between two objects
         is correct and return a user friendly output.
         """
-        obj1 = ongc.Dso('NGC1')
-        obj2 = ongc.Dso('NGC2')
-
         expected = '0° 1m 48.32s'
-        self.assertEqual(ongc.getSeparation(obj1, obj2, style='text'), expected)
+        self.assertEqual(ongc.getSeparation('NGC1', 'NGC2', style='text'), expected)
 
     def test_get_neighbors(self):
         """Test that neighbors are correctly found and returned."""
@@ -154,9 +151,7 @@ class TestDsoMethods(unittest.TestCase):
 
     def test_get_neighbors_with_filter(self):
         """Test that neighbors are correctly found and returned."""
-        obj1 = ongc.Dso('NGC521')
-
-        neighbors = ongc.getNeighbors(obj1, 15, filter='NGC')
+        neighbors = ongc.getNeighbors('NGC521', 15, filter='NGC')
         expectedListLength = 1
         expectedNearest = 'NGC0533, Galaxy in Cet'
         expectedNearestSeparation = 0.2414024394257306
@@ -281,6 +276,35 @@ class TestDsoMethods(unittest.TestCase):
             "+-----------------------------------------------------------------------------+\n"
             "| Other identifiers:                                                          |\n"
             "|    C2, IRAS 00102+7214, PN G120.0+09.8                                      |\n"
+            "+-----------------------------------------------------------------------------+\n"
+            )
+
+        self.assertEqual(obj_details, expected)
+
+    def test_print_details_obj_nebula(self):
+        """Test that printDetails() output is formatted in the right way for PNs."""
+        obj_details = ongc.printDetails('NGC6523')
+        expected = (
+            "+-----------------------------------------------------------------------------+\n"
+            "| Id: 12540     Name: NGC6523           Type: Nebula                          |\n"
+            "| R.A.: 18:03:41.27      Dec.: -24:22:48.6      Constellation: Sgr            |\n"
+            "| Also known as:                                                              |\n"
+            "|    M008, NGC6533                                                            |\n"
+            "| Common names:                                                               |\n"
+            "|    Lagoon Nebula                                                            |\n"
+            "+-----------------------------------------------------------------------------+\n"
+            "| Major axis: 45.0'      Minor axis: 30.0'      Position angle: N/A           |\n"
+            "| B-mag: 5.0     V-mag: N/A     J-mag: N/A     H-mag: N/A     K-mag: N/A      |\n"
+            "|                                                                             |\n"
+            "+-----------------------------------------------------------------------------+\n"
+            "| Other identifiers:                                                          |\n"
+            "|    LBN 25                                                                   |\n"
+            "+-----------------------------------------------------------------------------+\n"
+            "| NED notes:                                                                  |\n"
+            "|    Nominal position for NGC 6533 is -30 arcmin in error.                    |\n"
+            "+-----------------------------------------------------------------------------+\n"
+            "| OpenNGC notes:                                                              |\n"
+            "|    B-Mag taken from LEDA                                                    |\n"
             "+-----------------------------------------------------------------------------+\n"
             )
 
