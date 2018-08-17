@@ -38,6 +38,7 @@ Methods provided:
 
 from math import acos, cos, degrees, radians, sin
 from pkg_resources import resource_filename
+import numpy as np
 import re
 import sqlite3
 
@@ -56,9 +57,9 @@ class Dso(object):
         * __init__: Object constructor.
         * __str__: Returns basic data of the object as a formatted string.
         * getConstellation: Returns the constellation where the object is located.
-        * getCoords: Returns the coordinates of the object in J2000 Epoch.
+        * getCoords: Returns the coordinates of the object in J2000 Epoch as numpy array.
         * getCStarData: Returns data about central star of planetary nebulaes.
-        * getDec: Returns the Declination in J2000 Epoch.
+        * getDec: Returns the Declination in J2000 Epoch in string format.
         * getDimensions: Returns object axes dimensions and position angle.
         * getHubble: Returns the Hubble classification of the galaxy.
         * getId: Returns the database Id of the object.
@@ -68,7 +69,7 @@ class Dso(object):
         * getNotes: Returns notes from NED and from ONGC author.
         * getSurfaceBrightness: Returns the surface brightness value of the galaxy.
         * getType: Returns the type of the object.
-        * getRA: Returns the Right Ascension in J2000 Epoch.
+        * getRA: Returns the Right Ascension in J2000 Epoch in string format.
         * xephemFormat: Returns object data in Xephem format.
     """
 
@@ -133,8 +134,29 @@ class Dso(object):
         self._id = objectData[0]
         self._name = objectname
         self._type = objectData[2]
-        self._ra = objectData[3]
-        self._dec = objectData[4]
+
+        # R.A. can be empty for NonEx objects only
+        if self._type == "Nonexistent object" and objectData[3] == "":
+            self._ra = None
+        else:
+            try:
+                self._ra = np.array([float(x) for x in objectData[3].split(':')])
+            except:
+                raise ValueError('There must be some error in the database: '
+                                 + 'I can\'t recognize R.A. data of object '
+                                 + self._name)
+
+        # Declination can be empty for NonEx objects only
+        if self._type == "Nonexistent object" and objectData[4] == "":
+            self._dec = None
+        else:
+            try:
+                self._dec = np.array([float(x) for x in objectData[4].split(':')])
+            except:
+                raise ValueError('There must be some error in the database: '
+                                 + 'I can\'t recognize Declination data of object '
+                                 + self._name)
+
         self._const = objectData[5]
 
         # These properties may be empty
@@ -183,25 +205,22 @@ class Dso(object):
         return self._const
 
     def getCoords(self):
-        """Returns the coordinates of the object in J2000 Epoch.
+        """Returns the coordinates of the object in J2000 Epoch as numpy array.
 
-        :returns: ((HH,MM,SS.SS),(+/-,DD,MM,SS.SS))
+        :returns: array([[HH., MM., SS.ss],[DD., MM., SS.ss]])
 
         The value is espressed as a tuple of tuples
         with numerical values espressed as int or float:
 
                 >>> s = Dso("ngc1")
                 >>> s.getCoords()
-                ((0, 7, 15.84), ('+', 27, 42, 29.1))
+                array([[ 0.  ,  7.  , 15.84],
+                       [27.  , 42.  , 29.1 ]])
 
         """
-        if self._ra == "" or self._dec == "":
+        if self._ra is None or self._dec is None:
             raise ValueError('Object named ' + self._name + ' has no coordinates in database.')
-        ra = self._ra.split(":")
-        dec = self._dec.split(":")
-        raTuple = (int(ra[0]), int(ra[1]), float(ra[2]))
-        decTuple = (dec[0][0], int(dec[0][1:]), int(dec[1]), float(dec[2]))
-        return raTuple, decTuple
+        return np.array([self._ra, self._dec, ])
 
     def getCStarData(self):
         """Returns data about central star of planetary nebulaes.
@@ -230,16 +249,25 @@ class Dso(object):
         return identifiers, self._cstarumag, self._cstarbmag, self._cstarvmag
 
     def getDec(self):
-        """Returns the Declination in J2000 Epoch.
+        """Returns the Declination in J2000 Epoch in string format.
 
-        :returns: '+/-DD:MM:SS.SS'
+        :returns: '+/-DD:MM:SS.ss'
+
+        If you need the raw data use getCoords() method.
 
                 >>> s = Dso("ngc1")
                 >>> s.getDec()
                 '+27:42:29.1'
 
+                >>> s = Dso("ngc6991")
+                >>> s.getDec()
+                'N/A'
+
         """
-        return self._dec
+        if self._dec is not None:
+            return '{:+02.0f}:{:02.0f}:{:04.1f}'.format(*self._dec)
+        else:
+            return 'N/A'
 
     def getDimensions(self):
         """Returns a tuple with object axes dimensions (float) and position angle (int).
@@ -385,16 +413,25 @@ class Dso(object):
         return self._type
 
     def getRA(self):
-        """Returns the Right Ascension in J2000 Epoch.
+        """Returns the Right Ascension in J2000 Epoch in string format.
 
-        :returns: 'HH:MM:SS.SS'
+        :returns: 'HH:MM:SS.ss'
+
+        If you need the raw data use getCoords() method.
 
                 >>> s = Dso("ngc1")
                 >>> s.getRA()
                 '00:07:15.84'
 
+                >>> s = Dso("ngc6991")
+                >>> s.getRA()
+                'N/A'
+
         """
-        return self._ra
+        if self._ra is not None:
+            return '{:02.0f}:{:02.0f}:{:05.2f}'.format(*self._ra)
+        else:
+            return 'N/A'
 
     def xephemFormat(self):
         """Returns object data in Xephem format.
@@ -653,12 +690,8 @@ def getSeparation(obj1, obj2, style="raw"):
 
     a1 = radians(coordsObj1[0][0]*15 + coordsObj1[0][1]/4 + coordsObj1[0][2]/240)
     a2 = radians(coordsObj2[0][0]*15 + coordsObj2[0][1]/4 + coordsObj2[0][2]/240)
-    d1 = radians(coordsObj1[1][1] + coordsObj1[1][2]/60 + coordsObj1[1][3]/3600)
-    if coordsObj1[1][0] == "-":
-        d1 = 0 - d1
-    d2 = radians(coordsObj2[1][1] + coordsObj2[1][2]/60 + coordsObj2[1][3]/3600)
-    if coordsObj2[1][0] == "-":
-        d2 = 0 - d2
+    d1 = radians(coordsObj1[1][0] + coordsObj1[1][1]/60 + coordsObj1[1][2]/3600)
+    d2 = radians(coordsObj2[1][0] + coordsObj2[1][1]/60 + coordsObj2[1][2]/3600)
 
     separation = acos(sin(d1)*sin(d2) + cos(d1)*cos(d2)*cos(a1-a2))
 

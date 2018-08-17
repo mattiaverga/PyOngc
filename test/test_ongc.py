@@ -26,6 +26,8 @@
 import unittest
 from pyongc import ongc
 
+import numpy as np
+
 
 class TestDsoClass(unittest.TestCase):
     """Test that Dso objects are created in the right way and that data
@@ -60,7 +62,7 @@ class TestDsoClass(unittest.TestCase):
         obj = ongc.Dso('NGC1')
 
         expected = ((0, 7, 15.84), ('+', 27, 42, 29.1))
-        self.assertEqual(obj.getCoords(), expected)
+        np.testing.assert_equal(obj.getCoords(), ([[0., 7., 15.84], [27., 42., 29.1]]))
 
     def test_get_coordinates_nonexistent(self):
         """Test getCoords() on a Nonexistent object which doesn't have coords."""
@@ -349,7 +351,7 @@ class TestDatabaseIntegrity(unittest.TestCase):
             self.assertIsInstance(item.getId(), int)
             self.assertNotEqual(item.getType(), '')
             if item.getType() != 'Nonexistent object':
-                self.assertIsInstance(item.getCoords(), tuple)
+                self.assertIsInstance(item.getCoords(), np.ndarray)
                 self.assertNotEqual(item.getDec(), '')
                 self.assertNotEqual(item.getRA(), '')
                 self.assertNotEqual(item.getConstellation(), '')
