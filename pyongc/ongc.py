@@ -36,7 +36,6 @@ Methods provided:
     * searchAltId: Search a object in the database using an alternative identifier.
 """
 
-from math import acos, cos, degrees, radians, sin
 from pkg_resources import resource_filename
 import numpy as np
 import re
@@ -688,21 +687,27 @@ def getSeparation(obj1, obj2, style="raw"):
     coordsObj1 = obj1.getCoords()
     coordsObj2 = obj2.getCoords()
 
-    a1 = radians(coordsObj1[0][0]*15 + coordsObj1[0][1]/4 + coordsObj1[0][2]/240)
-    a2 = radians(coordsObj2[0][0]*15 + coordsObj2[0][1]/4 + coordsObj2[0][2]/240)
-    d1 = radians(coordsObj1[1][0] + coordsObj1[1][1]/60 + coordsObj1[1][2]/3600)
-    d2 = radians(coordsObj2[1][0] + coordsObj2[1][1]/60 + coordsObj2[1][2]/3600)
+    a1 = np.radians(coordsObj1[0][0]*15 + coordsObj1[0][1]/4 + coordsObj1[0][2]/240)
+    a2 = np.radians(coordsObj2[0][0]*15 + coordsObj2[0][1]/4 + coordsObj2[0][2]/240)
+    if np.signbit(coordsObj1[1][0]):
+        d1 = np.radians(np.sum(coordsObj1[1] * [1, -1/60, -1/3600]))
+    else:
+        d1 = np.radians(np.sum(coordsObj1[1] * [1, 1/60, 1/3600]))
+    if np.signbit(coordsObj2[1][0]):
+        d2 = np.radians(np.sum(coordsObj2[1] * [1, -1/60, -1/3600]))
+    else:
+        d2 = np.radians(np.sum(coordsObj2[1] * [1, 1/60, 1/3600]))
 
-    separation = acos(sin(d1)*sin(d2) + cos(d1)*cos(d2)*cos(a1-a2))
+    separation = np.arccos(np.sin(d1)*np.sin(d2) + np.cos(d1)*np.cos(d2)*np.cos(a1-a2))
 
     if style == "text":
-        d = int(degrees(separation))
-        md = abs(degrees(separation) - d) * 60
+        d = int(np.degrees(separation))
+        md = abs(np.degrees(separation) - d) * 60
         m = int(md)
         s = (md - m) * 60
         return str(d) + "° " + str(m) + "m " + "{:.2f}".format(s) + "s"
     else:
-        return degrees(separation), degrees(a2-a1), degrees(d2-d1)
+        return np.degrees(separation), np.degrees(a2-a1), np.degrees(d2-d1)
 
 
 def listObjects(**kwargs):

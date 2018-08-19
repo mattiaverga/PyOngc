@@ -124,18 +124,18 @@ class TestDsoMethods(unittest.TestCase):
         """Test that the calculated apparent angular separation between two objects
         is correct and report the raw data to user.
         """
-        obj1 = ongc.Dso('NGC1')
-        obj2 = ongc.Dso('NGC2')
+        obj1 = ongc.Dso('NGC6070')
+        obj2 = ongc.Dso('NGC6118')
 
-        expected = (0.030089273732482536, 0.005291666666666788, -0.02972222222221896)
+        expected = (4.207483963913519, 2.9580416666666864, -2.9927499999999996)
         self.assertEqual(ongc.getSeparation(obj1, obj2), expected)
 
     def test_calculate_separation_friendly(self):
         """Test that the calculated apparent angular separation between two objects
         is correct and return a user friendly output.
         """
-        expected = '0° 1m 48.32s'
-        self.assertEqual(ongc.getSeparation('NGC1', 'NGC2', style='text'), expected)
+        expected = '4° 12m 26.94s'
+        self.assertEqual(ongc.getSeparation('NGC6118', 'NGC6070', style='text'), expected)
 
     def test_get_neighbors(self):
         """Test that neighbors are correctly found and returned."""
