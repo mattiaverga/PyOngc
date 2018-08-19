@@ -265,7 +265,7 @@ class Dso(object):
 
         """
         if self._dec is not None:
-            return '{:+02.0f}:{:02.0f}:{:04.1f}'.format(*self._dec)
+            return '{:+03.0f}:{:02.0f}:{:04.1f}'.format(*self._dec)
         else:
             return 'N/A'
 
