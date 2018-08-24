@@ -1,20 +1,22 @@
-image:
-- Visual Studio 2017
-
-stack: python 3
+build: false
 
 environment:
-  PY_DIR: C:\Python36-x64
+  matrix:
+    - PYTHON_VERSION: 3.6
+      MINICONDA: C:\Miniconda3
+    - PYTHON_VERSION: 3.7
+      MINICONDA: C:\Miniconda3
 
-clone_depth: 3
+init:
+  - "ECHO %PYTHON_VERSION% %MINICONDA%"
 
-before_build:
-- cmd: set PATH=%PY_DIR%;%PY_DIR%\Scripts;%PATH%
+install:
+  - "set PATH=%MINICONDA%;%MINICONDA%\\Scripts;%PATH%"
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  - conda info -a
+  - "conda create -q -n test-environment python=%PYTHON_VERSION% numpy pytest mock"
+  - activate test-environment
 
-build_script:
-- python --version
-- pip install -e .[tests]
-  
-after_build:
-- pytest -v
-
+test_script:
+  - pytest -v

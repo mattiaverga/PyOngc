@@ -12,7 +12,7 @@ A python interface for accessing OpenNGC database data
    :target: https://travis-ci.org/mattiaverga/PyOngc
 .. image:: https://coveralls.io/repos/github/mattiaverga/PyOngc/badge.svg?branch=master
    :target: https://coveralls.io/github/mattiaverga/PyOngc?branch=master
-.. image:: https://ci.appveyor.com/api/projects/status/ee72q5vkbi7quri6?svg=true
+.. image:: https://ci.appveyor.com/api/projects/status/ee72q5vkbi7quri6/branch/master?svg=true
    :target: https://ci.appveyor.com/project/mattiaverga/pyongc
    
 
@@ -40,7 +40,8 @@ Usage
         >>> from pyongc import ongc
         >>> DSOobject = ongc.Dso("NGC7000")
         >>> DSOobject.getCoords()
-        ((20, 59, 17.14), ('+', 44, 31, 43.6))
+        array([[20.  , 59.  , 17.14],
+               [44.  , 31.  , 43.6 ]])
 
 Object data is easily available from command line also:
 

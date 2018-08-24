@@ -11,6 +11,7 @@ CLASSIFIERS = [
     'Programming Language :: Python',
     'Programming Language :: Python :: 3',
     'Programming Language :: Python :: 3.6',
+    'Programming Language :: Python :: 3.7',
     'Topic :: Database',
     'Topic :: Scientific/Engineering :: Astronomy'
 ]
@@ -19,7 +20,7 @@ LONG_DESCRIPTION = open('README.rst').read()
 
 setup(
     name='PyOngc',
-    version='0.2.0',
+    version='0.2.90',
     author='Mattia Verga',
     author_email='mattia.verga@tiscali.it',
     url='https://github.com/mattiaverga/PyOngc',
