@@ -26,6 +26,7 @@
 import unittest
 from pyongc import ongc
 
+import mock
 import numpy as np
 
 
@@ -33,6 +34,10 @@ class TestDsoClass(unittest.TestCase):
     """Test that Dso objects are created in the right way and that data
     is retrieved correctly.
     """
+    def test_dso_creation_error(self):
+        """Test we get a type error if user doesn't input a string."""
+        self.assertRaisesRegex(TypeError, 'Wrong type as parameter', ongc.Dso, 1234)
+
     def test_name_recognition(self):
         """Test the regex used to convert the name of the object inputted by the user
         to the correct form.
@@ -48,6 +53,19 @@ class TestDsoClass(unittest.TestCase):
         """Test that a duplicated object is returned as himself when asked to do so."""
         self.assertEqual(ongc.Dso('ngc20')._name, 'NGC0006')
         self.assertEqual(ongc.Dso('ngc20', returndup=True)._name, 'NGC0020')
+        self.assertEqual(ongc.Dso('ic555')._name, 'IC0554')
+
+    @mock.patch('pyongc.ongc._queryFetchOne')
+    def test_bad_ra(self, corrupted_data):
+        """Test useful error message on object creation if R.A. data is corrupted."""
+        corrupted_data.return_value = ('2', 'G', 'Galaxy', 'O0:11:00.88', '-12:49:22.3')
+        self.assertRaisesRegex(ValueError, 'I can\'t recognize R.A. data', ongc.Dso, 'IC2')
+
+    @mock.patch('pyongc.ongc._queryFetchOne')
+    def test_bad_dec(self, corrupted_data):
+        """Test useful error message on object creation if Declination data is corrupted."""
+        corrupted_data.return_value = ('2', 'G', 'Galaxy', '00:11:00.88', '-I2:49:22.3')
+        self.assertRaisesRegex(ValueError, 'I can\'t recognize Declination data', ongc.Dso, 'IC2')
 
     def test_object_print(self):
         """Test basic object data representation."""
@@ -57,11 +75,30 @@ class TestDsoClass(unittest.TestCase):
         actual = str(obj)
         self.assertEqual(actual, expected)
 
+    def test_getDec(self):
+        """Test Declination as string is returned correctly."""
+        obj = ongc.Dso('IC15')
+        expected = '-00:03:40.6'
+        self.assertEqual(obj.getDec(), expected)
+        # Nonexistent object
+        obj = ongc.Dso('NGC6991')
+        expected = 'N/A'
+        self.assertEqual(obj.getDec(), expected)
+
+    def test_getRA(self):
+        """Test Declination as string is returned correctly."""
+        obj = ongc.Dso('NGC475')
+        expected = '01:20:02.00'
+        self.assertEqual(obj.getRA(), expected)
+        # Nonexistent object
+        obj = ongc.Dso('NGC6991')
+        expected = 'N/A'
+        self.assertEqual(obj.getRA(), expected)
+
     def test_get_coordinates_successful(self):
         """Test succesful getCoords() method."""
         obj = ongc.Dso('NGC1')
 
-        expected = ((0, 7, 15.84), ('+', 27, 42, 29.1))
         np.testing.assert_equal(obj.getCoords(), ([[0., 7., 15.84], [27., 42., 29.1]]))
 
     def test_get_coordinates_nonexistent(self):
@@ -74,18 +111,27 @@ class TestDsoClass(unittest.TestCase):
 
     def test_get_PN_central_star_data(self):
         """Test retrieving Planetary Nebulaes central star data."""
+        # With central star identifiers
         obj = ongc.Dso('NGC1535')
-
         expected = (['BD -13 842', 'HD 26847'], None, 12.19, 12.18)
+        self.assertEqual(obj.getCStarData(), expected)
+        # Without central star identifiers
+        obj = ongc.Dso('IC289')
+        expected = (None, None, 15.1, 15.9)
         self.assertEqual(obj.getCStarData(), expected)
 
     def test_get_object_identifiers(self):
         """Test getIdentifiers() method."""
         obj = ongc.Dso('NGC650')
-
         expected = ('M076', ['NGC0651'], None, ['Barbell Nebula', 'Cork Nebula',
                     'Little Dumbbell Nebula'], ['2MASX J01421808+5134243', 'IRAS 01391+5119',
                     'PN G130.9-10.5'])
+        self.assertEqual(obj.getIdentifiers(), expected)
+
+        obj = ongc.Dso('IC5003')
+        expected = (None, None, ['IC5029', 'IC5039', 'IC5046'], None, ['2MASX J20431434-2951122',
+                    'ESO 463-020', 'ESO-LV 463-0200', 'IRAS 20401-3002', 'MCG -05-49-001',
+                    'PGC 065249'])
         self.assertEqual(obj.getIdentifiers(), expected)
 
     def test_get_magnitudes(self):
@@ -113,8 +159,11 @@ class TestDsoClass(unittest.TestCase):
     def test_xephem_format(self):
         """Test object representation in XEphem format."""
         obj = ongc.Dso('NGC1')
-
         expected = 'NGC0001,f|G,00:07:15.84,+27:42:29.1,13.4,,94.2|64.2|1.07'
+        self.assertEqual(obj.xephemFormat(), expected)
+        
+        obj = ongc.Dso('NGC405')
+        expected = 'NGC0405,f,01:08:34.11,-46:40:06.6,7.17,,||'
         self.assertEqual(obj.xephemFormat(), expected)
 
 
@@ -351,7 +400,9 @@ class TestDatabaseIntegrity(unittest.TestCase):
             self.assertIsInstance(item.getId(), int)
             self.assertNotEqual(item.getType(), '')
             if item.getType() != 'Nonexistent object':
-                self.assertIsInstance(item.getCoords(), np.ndarray)
+                coords = item.getCoords()
+                self.assertIsInstance(coords, np.ndarray)
+                self.assertEqual(coords.shape, (2, 3))
                 self.assertNotEqual(item.getDec(), '')
                 self.assertNotEqual(item.getRA(), '')
                 self.assertNotEqual(item.getConstellation(), '')

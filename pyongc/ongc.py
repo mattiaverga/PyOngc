@@ -250,7 +250,7 @@ class Dso(object):
     def getDec(self):
         """Returns the Declination in J2000 Epoch in string format.
 
-        :returns: '+/-DD:MM:SS.ss'
+        :returns: '+/-DD:MM:SS.s'
 
         If you need the raw data use getCoords() method.
 
