@@ -129,9 +129,12 @@ class TestDsoClass(unittest.TestCase):
         self.assertEqual(obj.getIdentifiers(), expected)
 
         obj = ongc.Dso('IC5003')
-        expected = (None, None, ['IC5029', 'IC5039', 'IC5046'], None, ['2MASX J20431434-2951122',
-                    'ESO 463-020', 'ESO-LV 463-0200', 'IRAS 20401-3002', 'MCG -05-49-001',
-                    'PGC 065249'])
+        expected = (None,
+                    None,
+                    ['IC5029', 'IC5039', 'IC5046'],
+                    None,
+                    ['2MASX J20431434-2951122', 'ESO 463-020', 'ESO-LV 463-0200',
+                     'IRAS 20401-3002', 'MCG -05-49-001', 'PGC 065249'])
         self.assertEqual(obj.getIdentifiers(), expected)
 
     def test_get_magnitudes(self):
@@ -161,7 +164,7 @@ class TestDsoClass(unittest.TestCase):
         obj = ongc.Dso('NGC1')
         expected = 'NGC0001,f|G,00:07:15.84,+27:42:29.1,13.4,,94.2|64.2|1.07'
         self.assertEqual(obj.xephemFormat(), expected)
-        
+
         obj = ongc.Dso('NGC405')
         expected = 'NGC0405,f,01:08:34.11,-46:40:06.6,7.17,,||'
         self.assertEqual(obj.xephemFormat(), expected)
