@@ -687,8 +687,8 @@ def getSeparation(obj1, obj2, style="raw"):
     coordsObj1 = obj1.getCoords()
     coordsObj2 = obj2.getCoords()
 
-    a1 = np.radians(coordsObj1[0][0]*15 + coordsObj1[0][1]/4 + coordsObj1[0][2]/240)
-    a2 = np.radians(coordsObj2[0][0]*15 + coordsObj2[0][1]/4 + coordsObj2[0][2]/240)
+    a1 = np.radians(np.sum(coordsObj1[0] * [15, 1/4, 1/240]))
+    a2 = np.radians(np.sum(coordsObj2[0] * [15, 1/4, 1/240]))
     if np.signbit(coordsObj1[1][0]):
         d1 = np.radians(np.sum(coordsObj1[1] * [1, -1/60, -1/3600]))
     else:
