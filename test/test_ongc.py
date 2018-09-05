@@ -179,7 +179,7 @@ class TestDsoMethods(unittest.TestCase):
         obj1 = ongc.Dso('NGC6070')
         obj2 = ongc.Dso('NGC6118')
 
-        expected = (4.207483963913519, 2.9580416666666864, -2.9927499999999996)
+        expected = (4.207483963913541, 2.9580416666666864, -2.9927499999999996)
         self.assertEqual(ongc.getSeparation(obj1, obj2), expected)
 
     def test_calculate_separation_friendly(self):
@@ -196,7 +196,7 @@ class TestDsoMethods(unittest.TestCase):
         neighbors = ongc.getNeighbors(obj1, 15)
         expectedListLength = 2
         expectedNearest = 'IC1694, Galaxy in Cet'
-        expectedNearestSeparation = 0.13726168561986588
+        expectedNearestSeparation = 0.13726168561780452
 
         self.assertIsInstance(neighbors, list)
         self.assertEqual(len(neighbors), expectedListLength)
@@ -208,7 +208,7 @@ class TestDsoMethods(unittest.TestCase):
         neighbors = ongc.getNeighbors('NGC521', 15, filter='NGC')
         expectedListLength = 1
         expectedNearest = 'NGC0533, Galaxy in Cet'
-        expectedNearestSeparation = 0.2414024394257306
+        expectedNearestSeparation = 0.24140243942744602
 
         self.assertIsInstance(neighbors, list)
         self.assertEqual(len(neighbors), expectedListLength)

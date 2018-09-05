@@ -599,8 +599,8 @@ def getNeighbors(obj, separation, filter="all"):
 
             >>> s1 = Dso("ngc521")
             >>> getNeighbors(s1, 15) #doctest: +ELLIPSIS
-            [(<__main__.Dso object at 0x...>, 0.13726168561986588), \
-(<__main__.Dso object at 0x...>, 0.2414024394257306)]
+            [(<__main__.Dso object at 0x...>, 0.13726168561780452), \
+(<__main__.Dso object at 0x...>, 0.24140243942744602)]
 
             >>> getNeighbors("ngc521", 1)
             []
@@ -608,7 +608,7 @@ def getNeighbors(obj, separation, filter="all"):
     The optional "filter" parameter can be used to filter the search to only NGC or IC objects:
 
             >>> getNeighbors("ngc521", 15, filter="NGC") #doctest: +ELLIPSIS
-            [(<__main__.Dso object at 0x...>, 0.2414024394257306)]
+            [(<__main__.Dso object at 0x...>, 0.24140243942744602)]
 
     """
     if not isinstance(obj, Dso):
@@ -655,10 +655,10 @@ def getSeparation(obj1, obj2, style="raw"):
             >>> s1 = Dso("ngc1")
             >>> s2 = Dso("ngc2")
             >>> getSeparation(s1, s2)
-            (0.030089273732482536, 0.005291666666666788, -0.02972222222221896)
+            (0.03008927371519897, 0.005291666666666788, -0.02972222222221896)
 
             >>> getSeparation("ngc1", "ngc2")
-            (0.030089273732482536, 0.005291666666666788, -0.02972222222221896)
+            (0.03008927371519897, 0.005291666666666788, -0.02972222222221896)
 
     With the optional parameter "style" set to "text", it returns a formatted string:
 
@@ -698,7 +698,10 @@ def getSeparation(obj1, obj2, style="raw"):
     else:
         d2 = np.radians(np.sum(coordsObj2[1] * [1, 1/60, 1/3600]))
 
-    separation = np.arccos(np.sin(d1)*np.sin(d2) + np.cos(d1)*np.cos(d2)*np.cos(a1-a2))
+    #separation = np.arccos(np.sin(d1)*np.sin(d2) + np.cos(d1)*np.cos(d2)*np.cos(a1-a2))
+    # Better precision formula
+    # see http://aa.quae.nl/en/reken/afstanden.html
+    separation = 2*np.arcsin(np.sqrt(np.sin((d2-d1)/2)**2 + np.cos(d1)*np.cos(d2)*np.sin((a2-a1)/2)**2))
 
     if style == "text":
         d = int(np.degrees(separation))
