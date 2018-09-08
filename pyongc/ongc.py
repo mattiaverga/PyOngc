@@ -592,8 +592,7 @@ def getNeighbors(obj, separation, filter="all"):
     This function is used to find all objects within a specified range from a given object.
     It requires an object as the starting point of the search (either a string containing
     the name or a Dso type) and a search radius expressed in arcmins.
-    Be aware that this can be quite slow as it computes separation for nearly every object
-    in the database!
+    The maximum allowed search radius is 600 arcmin (10 degrees).
     It returns a list of of tuples with the Dso objects found in range and its distance,
     or an empty list if no object is found:
 
@@ -611,6 +610,43 @@ def getNeighbors(obj, separation, filter="all"):
             [(<__main__.Dso object at 0x...>, 0.24140243942744602)]
 
     """
+    def limiting_coords(obj):
+        obj_coords = obj.getCoords()
+        ra_lower_limit_deg = np.sum(obj_coords[0] * [15, 1/4, 1/240]) - 10
+        if ra_lower_limit_deg < 0:
+            ra_lower_limit_deg += 360
+        ra_lower_limit_hour = np.floor_divide(ra_lower_limit_deg, 15)
+        ra_upper_limit_deg = np.sum(obj_coords[0] * [15, 1/4, 1/240]) + 10
+        if ra_upper_limit_deg > 360:
+            ra_upper_limit_deg -= 360
+        ra_upper_limit_hour = np.floor_divide(ra_upper_limit_deg, 15)
+        if obj_coords[0][0] == ra_lower_limit_hour or obj_coords[0][0] == ra_upper_limit_hour:
+            params = (" AND (ra LIKE '{:02.0f}:%'"
+                      "OR ra LIKE '{:02.0f}:%')".format(ra_lower_limit_hour,
+                                                        ra_upper_limit_hour))
+        else:
+            params = (" AND (ra LIKE '{:02.0f}:%'"
+                      "OR ra LIKE '{:02.0f}:%'"
+                      "OR ra LIKE '{:02.0f}:%')".format(ra_lower_limit_hour,
+                                                        obj_coords[0][0],
+                                                        ra_upper_limit_hour))
+
+        if np.signbit(obj_coords[1][0]):
+            dec_lower_limit = np.sum(obj_coords[1] * [1, -1/60, -1/3600]) - 10
+            dec_upper_limit = np.sum(obj_coords[1] * [1, -1/60, -1/3600]) + 10
+        else:
+            dec_lower_limit = np.sum(obj_coords[1] * [1, 1/60, 1/3600]) - 10
+            dec_upper_limit = np.sum(obj_coords[1] * [1, 1/60, 1/3600]) + 10
+        dec_lower_limit_str = '{:+03.0f}'.format(np.trunc(dec_lower_limit))
+        dec_upper_limit_str = '{:+03.0f}'.format(np.trunc(dec_upper_limit))
+        obj_limit_str = '{:+03.0f}'.format(obj_coords[1][0])
+        params += (" AND (dec LIKE '{}_:%'"
+                   "OR dec LIKE '{}_:%'"
+                   "OR dec LIKE '{}_:%')".format(dec_lower_limit_str[:2],
+                                                 obj_limit_str[:2],
+                                                 dec_upper_limit_str[:2]))
+        return params
+
     if not isinstance(obj, Dso):
         if isinstance(obj, str):
             obj = Dso(obj)
@@ -618,14 +654,18 @@ def getNeighbors(obj, separation, filter="all"):
             raise TypeError('Wrong type obj. Either a Dso or string type was expected.')
     if not (isinstance(separation, int) or isinstance(separation, float)):
         raise TypeError('Wrong type separation. Either a int or float type was expected.')
+    if separation > 600:
+        raise ValueError('The maximum search radius allowed is 10 degrees.')
 
     cols = 'objects.name'
     tables = 'objects'
-    params = 'type != "Dup" AND ra != "" AND dec != "" AND name !="' + obj.getName() + '"'
+    params = 'type != "Dup" AND name !="' + obj.getName() + '"'
     if filter.upper() == "NGC":
         params += " AND name LIKE 'NGC%'"
     elif filter.upper() == "IC":
         params += " AND name LIKE 'IC%'"
+
+    params += limiting_coords(obj)
 
     neighbors = []
     for item in _queryFetchMany(cols, tables, params):
@@ -698,10 +738,11 @@ def getSeparation(obj1, obj2, style="raw"):
     else:
         d2 = np.radians(np.sum(coordsObj2[1] * [1, 1/60, 1/3600]))
 
-    #separation = np.arccos(np.sin(d1)*np.sin(d2) + np.cos(d1)*np.cos(d2)*np.cos(a1-a2))
+    # separation = np.arccos(np.sin(d1)*np.sin(d2) + np.cos(d1)*np.cos(d2)*np.cos(a1-a2))
     # Better precision formula
     # see http://aa.quae.nl/en/reken/afstanden.html
-    separation = 2*np.arcsin(np.sqrt(np.sin((d2-d1)/2)**2 + np.cos(d1)*np.cos(d2)*np.sin((a2-a1)/2)**2))
+    separation = 2*np.arcsin(np.sqrt(np.sin((d2-d1)/2)**2 +
+                                     np.cos(d1)*np.cos(d2)*np.sin((a2-a1)/2)**2))
 
     if style == "text":
         d = int(np.degrees(separation))
