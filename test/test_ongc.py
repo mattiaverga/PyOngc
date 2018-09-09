@@ -203,6 +203,20 @@ class TestDsoMethods(unittest.TestCase):
         self.assertEqual(str(neighbors[0][0]), expectedNearest)
         self.assertEqual(neighbors[0][1], expectedNearestSeparation)
 
+    def test_get_neighbors_negative_dec(self):
+        """Test that neighbors are correctly found and returned - with negative Dec value."""
+        obj1 = ongc.Dso('IC60')
+
+        neighbors = ongc.getNeighbors(obj1, 30)
+        expectedListLength = 1
+        expectedNearest = 'IC0058, Galaxy in Cet'
+        expectedNearestSeparation = 0.4064105387726472
+
+        self.assertIsInstance(neighbors, list)
+        self.assertEqual(len(neighbors), expectedListLength)
+        self.assertEqual(str(neighbors[0][0]), expectedNearest)
+        self.assertEqual(neighbors[0][1], expectedNearestSeparation)
+
     def test_get_neighbors_with_filter(self):
         """Test that neighbors are correctly found and returned."""
         neighbors = ongc.getNeighbors('NGC521', 15, filter='NGC')
