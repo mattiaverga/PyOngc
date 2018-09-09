@@ -581,12 +581,12 @@ def _queryFetchMany(cols, tables, params):
         db.close()
 
 
-def getNeighbors(obj, separation, filter="all"):
+def getNeighbors(obj, separation, catalog="all"):
     """Find all neighbors of a object within a user selected range.
 
     :param object: a Dso object or a string which identifies the object
     :param float separation: maximum distance from the object expressed in arcmin
-    :param optional string filter: filter for "NGC" or "IC" objects - default is all
+    :param optional string catalog: filter for "NGC" or "IC" objects - default is all
     :returns: list of Dso objects within limits ordered by distance [(Dso, separation),]
 
     This function is used to find all objects within a specified range from a given object.
@@ -604,9 +604,9 @@ def getNeighbors(obj, separation, filter="all"):
             >>> getNeighbors("ngc521", 1)
             []
 
-    The optional "filter" parameter can be used to filter the search to only NGC or IC objects:
+    The optional "catalog" parameter can be used to filter the search to only NGC or IC objects:
 
-            >>> getNeighbors("ngc521", 15, filter="NGC") #doctest: +ELLIPSIS
+            >>> getNeighbors("ngc521", 15, catalog="NGC") #doctest: +ELLIPSIS
             [(<__main__.Dso object at 0x...>, 0.24140243942744602)]
 
     """
@@ -621,15 +621,15 @@ def getNeighbors(obj, separation, filter="all"):
             ra_upper_limit_deg -= 360
         ra_upper_limit_hour = np.floor_divide(ra_upper_limit_deg, 15)
         if obj_coords[0][0] == ra_lower_limit_hour or obj_coords[0][0] == ra_upper_limit_hour:
-            params = (" AND (ra LIKE '{:02.0f}:%'"
-                      "OR ra LIKE '{:02.0f}:%')".format(ra_lower_limit_hour,
-                                                        ra_upper_limit_hour))
+            params = (' AND (ra LIKE "{:02.0f}:%"'
+                      ' OR ra LIKE "{:02.0f}:%")'.format(ra_lower_limit_hour,
+                                                         ra_upper_limit_hour))
         else:
-            params = (" AND (ra LIKE '{:02.0f}:%'"
-                      "OR ra LIKE '{:02.0f}:%'"
-                      "OR ra LIKE '{:02.0f}:%')".format(ra_lower_limit_hour,
-                                                        obj_coords[0][0],
-                                                        ra_upper_limit_hour))
+            params = (' AND (ra LIKE "{:02.0f}:%"'
+                      ' OR ra LIKE "{:02.0f}:%"'
+                      ' OR ra LIKE "{:02.0f}:%")'.format(ra_lower_limit_hour,
+                                                         obj_coords[0][0],
+                                                         ra_upper_limit_hour))
 
         if np.signbit(obj_coords[1][0]):
             dec_lower_limit = np.sum(obj_coords[1] * [1, -1/60, -1/3600]) - 10
@@ -640,11 +640,11 @@ def getNeighbors(obj, separation, filter="all"):
         dec_lower_limit_str = '{:+03.0f}'.format(np.trunc(dec_lower_limit))
         dec_upper_limit_str = '{:+03.0f}'.format(np.trunc(dec_upper_limit))
         obj_limit_str = '{:+03.0f}'.format(obj_coords[1][0])
-        params += (" AND (dec LIKE '{}_:%'"
-                   "OR dec LIKE '{}_:%'"
-                   "OR dec LIKE '{}_:%')".format(dec_lower_limit_str[:2],
-                                                 obj_limit_str[:2],
-                                                 dec_upper_limit_str[:2]))
+        params += (' AND (dec LIKE "{}_:%"'
+                   ' OR dec LIKE "{}_:%"'
+                   ' OR dec LIKE "{}_:%")'.format(dec_lower_limit_str[:2],
+                                                  obj_limit_str[:2],
+                                                  dec_upper_limit_str[:2]))
         return params
 
     if not isinstance(obj, Dso):
@@ -659,11 +659,9 @@ def getNeighbors(obj, separation, filter="all"):
 
     cols = 'objects.name'
     tables = 'objects'
-    params = 'type != "Dup" AND name !="' + obj.getName() + '"'
-    if filter.upper() == "NGC":
-        params += " AND name LIKE 'NGC%'"
-    elif filter.upper() == "IC":
-        params += " AND name LIKE 'IC%'"
+    params = 'type != "Dup" AND name !="{}"'.format(obj.getName())
+    if catalog.upper() in ["NGC", "IC"]:
+        params += ' AND name LIKE "{}%"'.format(catalog.upper())
 
     params += limiting_coords(obj)
 

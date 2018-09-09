@@ -247,7 +247,7 @@ class TestDsoMethods(unittest.TestCase):
 
     def test_get_neighbors_with_filter(self):
         """Test that neighbors are correctly found and returned."""
-        neighbors = ongc.getNeighbors('NGC521', 15, filter='NGC')
+        neighbors = ongc.getNeighbors('NGC521', 15, catalog='NGC')
         expectedListLength = 1
         expectedNearest = 'NGC0533, Galaxy in Cet'
         expectedNearestSeparation = 0.24140243942744602
