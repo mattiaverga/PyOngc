@@ -217,6 +217,34 @@ class TestDsoMethods(unittest.TestCase):
         self.assertEqual(str(neighbors[0][0]), expectedNearest)
         self.assertEqual(neighbors[0][1], expectedNearestSeparation)
 
+    def test_get_neighbors_above0ra(self):
+        """Test that neighbors are correctly found and returned - with RA just above 00h."""
+        obj1 = ongc.Dso('IC1')
+
+        neighbors = ongc.getNeighbors(obj1, 15)
+        expectedListLength = 2
+        expectedNearest = 'NGC0016, Galaxy in Peg'
+        expectedNearestSeparation = 0.1378555838270968
+
+        self.assertIsInstance(neighbors, list)
+        self.assertEqual(len(neighbors), expectedListLength)
+        self.assertEqual(str(neighbors[0][0]), expectedNearest)
+        self.assertEqual(neighbors[0][1], expectedNearestSeparation)
+
+    def test_get_neighbors_below0ra(self):
+        """Test that neighbors are correctly found and returned - with RA just below 00h."""
+        obj1 = ongc.Dso('IC1523')
+
+        neighbors = ongc.getNeighbors(obj1, 60)
+        expectedListLength = 1
+        expectedNearest = 'NGC7802, Galaxy in Psc'
+        expectedNearestSeparation = 0.7874886760327793
+
+        self.assertIsInstance(neighbors, list)
+        self.assertEqual(len(neighbors), expectedListLength)
+        self.assertEqual(str(neighbors[0][0]), expectedNearest)
+        self.assertEqual(neighbors[0][1], expectedNearestSeparation)
+
     def test_get_neighbors_with_filter(self):
         """Test that neighbors are correctly found and returned."""
         neighbors = ongc.getNeighbors('NGC521', 15, filter='NGC')
@@ -228,6 +256,12 @@ class TestDsoMethods(unittest.TestCase):
         self.assertEqual(len(neighbors), expectedListLength)
         self.assertEqual(str(neighbors[0][0]), expectedNearest)
         self.assertEqual(neighbors[0][1], expectedNearestSeparation)
+
+    def test_get_neighbors_bad_value(self):
+        """Return the right message if search radius value is out of range."""
+        self.assertRaisesRegex(ValueError,
+                               'The maximum search radius allowed is 10 degrees.',
+                               ongc.getNeighbors, 'IC1', 601)
 
     def test_list_all_objects(self):
         """Test the listObjects() method without filters.
