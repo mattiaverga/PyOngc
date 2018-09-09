@@ -140,7 +140,7 @@ class Dso(object):
         else:
             try:
                 self._ra = np.array([float(x) for x in objectData[3].split(':')])
-            except:
+            except Exception:
                 raise ValueError('There must be some error in the database: '
                                  + 'I can\'t recognize R.A. data of object '
                                  + self._name)
@@ -151,7 +151,7 @@ class Dso(object):
         else:
             try:
                 self._dec = np.array([float(x) for x in objectData[4].split(':')])
-            except:
+            except Exception:
                 raise ValueError('There must be some error in the database: '
                                  + 'I can\'t recognize Declination data of object '
                                  + self._name)
