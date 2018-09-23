@@ -522,6 +522,82 @@ class Dso(object):
         return ",".join(line)
 
 
+def _distance(coords1, coords2):
+    """Calculate distance between two points in the sky.
+
+    :param coords1: A.R. and Dec of the first point as numpy array
+                    array([[HH., MM., SS.ss],[DD., MM., SS.ss]])
+    :param coords2: A.R. and Dec of the second point as numpy array
+                    array([[HH., MM., SS.ss],[DD., MM., SS.ss]])
+    :returns: (float: angular separation, float: difference in A.R, float: difference in Dec)
+    """
+    a1 = np.radians(np.sum(coords1[0] * [15, 1/4, 1/240]))
+    a2 = np.radians(np.sum(coords2[0] * [15, 1/4, 1/240]))
+    if np.signbit(coords1[1][0]):
+        d1 = np.radians(np.sum(coords1[1] * [1, -1/60, -1/3600]))
+    else:
+        d1 = np.radians(np.sum(coords1[1] * [1, 1/60, 1/3600]))
+    if np.signbit(coords2[1][0]):
+        d2 = np.radians(np.sum(coords2[1] * [1, -1/60, -1/3600]))
+    else:
+        d2 = np.radians(np.sum(coords2[1] * [1, 1/60, 1/3600]))
+
+    # separation = np.arccos(np.sin(d1)*np.sin(d2) + np.cos(d1)*np.cos(d2)*np.cos(a1-a2))
+    # Better precision formula
+    # see http://aa.quae.nl/en/reken/afstanden.html
+    separation = 2*np.arcsin(np.sqrt(np.sin((d2-d1)/2)**2 +
+                                     np.cos(d1)*np.cos(d2)*np.sin((a2-a1)/2)**2))
+
+    return np.degrees(separation), np.degrees(a2-a1), np.degrees(d2-d1)
+
+
+def _limiting_coords(coords, radius):
+    """Write query filters for limiting search to specific area of the sky.
+
+    :param coords: A.R. and Dec of the point in the sky
+                    array([[HH., MM., SS.ss],[DD., MM., SS.ss]])
+    :param int radius: radius in degrees
+    :returns string: parameters to be added to query
+
+    This is a quick method to exclude objects farther than a specified distance
+    from the starting point, but it's not meant to be precise.
+    """
+    ra_lower_limit_deg = np.sum(coords[0] * [15, 1/4, 1/240]) - radius
+    if ra_lower_limit_deg < 0:
+        ra_lower_limit_deg += 360
+    ra_lower_limit_hour = np.floor_divide(ra_lower_limit_deg, 15)
+    ra_upper_limit_deg = np.sum(coords[0] * [15, 1/4, 1/240]) + radius
+    if ra_upper_limit_deg > 360:
+        ra_upper_limit_deg -= 360
+    ra_upper_limit_hour = np.floor_divide(ra_upper_limit_deg, 15)
+    if coords[0][0] == ra_lower_limit_hour or coords[0][0] == ra_upper_limit_hour:
+        params = (' AND (ra LIKE "{:02.0f}:%"'
+                  ' OR ra LIKE "{:02.0f}:%")'.format(ra_lower_limit_hour,
+                                                     ra_upper_limit_hour))
+    else:
+        params = (' AND (ra LIKE "{:02.0f}:%"'
+                  ' OR ra LIKE "{:02.0f}:%"'
+                  ' OR ra LIKE "{:02.0f}:%")'.format(ra_lower_limit_hour,
+                                                     coords[0][0],
+                                                     ra_upper_limit_hour))
+
+    if np.signbit(coords[1][0]):
+        dec_lower_limit = np.sum(coords[1] * [1, -1/60, -1/3600]) - radius
+        dec_upper_limit = np.sum(coords[1] * [1, -1/60, -1/3600]) + radius
+    else:
+        dec_lower_limit = np.sum(coords[1] * [1, 1/60, 1/3600]) - radius
+        dec_upper_limit = np.sum(coords[1] * [1, 1/60, 1/3600]) + radius
+    dec_lower_limit_str = '{:+03.0f}'.format(np.trunc(dec_lower_limit))
+    dec_upper_limit_str = '{:+03.0f}'.format(np.trunc(dec_upper_limit))
+    obj_limit_str = '{:+03.0f}'.format(coords[1][0])
+    params += (' AND (dec LIKE "{}_:%"'
+               ' OR dec LIKE "{}_:%"'
+               ' OR dec LIKE "{}_:%")'.format(dec_lower_limit_str[:2],
+                                              obj_limit_str[:2],
+                                              dec_upper_limit_str[:2]))
+    return params
+
+
 def _queryFetchOne(cols, tables, params):
     """Search one row in database.
 
@@ -581,6 +657,25 @@ def _queryFetchMany(cols, tables, params):
         db.close()
 
 
+def _str_to_coords(text):
+    """Convert a string to coordinates
+
+    :param string text: a string expressing coordinates in the form
+                        "HH:MM:SS.ss +/-DD:MM:SS.s"
+    :returns: array([[HH., MM., SS.ss],[DD., MM., SS.ss]])
+    """
+    pattern = re.compile('^(?:(\d{1,2}):(\d{1,2}):(\d{1,2}(?:\.\d{1,2})?))\s'
+                         '(?:([+-]\d{1,2}):(\d{1,2}):(\d{1,2}(?:\.\d{1,2})?))$')
+    result = pattern.match(text)
+
+    if result:
+        return np.array([np.array([float(x) for x in result.groups()[0:3]]),
+                         np.array([float(x) for x in result.groups()[3:6]])
+                         ])
+    else:
+        raise ValueError('This text cannot be recognized as coordinates: ' + text)
+
+
 def getNeighbors(obj, separation, catalog="all"):
     """Find all neighbors of a object within a user selected range.
 
@@ -610,43 +705,6 @@ def getNeighbors(obj, separation, catalog="all"):
             [(<__main__.Dso object at 0x...>, 0.24140243942744602)]
 
     """
-    def limiting_coords(obj):
-        obj_coords = obj.getCoords()
-        ra_lower_limit_deg = np.sum(obj_coords[0] * [15, 1/4, 1/240]) - 10
-        if ra_lower_limit_deg < 0:
-            ra_lower_limit_deg += 360
-        ra_lower_limit_hour = np.floor_divide(ra_lower_limit_deg, 15)
-        ra_upper_limit_deg = np.sum(obj_coords[0] * [15, 1/4, 1/240]) + 10
-        if ra_upper_limit_deg > 360:
-            ra_upper_limit_deg -= 360
-        ra_upper_limit_hour = np.floor_divide(ra_upper_limit_deg, 15)
-        if obj_coords[0][0] == ra_lower_limit_hour or obj_coords[0][0] == ra_upper_limit_hour:
-            params = (' AND (ra LIKE "{:02.0f}:%"'
-                      ' OR ra LIKE "{:02.0f}:%")'.format(ra_lower_limit_hour,
-                                                         ra_upper_limit_hour))
-        else:
-            params = (' AND (ra LIKE "{:02.0f}:%"'
-                      ' OR ra LIKE "{:02.0f}:%"'
-                      ' OR ra LIKE "{:02.0f}:%")'.format(ra_lower_limit_hour,
-                                                         obj_coords[0][0],
-                                                         ra_upper_limit_hour))
-
-        if np.signbit(obj_coords[1][0]):
-            dec_lower_limit = np.sum(obj_coords[1] * [1, -1/60, -1/3600]) - 10
-            dec_upper_limit = np.sum(obj_coords[1] * [1, -1/60, -1/3600]) + 10
-        else:
-            dec_lower_limit = np.sum(obj_coords[1] * [1, 1/60, 1/3600]) - 10
-            dec_upper_limit = np.sum(obj_coords[1] * [1, 1/60, 1/3600]) + 10
-        dec_lower_limit_str = '{:+03.0f}'.format(np.trunc(dec_lower_limit))
-        dec_upper_limit_str = '{:+03.0f}'.format(np.trunc(dec_upper_limit))
-        obj_limit_str = '{:+03.0f}'.format(obj_coords[1][0])
-        params += (' AND (dec LIKE "{}_:%"'
-                   ' OR dec LIKE "{}_:%"'
-                   ' OR dec LIKE "{}_:%")'.format(dec_lower_limit_str[:2],
-                                                  obj_limit_str[:2],
-                                                  dec_upper_limit_str[:2]))
-        return params
-
     if not isinstance(obj, Dso):
         if isinstance(obj, str):
             obj = Dso(obj)
@@ -663,7 +721,8 @@ def getNeighbors(obj, separation, catalog="all"):
     if catalog.upper() in ["NGC", "IC"]:
         params += ' AND name LIKE "{}%"'.format(catalog.upper())
 
-    params += limiting_coords(obj)
+    objCoords = obj.getCoords()
+    params += _limiting_coords(objCoords, np.ceil(separation / 60))
 
     neighbors = []
     for item in _queryFetchMany(cols, tables, params):
@@ -725,31 +784,16 @@ def getSeparation(obj1, obj2, style="raw"):
     coordsObj1 = obj1.getCoords()
     coordsObj2 = obj2.getCoords()
 
-    a1 = np.radians(np.sum(coordsObj1[0] * [15, 1/4, 1/240]))
-    a2 = np.radians(np.sum(coordsObj2[0] * [15, 1/4, 1/240]))
-    if np.signbit(coordsObj1[1][0]):
-        d1 = np.radians(np.sum(coordsObj1[1] * [1, -1/60, -1/3600]))
-    else:
-        d1 = np.radians(np.sum(coordsObj1[1] * [1, 1/60, 1/3600]))
-    if np.signbit(coordsObj2[1][0]):
-        d2 = np.radians(np.sum(coordsObj2[1] * [1, -1/60, -1/3600]))
-    else:
-        d2 = np.radians(np.sum(coordsObj2[1] * [1, 1/60, 1/3600]))
-
-    # separation = np.arccos(np.sin(d1)*np.sin(d2) + np.cos(d1)*np.cos(d2)*np.cos(a1-a2))
-    # Better precision formula
-    # see http://aa.quae.nl/en/reken/afstanden.html
-    separation = 2*np.arcsin(np.sqrt(np.sin((d2-d1)/2)**2 +
-                                     np.cos(d1)*np.cos(d2)*np.sin((a2-a1)/2)**2))
+    separation = _distance(coordsObj1, coordsObj2)
 
     if style == "text":
-        d = int(np.degrees(separation))
-        md = abs(np.degrees(separation) - d) * 60
+        d = int(separation[0])
+        md = abs(separation[0] - d) * 60
         m = int(md)
         s = (md - m) * 60
         return str(d) + "° " + str(m) + "m " + "{:.2f}".format(s) + "s"
     else:
-        return np.degrees(separation), np.degrees(a2-a1), np.degrees(d2-d1)
+        return separation
 
 
 def listObjects(**kwargs):
@@ -836,6 +880,57 @@ def listObjects(**kwargs):
 
     params = " AND ".join(paramslist)
     return [Dso(item[0], True) for item in _queryFetchMany(cols, tables, params)]
+
+
+def nearby(coords_string, separation=60, catalog="all"):
+    """Search for objects around given coordinates.
+
+    :param string coords: A.R. and Dec of the center of search
+    :param float separation: search radius expressed in arcmin - default 60
+    :param optional string catalog: filter for "NGC" or "IC" objects - default is all
+    :returns: list of Dso objects within limits ordered by distance [(Dso, separation),]
+
+    Returns all objects around a point expressed by the coords parameter and within a search
+    radius expressed by the separation parameter.
+    Coordinates must be Right Ascension and Declination expressed as a string in the
+    form "HH:MM:SS.ss +/-DD:MM:SS.s".
+
+    The maximum allowed search radius is 600 arcmin (10 degrees) and default value is 60.
+
+    It returns a list of of tuples with the Dso objects found in range and its distance,
+    or an empty list if no object is found:
+
+            >>> nearby('11:08:44 -00:09:01.3') #doctest: +ELLIPSIS
+            [(<__main__.Dso object at 0x...>, 0.1799936868460791), \
+(<__main__.Dso object at 0x...>, 0.7398295985600021), \
+(<__main__.Dso object at 0x...>, 0.9810037613087355)]
+
+    The optional "catalog" parameter can be used to filter the search to only NGC or IC objects:
+
+            >>> nearby('11:08:44 -00:09:01.3', separation=60, catalog='NGC') #doctest: +ELLIPSIS
+            [(<__main__.Dso object at 0x...>, 0.7398295985600021)]
+    """
+    if separation > 600:
+        raise ValueError('The maximum search radius allowed is 10 degrees.')
+
+    coords = _str_to_coords(coords_string)
+
+    cols = 'objects.name'
+    tables = 'objects'
+    params = 'type != "Dup"'
+    if catalog.upper() in ["NGC", "IC"]:
+        params += ' AND name LIKE "{}%"'.format(catalog.upper())
+
+    params += _limiting_coords(coords, np.ceil(separation / 60))
+
+    neighbors = []
+    for item in _queryFetchMany(cols, tables, params):
+        possibleNeighbor = Dso(item[0])
+        distance = _distance(coords, possibleNeighbor.getCoords())[0]
+        if distance <= (separation / 60):
+            neighbors.append((possibleNeighbor, distance))
+
+    return sorted(neighbors, key=lambda neighbor: neighbor[1])
 
 
 def printDetails(dso):

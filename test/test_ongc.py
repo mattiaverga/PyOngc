@@ -172,9 +172,25 @@ class TestDsoClass(unittest.TestCase):
 
 class TestDsoMethods(unittest.TestCase):
     """Test functions about DS Objects."""
+    def test__str_to_coords(self):
+        """Test conversion from string to coordinates."""
+        np.testing.assert_equal(ongc._str_to_coords('00:12:04.5 +22:3:45'),
+                                np.array([[0., 12., 4.5], [22., 3., 45.]])
+                                )
+        np.testing.assert_equal(ongc._str_to_coords('10:02:34.99 -8:44:12.3'),
+                                np.array([[10., 2., 34.99], [-8., 44., 12.3]])
+                                )
+
+    def test__str_to_coords_not_recognized(self):
+        """Test failed conversion from string to coordinates."""
+        bad_coords = '11:11:11 1:2:3'
+        self.assertRaisesRegex(ValueError,
+                               'This text cannot be recognized as coordinates: ' + bad_coords,
+                               ongc._str_to_coords, bad_coords)
+
     def test_calculate_separation_raw(self):
         """Test that the calculated apparent angular separation between two objects
-        is correct and report the raw data to user.
+        is correct and reports the raw data to user.
         """
         obj1 = ongc.Dso('NGC6070')
         obj2 = ongc.Dso('NGC6118')
@@ -184,7 +200,7 @@ class TestDsoMethods(unittest.TestCase):
 
     def test_calculate_separation_friendly(self):
         """Test that the calculated apparent angular separation between two objects
-        is correct and return a user friendly output.
+        is correct and returns a user friendly output.
         """
         expected = '4° 12m 26.94s'
         self.assertEqual(ongc.getSeparation('NGC6118', 'NGC6070', style='text'), expected)
@@ -335,6 +351,40 @@ class TestDsoMethods(unittest.TestCase):
 
         with self.assertRaisesRegex(ValueError, expected):
             ongc.listObjects(catalog='NGC', name='NGC1')
+
+    def test_nearby(self):
+        """Test that searching neighbors by coords works properly."""
+        obj = ongc.Dso('NGC521')
+        objCoords = ' '.join([obj.getRA(), obj.getDec()])
+
+        neighbors = ongc.getNeighbors(obj, 15)
+        nearby_objects = ongc.nearby(objCoords, separation=15)
+
+        self.assertIsInstance(nearby_objects, list)
+        self.assertEqual(len(nearby_objects), len(neighbors)+1)
+        self.assertEqual(str(nearby_objects[0][0]), str(obj))
+        self.assertEqual(nearby_objects[0][1], 0)
+        self.assertEqual(str(nearby_objects[1][0]), str(neighbors[0][0]))
+        self.assertEqual(nearby_objects[1][1], neighbors[0][1])
+
+    def test_nearby_with_filter(self):
+        """Test that neighbors are correctly filtered."""
+        obj = ongc.Dso('NGC521')
+        objCoords = ' '.join([obj.getRA(), obj.getDec()])
+
+        neighbors = ongc.getNeighbors('NGC521', 15, catalog='IC')
+        nearby_objects = ongc.nearby(objCoords, separation=15, catalog='IC')
+
+        self.assertIsInstance(nearby_objects, list)
+        self.assertEqual(len(nearby_objects), len(neighbors))
+        self.assertEqual(str(nearby_objects[0][0]), str(neighbors[0][0]))
+        self.assertEqual(nearby_objects[0][1], neighbors[0][1])
+
+    def test_nearby_bad_value(self):
+        """Return the right message if search radius value is out of range."""
+        self.assertRaisesRegex(ValueError,
+                               'The maximum search radius allowed is 10 degrees.',
+                               ongc.nearby, '01:24:33.78 +01:43:53.0', separation=601)
 
     def test_print_details_obj_galaxy(self):
         """Test that printDetails() output is formatted in the right way for galaxies."""
