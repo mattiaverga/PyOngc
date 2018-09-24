@@ -172,6 +172,29 @@ class TestDsoClass(unittest.TestCase):
 
 class TestDsoMethods(unittest.TestCase):
     """Test functions about DS Objects."""
+    def test__distance(self):
+        """Test distance calculation."""
+        np.testing.assert_allclose(ongc._distance(np.array([[0., 0., 0.], [0., 0., 0.]]),
+                                                  np.array([[1., 0., 0.], [0., 0., 0.]])),
+                                   (15, 15, 0),
+                                   1e-12
+                                   )
+        np.testing.assert_allclose(ongc._distance(np.array([[0., 0., 0.], [0., 0., 0.]]),
+                                                  np.array([[23., 0., 0.], [0., 0., 0.]])),
+                                   (15, 345, 0),
+                                   1e-12
+                                   )
+        np.testing.assert_allclose(ongc._distance(np.array([[0., 0., 0.], [0., 0., 0.]]),
+                                                  np.array([[0., 0., 0.], [15., 0., 0.]])),
+                                   (15, 0, 15),
+                                   1e-12
+                                   )
+        np.testing.assert_allclose(ongc._distance(np.array([[0., 0., 0.], [0., 0., 0.]]),
+                                                  np.array([[0., 0., 0.], [-15., 0., 0.]])),
+                                   (15, 0, -15),
+                                   1e-12
+                                   )
+
     def test__str_to_coords(self):
         """Test conversion from string to coordinates."""
         np.testing.assert_equal(ongc._str_to_coords('00:12:04.5 +22:3:45'),
