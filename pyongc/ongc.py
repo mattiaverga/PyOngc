@@ -208,9 +208,6 @@ class Dso(object):
 
         :returns: array([[HH., MM., SS.ss],[DD., MM., SS.ss]])
 
-        The value is espressed as a tuple of tuples
-        with numerical values espressed as int or float:
-
                 >>> s = Dso("ngc1")
                 >>> s.getCoords()
                 array([[ 0.  ,  7.  , 15.84],
