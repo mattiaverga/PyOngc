@@ -83,7 +83,7 @@ class Dso(object):
             raise TypeError('Wrong type as parameter. A string type was expected.')
 
         # Make sure object name is written in correct form
-        nameParts = re.match(r'((?:NGC|IC)\s?)(\d{1,4})(\s?(NED)(\d{1,2})|\s?[A-Z]+)?',
+        nameParts = re.match(r'^((?:NGC|IC)\s?)(\d{1,4})\s?((NED)(\d{1,2})|[A-Z]{1,2})?$',
                              name.upper())
         if nameParts is None:
             raise ValueError('Wrong object name. Please insert a valid NGC or IC object name.')
@@ -99,7 +99,7 @@ class Dso(object):
                               + '{:0>2}'.format(nameParts.group(5))
                               )
             else:
-                # User searches a single letter suffixed component
+                # User searches a letter suffixed component
                 objectname = (nameParts.group(1).strip()
                               + '{:0>4}'.format(nameParts.group(2))
                               + nameParts.group(3).strip()
