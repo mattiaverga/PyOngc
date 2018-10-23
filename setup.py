@@ -26,7 +26,7 @@ setup(
     url='https://github.com/mattiaverga/PyOngc',
     packages=find_packages(),
     package_data={'pyongc': ['ongc.db', ], },
-    scripts=['bin/ongcbrowse', ],
+    scripts=['bin/ongc', ],
     license='MIT',
     description='Python interface to OpenNGC database data.',
     long_description=LONG_DESCRIPTION,

@@ -47,7 +47,7 @@ Object data is easily available from command line also:
 
 ::
 
-        $ ongcbrowse -n NGC7000 --details
+        $ ongc view NGC7000 --details
         +-----------------------------------------------------------------------------+
         | Id: 13055     Name: NGC7000           Type: HII Ionized region              |
         | R.A.: 20:59:17.14      Dec.: +44:31:43.6      Constellation: Cyg            |
