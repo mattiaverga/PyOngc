@@ -661,8 +661,8 @@ def _str_to_coords(text):
                         "HH:MM:SS.ss +/-DD:MM:SS.s"
     :returns: array([[HH., MM., SS.ss],[DD., MM., SS.ss]])
     """
-    pattern = re.compile('^(?:(\d{1,2}):(\d{1,2}):(\d{1,2}(?:\.\d{1,2})?))\s'
-                         '(?:([+-]\d{1,2}):(\d{1,2}):(\d{1,2}(?:\.\d{1,2})?))$')
+    pattern = re.compile(r'^(?:(\d{1,2}):(\d{1,2}):(\d{1,2}(?:\.\d{1,2})?))\s'
+                         r'(?:([+-]\d{1,2}):(\d{1,2}):(\d{1,2}(?:\.\d{1,2})?))$')
     result = pattern.match(text)
 
     if result:

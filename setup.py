@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-TESTS_REQUIRE = ['pytest', 'nose', 'coveralls']
+TESTS_REQUIRE = ['pytest', 'mock', 'nose', 'coveralls']
 
 CLASSIFIERS = [
     'Development Status :: 3 - Alpha',
@@ -24,14 +24,19 @@ setup(
     author='Mattia Verga',
     author_email='mattia.verga@tiscali.it',
     url='https://github.com/mattiaverga/PyOngc',
-    packages=find_packages(),
+    packages=find_packages(exclude=("tests",)),
     package_data={'pyongc': ['ongc.db', ], },
-    scripts=['bin/ongc', ],
     license='MIT',
     description='Python interface to OpenNGC database data.',
     long_description=LONG_DESCRIPTION,
     classifiers=CLASSIFIERS,
-    install_requires=[],
+    install_requires=[
+        'Click',
+    ],
+    entry_points='''
+        [console_scripts]
+        ongc=pyongc.scripts.ongc:cli
+    ''',
     tests_require=TESTS_REQUIRE,
     extras_require={'tests': TESTS_REQUIRE},
     python_requires=">=3",
