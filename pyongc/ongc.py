@@ -874,6 +874,8 @@ def listObjects(**kwargs):
         paramslist.append('vmag <= ' + str(kwargs["uptovmag"]))
     if "withname" in kwargs and kwargs["withname"] is True:
         paramslist.append('commonnames != ""')
+    elif "withname" in kwargs and kwargs["withname"] is False:
+        paramslist.append('commonnames = ""')
 
     params = " AND ".join(paramslist)
     return [Dso(item[0], True) for item in _queryFetchMany(cols, tables, params)]

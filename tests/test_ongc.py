@@ -370,6 +370,12 @@ class TestDsoMethods(unittest.TestCase):
 
         self.assertEqual(len(objectList), 121)
 
+    def test_list_objects_without_name(self):
+        """Test the listObjects() method to list objects without common name."""
+        objectList = ongc.listObjects(withname=False)
+
+        self.assertEqual(len(objectList), 13833)
+
     def test_list_objects_wrong_filter(self):
         """Test the listObjects() method when an unsupported filter is used."""
         expected = 'Wrong filter name.'
