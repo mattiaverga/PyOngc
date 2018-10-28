@@ -25,6 +25,7 @@
 
 import click
 from click.testing import CliRunner
+import os.path
 
 from pyongc.scripts import ongc
 from pyongc.ongc import __version__ as version
@@ -35,20 +36,243 @@ def test_view():
     assert result.exit_code == 0
     assert result.output == 'NGC0001, Galaxy in Peg\n'
 
+def test_view_details():
+    runner = CliRunner()
+    result = runner.invoke(ongc.view, ['ngc1', '--details'])
+    assert result.exit_code == 0
+    assert result.output == (
+        "+-----------------------------------------------------------------------------+\n"
+        "| Id: 5612      Name: NGC0001           Type: Galaxy                          |\n"
+        "| R.A.: 00:07:15.84      Dec.: +27:42:29.1      Constellation: Peg            |\n"
+        "+-----------------------------------------------------------------------------+\n"
+        "| Major axis: 1.57'      Minor axis: 1.07'      Position angle: 112°          |\n"
+        "| B-mag: 13.4    V-mag: N/A     J-mag: 10.78   H-mag: 10.02   K-mag: 9.76     |\n"
+        "|                                                                             |\n"
+        "| Surface brightness: 23.13     Hubble classification: Sb                     |\n"
+        "+-----------------------------------------------------------------------------+\n"
+        "| Other identifiers:                                                          |\n"
+        "|    2MASX J00071582+2742291, IRAS 00047+2725, MCG +04-01-025, PGC 000564,    |\n"
+        "|    UGC 00057                                                                |\n"
+        "+-----------------------------------------------------------------------------+\n\n")
+
 def test_view_not_found():
     runner = CliRunner()
     result = runner.invoke(ongc.view, ['ngc1a'])
     assert result.exit_code == 0
-    assert result.output == 'Object named NGC0001A not found in the database.\n'
+    assert result.output == 'ERROR: Object named NGC0001A not found in the database.\n'
 
 def test_view_bad_name():
     runner = CliRunner()
     result = runner.invoke(ongc.view, ['bad'])
     assert result.exit_code == 0
-    assert result.output == 'Wrong object name. Please insert a valid NGC or IC object name.\n'
+    assert result.output == ('ERROR: Wrong object name. '
+                             'Please insert a valid NGC or IC object name.\n')
 
 def test_stats():
     runner = CliRunner()
     result = runner.invoke(ongc.stats)
     assert result.exit_code == 0
     assert 'PyONGC version: ' + version in result.output
+
+def test_neighbors():
+    runner = CliRunner()
+    result = runner.invoke(ongc.neighbors, ['ngc1'])
+    assert result.exit_code == 0
+    assert result.output == ('\nNGC0001 neighbors from nearest to farthest:\n'
+        '0.03° --> NGC0002, Galaxy in Peg\n'
+        '0.09° --> NGC7839, Double star in Peg\n'
+        '0.18° --> NGC7833, Object of other/unknown type in Peg\n'
+        '0.26° --> IC0001, Double star in Peg\n'
+        '0.40° --> NGC0016, Galaxy in Peg\n'
+        '0.47° --> NGC0018, Double star in Peg\n'
+        '(using a search radius of 30 arcmin)\n\n')
+
+def test_neighbors_with_catalog_filter():
+    runner = CliRunner()
+    result = runner.invoke(ongc.neighbors, ['ngc1', '--catalog=IC'])
+    assert result.exit_code == 0
+    assert result.output == ('\nNGC0001 neighbors from nearest to farthest:\n'
+        '0.26° --> IC0001, Double star in Peg\n'
+        '(using a search radius of 30 arcmin and showing IC objects only)\n\n')
+
+def test_neighbors_with_radius_filter():
+    runner = CliRunner()
+    result = runner.invoke(ongc.neighbors, ['ngc1', '--radius=12'])
+    assert result.exit_code == 0
+    assert result.output == ('\nNGC0001 neighbors from nearest to farthest:\n'
+        '0.03° --> NGC0002, Galaxy in Peg\n'
+        '0.09° --> NGC7839, Double star in Peg\n'
+        '0.18° --> NGC7833, Object of other/unknown type in Peg\n'
+        '(using a search radius of 12 arcmin)\n\n')
+
+def test_neighbors_no_results():
+    runner = CliRunner()
+    result = runner.invoke(ongc.neighbors, ['ngc1', '--radius=1'])
+    assert result.exit_code == 0
+    assert result.output == '\nNo objects found within search radius!\n'
+
+def test_neighbors_bad_name():
+    runner = CliRunner()
+    result = runner.invoke(ongc.neighbors, ['bad'])
+    assert result.exit_code == 0
+    assert result.output == ('ERROR: Wrong object name. '
+                             'Please insert a valid NGC or IC object name.\n')
+
+def test_neighbors_with_pager():
+    runner = CliRunner()
+    result = runner.invoke(ongc.neighbors, ['ngc1', '--radius=600'], input='y')
+    assert result.exit_code == 0
+    assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
+    assert '\nNGC0001 neighbors from nearest to farthest:\n' not in result.output
+
+def test_separation():
+    runner = CliRunner()
+    result = runner.invoke(ongc.separation, ['ngc1', 'ngc2'])
+    assert result.exit_code == 0
+    assert result.output == ('Apparent angular separation between NGC0001 and NGC0002 is:\n'
+                             '0° 1m 48.32s\n')
+
+def test_separation_bad_name():
+    runner = CliRunner()
+    result = runner.invoke(ongc.separation, ['ngc1', 'bad'])
+    assert result.exit_code == 0
+    assert result.output == ('ERROR: Wrong object name. '
+                             'Please insert a valid NGC or IC object name.\n')
+
+def test_search():
+    runner = CliRunner()
+    result = runner.invoke(ongc.search)
+    assert result.exit_code == 0
+    assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
+    assert result.output.endswith('NGC7840, Galaxy in Psc\n')
+
+def test_search_with_catalog_filter():
+    runner = CliRunner()
+    result = runner.invoke(ongc.search, ['--catalog=M'])
+    assert result.exit_code == 0
+    assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
+    assert result.output.endswith('NGC7654, Open Cluster in Cas\n')
+
+def test_search_with_type_filter():
+    runner = CliRunner()
+    result = runner.invoke(ongc.search, ['--type=*'])
+    assert result.exit_code == 0
+    assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
+    assert result.output.endswith('NGC7830, Star in Psc\n')
+
+def test_search_with_constellation_filter():
+    runner = CliRunner()
+    result = runner.invoke(ongc.search, ['--constellation=aql'])
+    assert result.exit_code == 0
+    assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
+    assert result.output.endswith('NGC6941, Galaxy in Aql\n')
+
+def test_search_with_minsize_filter():
+    runner = CliRunner()
+    result = runner.invoke(ongc.search, ['--minsize=5'])
+    assert result.exit_code == 0
+    assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
+    assert result.output.endswith('NGC7822, HII Ionized region in Cep\n')
+
+def test_search_with_maxsize_filter():
+    runner = CliRunner()
+    result = runner.invoke(ongc.search, ['--maxsize=0.5'])
+    assert result.exit_code == 0
+    assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
+    assert result.output.endswith('NGC7839, Double star in Peg\n')
+
+def test_search_with_uptobmag_filter():
+    runner = CliRunner()
+    result = runner.invoke(ongc.search, ['--uptobmag=8'])
+    assert result.exit_code == 0
+    assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
+    assert result.output.endswith('NGC7789, Open Cluster in Cas\n')
+
+def test_search_with_uptovmag_filter():
+    runner = CliRunner()
+    result = runner.invoke(ongc.search, ['--uptovmag=6'])
+    assert result.exit_code == 0
+    assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
+    assert result.output.endswith('NGC7686, Open Cluster in And\n')
+
+def test_search_with_common_name():
+    runner = CliRunner()
+    result = runner.invoke(ongc.search, ['--constellation=aql', '-N'])
+    assert result.exit_code == 0
+    assert result.output == 'NGC6741, Planetary Nebula in Aql\n'
+
+def test_search_to_file():
+    runner = CliRunner()
+    with runner.isolated_filesystem():
+        result = runner.invoke(ongc.search, ['--constellation=aql', '--out_file=test.txt'])
+        assert result.exit_code == 0
+        assert os.path.isfile('test.txt')
+
+def test_nearby():
+    runner = CliRunner()
+    result = runner.invoke(ongc.nearby, ['11:08:44', '-00:09:01.3'])
+    assert result.exit_code == 0
+    assert result.output == ('\nObjects in proximity of 11:08:44 -00:09:01.3 '
+        'from nearest to farthest:\n'
+        '0.18° --> IC0673, Galaxy in Leo\n'
+        '0.74° --> NGC3521, Galaxy in Leo\n'
+        '0.98° --> IC0671, Galaxy in Leo\n'
+        '(using a search radius of 60 arcmin)\n\n')
+
+def test_nearby_with_catalog_filter():
+    runner = CliRunner()
+    result = runner.invoke(ongc.nearby, ['11:08:44', '-00:09:01.3', '--catalog=IC'])
+    assert result.exit_code == 0
+    assert result.output == ('\nObjects in proximity of 11:08:44 -00:09:01.3 '
+        'from nearest to farthest:\n'
+        '0.18° --> IC0673, Galaxy in Leo\n'
+        '0.98° --> IC0671, Galaxy in Leo\n'
+        '(using a search radius of 60 arcmin and showing IC objects only)\n\n')
+
+def test_nearby_with_radius_filter():
+    runner = CliRunner()
+    result = runner.invoke(ongc.nearby, ['11:08:44', '+00:09:01.3', '--radius=30'])
+    assert result.exit_code == 0
+    assert result.output == ('\nObjects in proximity of 11:08:44 +00:09:01.3 '
+        'from nearest to farthest:\n'
+        '0.30° --> IC0673, Galaxy in Leo\n'
+        '(using a search radius of 30 arcmin)\n\n')
+
+def test_nearby_no_results():
+    runner = CliRunner()
+    result = runner.invoke(ongc.nearby, ['11:08:44', '-00:09:01.3', '--radius=1'])
+    assert result.exit_code == 0
+    assert result.output == '\nNo objects found within search radius!\n'
+
+def test_nearby_bad_name():
+    runner = CliRunner()
+    result = runner.invoke(ongc.nearby, ['11:08:44', '00:09:01.3'])
+    assert result.exit_code == 0
+    assert result.output == ('ERROR: This text cannot be recognized as coordinates: '
+                             '11:08:44 00:09:01.3\n')
+
+def test_nearby_with_pager():
+    runner = CliRunner()
+    result = runner.invoke(ongc.nearby, ['11:08:44', '-00:09:01.3', '--radius=600'], input='y')
+    assert result.exit_code == 0
+    assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
+    assert '\nObjects in proximity of 11:08:44 -00:09:01.3' not in result.output
+
+def test_translate():
+    runner = CliRunner()
+    result = runner.invoke(ongc.translate, ['pgc1234'])
+    assert result.exit_code == 0
+    assert result.output == ('IC0008, Galaxy in Psc\n')
+
+def test_translate_not_found():
+    runner = CliRunner()
+    result = runner.invoke(ongc.translate, ['m112'])
+    assert result.exit_code == 0
+    assert result.output == ('Object not found.\n')
+
+def test_translate_bad_name():
+    runner = CliRunner()
+    result = runner.invoke(ongc.translate, ['pgs1234'])
+    assert result.exit_code == 0
+    assert result.output == ('ERROR: Wrong object name. Search can be performed '
+                             'for Messier, PGC, LBN, MWSC or UGC catalogs.\n')
