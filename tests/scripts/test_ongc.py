@@ -26,6 +26,7 @@
 import click
 from click.testing import CliRunner
 import os.path
+import mock
 
 from pyongc.scripts import ongc
 from pyongc.ongc import __version__ as version
@@ -207,6 +208,19 @@ def test_search_to_file():
         result = runner.invoke(ongc.search, ['--constellation=aql', '--out_file=test.txt'])
         assert result.exit_code == 0
         assert os.path.isfile('test.txt')
+
+def test_search_no_results():
+    runner = CliRunner()
+    result = runner.invoke(ongc.search, ['--type=*', '--minsize=5'])
+    assert result.exit_code == 0
+    assert result.output == '\nNo objects found with such parameters!\n'
+
+def test_search_with_pager():
+    runner = CliRunner()
+    result = runner.invoke(ongc.search, ['--catalog=M'], input='y')
+    assert result.exit_code == 0
+    assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
+    assert result.output.endswith('NGC7654, Open Cluster in Cas\n')
 
 def test_nearby():
     runner = CliRunner()
