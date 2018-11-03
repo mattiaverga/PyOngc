@@ -39,6 +39,7 @@ from os import environ
 # Make sure Less pager will properly display utf-8 characters
 environ["LESSCHARSET"] = 'utf-8'
 
+
 @click.group()
 def cli():
     """A Command Line Interface to query OpenNGC database."""
@@ -95,7 +96,7 @@ def neighbors(name, radius, catalog):
             return
         if len(object_list) > 20:
             if click.confirm(click.style('WARNING: ', fg='yellow', bold=True)
-                       + 'the result list is long. Do you want to see it via a pager?'):
+                             + 'the result list is long. Do you want to see it via a pager?'):
                 click.echo_via_pager('\n'.join('{:.2f}° --> {}'.format(dso[1], dso[0])
                                                for dso in object_list))
                 return
@@ -184,7 +185,7 @@ def search(out_file, **kwargs):
               help='Search only for NGC or IC objects')
 def nearby(ra, dec, radius, catalog):
     """List objects in proximity of given J2000 coordinates.
-    
+
     Coordinates must be expressed in the form 'HH:MM:SS(.SS) +/-DD:MM:SS(.S)'
     """
     try:
@@ -195,7 +196,7 @@ def nearby(ra, dec, radius, catalog):
             return
         if len(object_list) > 20:
             if click.confirm(click.style('WARNING: ', fg='yellow', bold=True)
-                       + 'the result list is long. Do you want to see it via a pager?'):
+                             + 'the result list is long. Do you want to see it via a pager?'):
                 click.echo_via_pager('\n'.join('{:.2f}° --> {}'.format(dso[1], dso[0])
                                                for dso in object_list))
                 return

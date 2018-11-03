@@ -34,6 +34,16 @@ class TestDsoClass(unittest.TestCase):
     """Test that Dso objects are created in the right way and that data
     is retrieved correctly.
     """
+    @mock.patch('pyongc.ongc.DBPATH', 'badpath')
+    def test_fail_database_connection(self):
+        """Test a failed connection to database."""
+        self.assertRaisesRegex(OSError, 'There was a problem accessing database file',
+                               ongc.Dso, 'NGC0001')
+        self.assertRaisesRegex(OSError, 'There was a problem accessing database file',
+                               ongc.listObjects)
+        self.assertRaisesRegex(OSError, 'There was a problem accessing database file',
+                               ongc.stats)
+
     def test_dso_creation_error(self):
         """Test we get a type error if user doesn't input a string."""
         self.assertRaisesRegex(TypeError, 'Wrong type as parameter', ongc.Dso, 1234)

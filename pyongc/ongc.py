@@ -604,19 +604,19 @@ def _queryFetchOne(cols, tables, params):
     :returns: tuple with selected row data from database
     """
     try:
-        db = sqlite3.connect(DBPATH)
-        cursor = db.cursor()
+        db = sqlite3.connect('file:' + DBPATH + '?mode=ro', uri=True)
+    except sqlite3.Error:
+        raise OSError('There was a problem accessing database file at ' + DBPATH)
 
+    try:
+        cursor = db.cursor()
         cursor.execute('SELECT ' + cols
                        + ' FROM ' + tables
                        + ' WHERE ' + params
                        )
         objectData = cursor.fetchone()
-
-    except Exception as e:
-        db.rollback()
-        raise e
-
+    except Exception as err:
+        raise err
     finally:
         db.close()
 
@@ -632,24 +632,24 @@ def _queryFetchMany(cols, tables, params):
     :returns: generator object yielding a tuple with selected row data from database
     """
     try:
-        db = sqlite3.connect(DBPATH)
+        db = sqlite3.connect('file:' + DBPATH + '?mode=ro', uri=True)
+    except sqlite3.Error:
+        raise OSError('There was a problem accessing database file at ' + DBPATH)
+
+    try:
         cursor = db.cursor()
 
         cursor.execute('SELECT ' + cols
                        + ' FROM ' + tables
                        + ' WHERE ' + params
                        )
-
         while True:
             objectList = cursor.fetchmany()
             if objectList == []:
                 break
             yield objectList[0]
-
-    except Exception as e:
-        db.rollback()
-        raise e
-
+    except Exception as err:
+        raise err
     finally:
         db.close()
 
@@ -1171,18 +1171,19 @@ MWSC or UGC catalogs.
 
 def stats():
     try:
-        db = sqlite3.connect(DBPATH)
+        db = sqlite3.connect('file:' + DBPATH + '?mode=ro', uri=True)
+    except sqlite3.Error:
+        raise OSError('There was a problem accessing database file at ' + DBPATH)
+
+    try:
         cursor = db.cursor()
 
         cursor.execute('SELECT objTypes.typedesc, count(*) '
                        'FROM objects JOIN objTypes ON objects.type = objTypes.type '
                        'GROUP BY objects.type')
         typesStats = cursor.fetchall()
-
-    except Exception as e:
-        db.rollback()
-        raise e
-
+    except Exception as err:
+        raise err
     finally:
         db.close()
 
