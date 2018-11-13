@@ -41,7 +41,7 @@ import numpy as np
 import re
 import sqlite3
 
-__version__ = '0.2.90'
+__version__ = '0.3.0'
 DBDATE = 20180325  # Version of database data
 DBPATH = resource_filename(__name__, 'ongc.db')
 

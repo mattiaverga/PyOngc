@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 TESTS_REQUIRE = ['pytest', 'mock', 'nose', 'coveralls']
 
 CLASSIFIERS = [
-    'Development Status :: 3 - Alpha',
+    'Development Status :: 4 - Beta',
     'Intended Audience :: Developers',
     'Intended Audience :: Science/Research',
     'License :: OSI Approved :: MIT License',
@@ -20,7 +20,7 @@ LONG_DESCRIPTION = open('README.rst').read()
 
 setup(
     name='PyOngc',
-    version='0.2.90',
+    version='0.3.0',
     author='Mattia Verga',
     author_email='mattia.verga@tiscali.it',
     url='https://github.com/mattiaverga/PyOngc',
@@ -32,6 +32,7 @@ setup(
     classifiers=CLASSIFIERS,
     install_requires=[
         'Click',
+        'numpy',
     ],
     entry_points='''
         [console_scripts]
