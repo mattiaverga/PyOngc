@@ -372,7 +372,7 @@ class TestDsoMethods(unittest.TestCase):
         """Test the listObjects() method with magnitudes filters applied."""
         objectList = ongc.listObjects(uptobmag=8, uptovmag=10)
 
-        self.assertEqual(len(objectList), 160)
+        self.assertEqual(len(objectList), 168)
 
     def test_list_objects_with_name(self):
         """Test the listObjects() method to list objects with common name."""
@@ -459,7 +459,7 @@ class TestDsoMethods(unittest.TestCase):
             "|    Bow-Tie nebula                                                           |\n"
             "+-----------------------------------------------------------------------------+\n"
             "| Major axis: 0.8'       Minor axis: N/A        Position angle: N/A           |\n"
-            "| B-mag: 11.27   V-mag: N/A     J-mag: N/A     H-mag: N/A     K-mag: N/A      |\n"
+            "| B-mag: 11.27   V-mag: 11.89   J-mag: 10.89   H-mag: 10.8    K-mag: 10.38    |\n"
             "|                                                                             |\n"
             "| Central star identifiers:                                                   |\n"
             "|    HD 000826, HIP 001041, TYC 4302-01297-1                                  |\n"
@@ -487,7 +487,7 @@ class TestDsoMethods(unittest.TestCase):
             "|    Lagoon Nebula                                                            |\n"
             "+-----------------------------------------------------------------------------+\n"
             "| Major axis: 45.0'      Minor axis: 30.0'      Position angle: N/A           |\n"
-            "| B-mag: 5.0     V-mag: N/A     J-mag: N/A     H-mag: N/A     K-mag: N/A      |\n"
+            "| B-mag: 5.0     V-mag: 5.8     J-mag: N/A     H-mag: N/A     K-mag: N/A      |\n"
             "|                                                                             |\n"
             "+-----------------------------------------------------------------------------+\n"
             "| Other identifiers:                                                          |\n"
@@ -497,7 +497,7 @@ class TestDsoMethods(unittest.TestCase):
             "|    Nominal position for NGC 6533 is -30 arcmin in error.                    |\n"
             "+-----------------------------------------------------------------------------+\n"
             "| OpenNGC notes:                                                              |\n"
-            "|    B-Mag taken from LEDA                                                    |\n"
+            "|    B-Mag taken from LEDA, V-mag taken from HEASARC's messier table          |\n"
             "+-----------------------------------------------------------------------------+\n"
             )
 

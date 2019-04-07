@@ -20,7 +20,7 @@ LONG_DESCRIPTION = open('README.rst').read()
 
 setup(
     name='PyOngc',
-    version='0.3.0',
+    version='0.3.1',
     author='Mattia Verga',
     author_email='mattia.verga@tiscali.it',
     url='https://github.com/mattiaverga/PyOngc',
