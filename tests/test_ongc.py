@@ -112,7 +112,6 @@ class TestDsoClass(unittest.TestCase):
     def test_get_coordinates_radians_successful(self):
         """Test succesful getCoords() method."""
         obj = ongc.Dso('NGC1')
-
         np.testing.assert_allclose(obj.getCoordsRad(),
                                    ([0.03169517921621703, 0.48359728358363213]),
                                    1e-12)
