@@ -67,18 +67,6 @@ class TestDsoClass(unittest.TestCase):
         self.assertEqual(ongc.Dso('ngc20', returndup=True)._name, 'NGC0020')
         self.assertEqual(ongc.Dso('ic555')._name, 'IC0554')
 
-    @mock.patch('pyongc.ongc._queryFetchOne')
-    def test_bad_ra(self, corrupted_data):
-        """Test useful error message on object creation if R.A. data is corrupted."""
-        corrupted_data.return_value = ('2', 'G', 'Galaxy', 'O0:11:00.88', '-12:49:22.3')
-        self.assertRaisesRegex(ValueError, 'I can\'t recognize R.A. data', ongc.Dso, 'IC2')
-
-    @mock.patch('pyongc.ongc._queryFetchOne')
-    def test_bad_dec(self, corrupted_data):
-        """Test useful error message on object creation if Declination data is corrupted."""
-        corrupted_data.return_value = ('2', 'G', 'Galaxy', '00:11:00.88', '-I2:49:22.3')
-        self.assertRaisesRegex(ValueError, 'I can\'t recognize Declination data', ongc.Dso, 'IC2')
-
     def test_object_print(self):
         """Test basic object data representation."""
         obj = ongc.Dso('NGC1')
@@ -111,7 +99,7 @@ class TestDsoClass(unittest.TestCase):
         """Test succesful getCoords() method."""
         obj = ongc.Dso('NGC1')
 
-        np.testing.assert_equal(obj.getCoords(), ([[0., 7., 15.84], [27., 42., 29.1]]))
+        np.testing.assert_allclose(obj.getCoords(), ([[0., 7., 15.84], [27., 42., 29.1]]), 1e-12)
 
     def test_get_coordinates_nonexistent(self):
         """Test getCoords() on a Nonexistent object which doesn't have coords."""
@@ -120,6 +108,12 @@ class TestDsoClass(unittest.TestCase):
         expected = 'Object named IC1064 has no coordinates in database.'
         with self.assertRaisesRegex(ValueError, expected):
             obj.getCoords()
+
+    def test_get_coordinates_radians_successful(self):
+        """Test succesful getCoords() method."""
+        obj = ongc.Dso('NGC1')
+
+        np.testing.assert_allclose(obj.getCoordsRad(), ([0.03169518, 0.48359728]), 1e-12)
 
     def test_get_PN_central_star_data(self):
         """Test retrieving Planetary Nebulaes central star data."""
@@ -186,35 +180,37 @@ class TestDsoMethods(unittest.TestCase):
     """Test functions about DS Objects."""
     def test__distance(self):
         """Test distance calculation."""
-        np.testing.assert_allclose(ongc._distance(np.array([[0., 0., 0.], [0., 0., 0.]]),
-                                                  np.array([[1., 0., 0.], [0., 0., 0.]])),
+        np.testing.assert_allclose(ongc._distance(np.array([0., 0.]),
+                                                  np.array([np.radians(15), 0.])),
                                    (15, 15, 0),
                                    1e-12
                                    )
-        np.testing.assert_allclose(ongc._distance(np.array([[0., 0., 0.], [0., 0., 0.]]),
-                                                  np.array([[23., 0., 0.], [0., 0., 0.]])),
+        np.testing.assert_allclose(ongc._distance(np.array([0., 0.]),
+                                                  np.array([np.radians(23*15), 0.])),
                                    (15, 345, 0),
                                    1e-12
                                    )
-        np.testing.assert_allclose(ongc._distance(np.array([[0., 0., 0.], [0., 0., 0.]]),
-                                                  np.array([[0., 0., 0.], [15., 0., 0.]])),
+        np.testing.assert_allclose(ongc._distance(np.array([0., 0.]),
+                                                  np.array([0., np.radians(15)])),
                                    (15, 0, 15),
                                    1e-12
                                    )
-        np.testing.assert_allclose(ongc._distance(np.array([[0., 0., 0.], [0., 0., 0.]]),
-                                                  np.array([[0., 0., 0.], [-15., 0., 0.]])),
+        np.testing.assert_allclose(ongc._distance(np.array([0., 0.]),
+                                                  np.array([0., np.radians(-15)])),
                                    (15, 0, -15),
                                    1e-12
                                    )
 
     def test__str_to_coords(self):
         """Test conversion from string to coordinates."""
-        np.testing.assert_equal(ongc._str_to_coords('00:12:04.5 +22:3:45'),
-                                np.array([[0., 12., 4.5], [22., 3., 45.]])
-                                )
-        np.testing.assert_equal(ongc._str_to_coords('10:02:34.99 -8:44:12.3'),
-                                np.array([[10., 2., 34.99], [-8., 44., 12.3]])
-                                )
+        np.testing.assert_allclose(ongc._str_to_coords('01:12:24.0 +22:6:18'),
+                                   np.array([np.radians(18.1), np.radians(22.105)]),
+                                   1e-12
+                                   )
+        np.testing.assert_allclose(ongc._str_to_coords('10:04:50.40 -8:42:36.9'),
+                                   np.array([np.radians(151.21), np.radians(-8.71025)]),
+                                   1e-12
+                                   )
 
     def test__str_to_coords_not_recognized(self):
         """Test failed conversion from string to coordinates."""
