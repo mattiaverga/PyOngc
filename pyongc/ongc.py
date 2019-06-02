@@ -550,9 +550,9 @@ def _limiting_coords(coords, radius):
     """Write query filters for limiting search to specific area of the sky.
 
     :param coords: A.R. and Dec of the point in the sky.
-                   They can be expressed as an array of H:M:S/D:M:S
+                   They can be expressed as a numpy array of H:M:S/D:M:S
                     array([[HH., MM., SS.ss],[DD., MM., SS.ss]])
-                   or as array of radians
+                   or as numpy array of radians
                     array([RA, Dec])
     :param int radius: radius in degrees
     :returns string: parameters to be added to query
@@ -560,7 +560,8 @@ def _limiting_coords(coords, radius):
     This is a quick method to exclude objects farther than a specified distance
     from the starting point, but it's not meant to be precise.
     """
-    if isinstance(coords[0], list):
+    if coords.shape == (2, 3):
+        rad_coords = np.empty(2)
         rad_coords[0] = np.radians(np.sum(coords[0] * [15, 1/4, 1/240]))
         if np.signbit(coords[1][0]):
             rad_coords[1] = np.radians(np.sum(coords[1] * [1, -1/60, -1/3600]))
@@ -570,8 +571,8 @@ def _limiting_coords(coords, radius):
         rad_coords = coords
 
     radius_rad = np.radians(radius)
-    ra_lower_limit = coords[0] - radius_rad
-    ra_upper_limit = coords[0] + radius_rad
+    ra_lower_limit = rad_coords[0] - radius_rad
+    ra_upper_limit = rad_coords[0] + radius_rad
     if ra_lower_limit < 0:
         ra_lower_limit += 2 * np.pi
         params = ' AND (ra <= {} OR ra >= {})'.format(ra_upper_limit, ra_lower_limit)
@@ -581,12 +582,12 @@ def _limiting_coords(coords, radius):
     else:
         params = ' AND (ra BETWEEN {} AND {})'.format(ra_lower_limit, ra_upper_limit)
 
-    dec_lower_limit = coords[1] - radius_rad
+    dec_lower_limit = rad_coords[1] - radius_rad
     if dec_lower_limit < -1/2 * np.pi:
         dec_lower_limit = -1/2 * np.pi
-    dec_upper_limit = coords[1] + radius_rad
+    dec_upper_limit = rad_coords[1] + radius_rad
     if dec_upper_limit > 1/2 * np.pi:
-        dec_lower_limit = 1/2 * np.pi
+        dec_upper_limit = 1/2 * np.pi
 
     params += ' AND (dec BETWEEN {} AND {})'.format(dec_lower_limit, dec_upper_limit)
     return params

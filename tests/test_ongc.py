@@ -202,6 +202,41 @@ class TestDsoMethods(unittest.TestCase):
                                    1e-12
                                    )
 
+    def test__limiting_coords_hms(self):
+        """Test query filters for coordinates expressed in HMS."""
+        # Positive dec
+        coords = np.array([[0., 8., 27.05], [27., 43., 3.6]])
+        expected = (' AND (ra BETWEEN 0.0019671315111019425 AND 0.07178030159087512)'
+                    ' AND (dec BETWEEN 0.44885795926372835 AND 0.5186711293435016)')
+        self.assertEqual(ongc._limiting_coords(coords, 2), expected)
+        # Negative dec
+        coords = np.array([[0., 11., 0.88], [-12., 49., 22.3]])
+        expected = (' AND (ra BETWEEN 0.013153964795863934 AND 0.08296713487563712)'
+                    ' AND (dec BETWEEN -0.25870773095471394 AND -0.18889456087494075)')
+        self.assertEqual(ongc._limiting_coords(coords, 2), expected)
+
+    def test__limiting_coords_rad(self):
+        """Test query filters for coordinates expressed in radians."""
+        # Crossing 0 RA
+        coords = np.array([[0., 2., 0.], [27., 43., 3.6]])
+        expected = (' AND (ra <= 0.04363323129985824 OR ra >= 6.257005368399671)'
+                    ' AND (dec BETWEEN 0.44885795926372835 AND 0.5186711293435016)')
+        self.assertEqual(ongc._limiting_coords(coords, 2), expected)
+        coords = np.array([[23., 58., 0.], [27., 43., 3.6]])
+        expected = (' AND (ra <= 0.02617993877991509 OR ra >= 6.239552075879729)'
+                    ' AND (dec BETWEEN 0.44885795926372835 AND 0.5186711293435016)')
+        self.assertEqual(ongc._limiting_coords(coords, 2), expected)
+        # Max declination
+        coords = np.array([[0., 11., 0.88], [89., 0., 0.]])
+        expected = (' AND (ra BETWEEN 0.013153964795863934 AND 0.08296713487563712)'
+                    ' AND (dec BETWEEN 1.5184364492350666 AND 1.5707963267948966)')
+        self.assertEqual(ongc._limiting_coords(coords, 2), expected)
+        # Min declination
+        coords = np.array([[0., 11., 0.88], [-89., 0., 0.]])
+        expected = (' AND (ra BETWEEN 0.013153964795863934 AND 0.08296713487563712)'
+                    ' AND (dec BETWEEN -1.5707963267948966 AND -1.5184364492350666)')
+        self.assertEqual(ongc._limiting_coords(coords, 2), expected)
+
     def test__str_to_coords(self):
         """Test conversion from string to coordinates."""
         np.testing.assert_allclose(ongc._str_to_coords('01:12:24.0 +22:6:18'),
@@ -390,6 +425,13 @@ class TestDsoMethods(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, expected):
             ongc.listObjects(catalog='NGC', name='NGC1')
 
+    def test_list_objects_wrong_catalog(self):
+        """Test the listObjects() method with a wrong catalog name."""
+        expected = 'Wrong value for catalog filter.'
+
+        with self.assertRaisesRegex(ValueError, expected):
+            ongc.listObjects(catalog='UGC')
+
     def test_nearby(self):
         """Test that searching neighbors by coords works properly."""
         obj = ongc.Dso('NGC521')
@@ -511,6 +553,12 @@ class TestDsoMethods(unittest.TestCase):
         obj = ongc.searchAltId("M1")
 
         self.assertEqual(obj.getName(), 'NGC1952')
+
+    def test_search_for_M102(self):
+        """M102 is M101."""
+        obj = ongc.searchAltId("M102")
+
+        self.assertEqual(obj.getName(), 'NGC5457')
 
     def test_search_for_MWSC(self):
         """Test the searchAltId by passing a MWSC identifier."""
