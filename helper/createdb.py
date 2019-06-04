@@ -33,6 +33,7 @@ The first line of the csv file, which contains the headers, must be removed.
 
 import os
 import csv
+import numpy as np
 import sqlite3
 
 outputFile = os.path.join(os.path.dirname(__file__), os.pardir, 'pyongc', 'ongc.db')
@@ -79,8 +80,8 @@ try:
                    'id INTEGER PRIMARY KEY NOT NULL, '
                    'name TEXT NOT NULL UNIQUE, '
                    'type TEXT NOT NULL, '
-                   'ra TEXT, '
-                   'dec TEXT, '
+                   'ra REAL, '
+                   'dec REAL, '
                    'const TEXT, '
                    'majax REAL, '
                    'minax REAL, '
@@ -113,11 +114,26 @@ try:
                 if line[column] == '':
                     line[column] = None
 
+            # Convert RA and Dec in radians
+            if line[2] != '':
+                ra_array = np.array([float(x) for x in line[2].split(':')])
+                ra_rad = np.radians(np.sum(ra_array * [15, 1/4, 1/240]))
+            else:
+                ra_rad = None
+            if line[3] != '':
+                dec_array = np.array([float(x) for x in line[3].split(':')])
+                if np.signbit(dec_array[0]):
+                    dec_rad = np.radians(np.sum(dec_array * [1, -1/60, -1/3600]))
+                else:
+                    dec_rad = np.radians(np.sum(dec_array * [1, 1/60, 1/3600]))
+            else:
+                dec_rad = None
+
             cursor.execute('INSERT INTO objects(name,type,ra,dec,const,majax,minax,pa,bmag,vmag,'
                            'jmag,hmag,kmag,sbrightn,hubble,cstarumag,cstarbmag,cstarvmag,messier,'
                            'ngc,ic,cstarnames,identifiers,commonnames,nednotes,ongcnotes) '
                            'VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
-                           (line[0], line[1], line[2], line[3], line[4], line[5], line[6],
+                           (line[0], line[1], ra_rad, dec_rad, line[4], line[5], line[6],
                             line[7], line[8], line[9], line[10], line[11], line[12], line[13],
                             line[14], line[15], line[16], line[17], line[18], line[19], line[20],
                             line[21], line[22], line[23], line[24], line[25])

@@ -33,6 +33,7 @@
 
 from pyongc import ongc
 import click
+import re
 
 from os import environ
 
@@ -149,12 +150,33 @@ def separation(obj1, obj2):
               help='List only objects with B-Mag brighter than value')
 @click.option('--uptovmag', type=float,
               help='List only objects with V-Mag brighter than value')
+@click.option('--minra', help='List only objects with min R.A. HH:MM:SS[.ss]')
+@click.option('--maxra', help='List only objects with max R.A. HH:MM:SS[.ss]')
+@click.option('--mindec',
+              help='List only objects above specified Declination +/-DD:MM:SS[.ss]')
+@click.option('--maxdec',
+              help='List only objects below specified Declination +/-DD:MM:SS[.ss]')
 @click.option('--named', '-N', 'withname', is_flag=True, help='List only objects with common name')
 @click.option('--out_file', '-O', type=click.File('w'),
               help='Output results to text file')
 def search(out_file, **kwargs):
     """Search in the database for objects with given parameters."""
     try:
+        for r in ['minra', 'maxra']:
+            if kwargs[r] is not None:
+                pattern = re.compile(r'^(?:(\d{1,2}):(\d{1,2}):(\d{1,2}(?:\.\d{1,2})?))$')
+                result = pattern.match(kwargs[r])
+                hms = [float(x) for x in result.groups()[0:3]]
+                kwargs[r] = hms[0] * 15 + hms[1] * 1/4 + hms[2] * 1/240
+        for d in ['mindec', 'maxdec']:
+            if kwargs[d] is not None:
+                pattern = re.compile(r'^(?:([+-]?\d{1,2}):(\d{1,2}):(\d{1,2}(?:\.\d{1,2})?))$')
+                result = pattern.match(kwargs[d])
+                dms = [float(x) for x in result.groups()[0:3]]
+                if dms[0] < 0:
+                    kwargs[d] = dms[0] + dms[1] * -1/60 + dms[2] * -1/3600
+                else:
+                    kwargs[d] = dms[0] + dms[1] * 1/60 + dms[2] * 1/3600
         object_list = ongc.listObjects(**{k: v for k, v in kwargs.items() if (v is not None
                                                                               and v is not False)})
         if len(object_list) == 0:

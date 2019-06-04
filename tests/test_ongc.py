@@ -67,18 +67,6 @@ class TestDsoClass(unittest.TestCase):
         self.assertEqual(ongc.Dso('ngc20', returndup=True)._name, 'NGC0020')
         self.assertEqual(ongc.Dso('ic555')._name, 'IC0554')
 
-    @mock.patch('pyongc.ongc._queryFetchOne')
-    def test_bad_ra(self, corrupted_data):
-        """Test useful error message on object creation if R.A. data is corrupted."""
-        corrupted_data.return_value = ('2', 'G', 'Galaxy', 'O0:11:00.88', '-12:49:22.3')
-        self.assertRaisesRegex(ValueError, 'I can\'t recognize R.A. data', ongc.Dso, 'IC2')
-
-    @mock.patch('pyongc.ongc._queryFetchOne')
-    def test_bad_dec(self, corrupted_data):
-        """Test useful error message on object creation if Declination data is corrupted."""
-        corrupted_data.return_value = ('2', 'G', 'Galaxy', '00:11:00.88', '-I2:49:22.3')
-        self.assertRaisesRegex(ValueError, 'I can\'t recognize Declination data', ongc.Dso, 'IC2')
-
     def test_object_print(self):
         """Test basic object data representation."""
         obj = ongc.Dso('NGC1')
@@ -111,7 +99,7 @@ class TestDsoClass(unittest.TestCase):
         """Test succesful getCoords() method."""
         obj = ongc.Dso('NGC1')
 
-        np.testing.assert_equal(obj.getCoords(), ([[0., 7., 15.84], [27., 42., 29.1]]))
+        np.testing.assert_allclose(obj.getCoords(), ([[0., 7., 15.84], [27., 42., 29.1]]), 1e-12)
 
     def test_get_coordinates_nonexistent(self):
         """Test getCoords() on a Nonexistent object which doesn't have coords."""
@@ -120,6 +108,13 @@ class TestDsoClass(unittest.TestCase):
         expected = 'Object named IC1064 has no coordinates in database.'
         with self.assertRaisesRegex(ValueError, expected):
             obj.getCoords()
+
+    def test_get_coordinates_radians_successful(self):
+        """Test succesful getCoords() method."""
+        obj = ongc.Dso('NGC1')
+        np.testing.assert_allclose(obj.getCoordsRad(),
+                                   ([0.03169517921621703, 0.48359728358363213]),
+                                   1e-12)
 
     def test_get_PN_central_star_data(self):
         """Test retrieving Planetary Nebulaes central star data."""
@@ -186,35 +181,72 @@ class TestDsoMethods(unittest.TestCase):
     """Test functions about DS Objects."""
     def test__distance(self):
         """Test distance calculation."""
-        np.testing.assert_allclose(ongc._distance(np.array([[0., 0., 0.], [0., 0., 0.]]),
-                                                  np.array([[1., 0., 0.], [0., 0., 0.]])),
+        np.testing.assert_allclose(ongc._distance(np.array([0., 0.]),
+                                                  np.array([np.radians(15), 0.])),
                                    (15, 15, 0),
                                    1e-12
                                    )
-        np.testing.assert_allclose(ongc._distance(np.array([[0., 0., 0.], [0., 0., 0.]]),
-                                                  np.array([[23., 0., 0.], [0., 0., 0.]])),
+        np.testing.assert_allclose(ongc._distance(np.array([0., 0.]),
+                                                  np.array([np.radians(23*15), 0.])),
                                    (15, 345, 0),
                                    1e-12
                                    )
-        np.testing.assert_allclose(ongc._distance(np.array([[0., 0., 0.], [0., 0., 0.]]),
-                                                  np.array([[0., 0., 0.], [15., 0., 0.]])),
+        np.testing.assert_allclose(ongc._distance(np.array([0., 0.]),
+                                                  np.array([0., np.radians(15)])),
                                    (15, 0, 15),
                                    1e-12
                                    )
-        np.testing.assert_allclose(ongc._distance(np.array([[0., 0., 0.], [0., 0., 0.]]),
-                                                  np.array([[0., 0., 0.], [-15., 0., 0.]])),
+        np.testing.assert_allclose(ongc._distance(np.array([0., 0.]),
+                                                  np.array([0., np.radians(-15)])),
                                    (15, 0, -15),
                                    1e-12
                                    )
 
+    def test__limiting_coords_hms(self):
+        """Test query filters for coordinates expressed in HMS."""
+        # Positive dec
+        coords = np.array([[0., 8., 27.05], [27., 43., 3.6]])
+        expected = (' AND (ra BETWEEN 0.0019671315111019425 AND 0.07178030159087512)'
+                    ' AND (dec BETWEEN 0.44885795926372835 AND 0.5186711293435016)')
+        self.assertEqual(ongc._limiting_coords(coords, 2), expected)
+        # Negative dec
+        coords = np.array([[0., 11., 0.88], [-12., 49., 22.3]])
+        expected = (' AND (ra BETWEEN 0.013153964795863934 AND 0.08296713487563712)'
+                    ' AND (dec BETWEEN -0.25870773095471394 AND -0.18889456087494075)')
+        self.assertEqual(ongc._limiting_coords(coords, 2), expected)
+
+    def test__limiting_coords_rad(self):
+        """Test query filters for coordinates expressed in radians."""
+        # Crossing 0 RA
+        coords = np.array([[0., 2., 0.], [27., 43., 3.6]])
+        expected = (' AND (ra <= 0.04363323129985824 OR ra >= 6.257005368399671)'
+                    ' AND (dec BETWEEN 0.44885795926372835 AND 0.5186711293435016)')
+        self.assertEqual(ongc._limiting_coords(coords, 2), expected)
+        coords = np.array([[23., 58., 0.], [27., 43., 3.6]])
+        expected = (' AND (ra <= 0.02617993877991509 OR ra >= 6.239552075879729)'
+                    ' AND (dec BETWEEN 0.44885795926372835 AND 0.5186711293435016)')
+        self.assertEqual(ongc._limiting_coords(coords, 2), expected)
+        # Max declination
+        coords = np.array([[0., 11., 0.88], [89., 0., 0.]])
+        expected = (' AND (ra BETWEEN 0.013153964795863934 AND 0.08296713487563712)'
+                    ' AND (dec BETWEEN 1.5184364492350666 AND 1.5707963267948966)')
+        self.assertEqual(ongc._limiting_coords(coords, 2), expected)
+        # Min declination
+        coords = np.array([[0., 11., 0.88], [-89., 0., 0.]])
+        expected = (' AND (ra BETWEEN 0.013153964795863934 AND 0.08296713487563712)'
+                    ' AND (dec BETWEEN -1.5707963267948966 AND -1.5184364492350666)')
+        self.assertEqual(ongc._limiting_coords(coords, 2), expected)
+
     def test__str_to_coords(self):
         """Test conversion from string to coordinates."""
-        np.testing.assert_equal(ongc._str_to_coords('00:12:04.5 +22:3:45'),
-                                np.array([[0., 12., 4.5], [22., 3., 45.]])
-                                )
-        np.testing.assert_equal(ongc._str_to_coords('10:02:34.99 -8:44:12.3'),
-                                np.array([[10., 2., 34.99], [-8., 44., 12.3]])
-                                )
+        np.testing.assert_allclose(ongc._str_to_coords('01:12:24.0 +22:6:18'),
+                                   np.array([np.radians(18.1), np.radians(22.105)]),
+                                   1e-12
+                                   )
+        np.testing.assert_allclose(ongc._str_to_coords('10:04:50.40 -8:42:36.9'),
+                                   np.array([np.radians(151.21), np.radians(-8.71025)]),
+                                   1e-12
+                                   )
 
     def test__str_to_coords_not_recognized(self):
         """Test failed conversion from string to coordinates."""
@@ -374,6 +406,48 @@ class TestDsoMethods(unittest.TestCase):
 
         self.assertEqual(len(objectList), 168)
 
+    def test_list_objects_filter_minra(self):
+        """List objects with RA greater than minra."""
+        objectList = ongc.listObjects(minra=358)
+
+        self.assertEqual(len(objectList), 55)
+
+    def test_list_objects_filter_maxra(self):
+        """List objects with RA lower than maxra."""
+        objectList = ongc.listObjects(maxra=2)
+
+        self.assertEqual(len(objectList), 64)
+
+    def test_list_objects_filter_ra_between(self):
+        """List objects with RA between minra and maxra."""
+        objectList = ongc.listObjects(minra=1, maxra=2)
+
+        self.assertEqual(len(objectList), 30)
+
+    def test_list_objects_filter_ra_between_crossing_zero(self):
+        """List objects with RA between minra and maxra crossing 0h."""
+        objectList = ongc.listObjects(minra=359, maxra=1)
+
+        self.assertEqual(len(objectList), 68)
+
+    def test_list_objects_filter_mindec(self):
+        """List objects with Dec above mindec."""
+        objectList = ongc.listObjects(mindec=85)
+
+        self.assertEqual(len(objectList), 9)
+
+    def test_list_objects_filter_maxdec(self):
+        """List objects with RA below maxdec."""
+        objectList = ongc.listObjects(maxdec=-85)
+
+        self.assertEqual(len(objectList), 4)
+
+    def test_list_objects_filter_dec_between(self):
+        """List objects with Dec between mindec and maxdec."""
+        objectList = ongc.listObjects(mindec=-1, maxdec=1)
+
+        self.assertEqual(len(objectList), 263)
+
     def test_list_objects_with_name(self):
         """Test the listObjects() method to list objects with common name."""
         objectList = ongc.listObjects(withname=True)
@@ -392,6 +466,13 @@ class TestDsoMethods(unittest.TestCase):
 
         with self.assertRaisesRegex(ValueError, expected):
             ongc.listObjects(catalog='NGC', name='NGC1')
+
+    def test_list_objects_wrong_catalog(self):
+        """Test the listObjects() method with a wrong catalog name."""
+        expected = 'Wrong value for catalog filter.'
+
+        with self.assertRaisesRegex(ValueError, expected):
+            ongc.listObjects(catalog='UGC')
 
     def test_nearby(self):
         """Test that searching neighbors by coords works properly."""
@@ -514,6 +595,12 @@ class TestDsoMethods(unittest.TestCase):
         obj = ongc.searchAltId("M1")
 
         self.assertEqual(obj.getName(), 'NGC1952')
+
+    def test_search_for_M102(self):
+        """M102 is M101."""
+        obj = ongc.searchAltId("M102")
+
+        self.assertEqual(obj.getName(), 'NGC5457')
 
     def test_search_for_MWSC(self):
         """Test the searchAltId by passing a MWSC identifier."""

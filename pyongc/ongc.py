@@ -133,29 +133,8 @@ class Dso(object):
         self._id = objectData[0]
         self._name = objectname
         self._type = objectData[2]
-
-        # R.A. can be empty for NonEx objects only
-        if self._type == "Nonexistent object" and objectData[3] == "":
-            self._ra = None
-        else:
-            try:
-                self._ra = np.array([float(x) for x in objectData[3].split(':')])
-            except Exception:
-                raise ValueError('There must be some error in the database: '
-                                 + 'I can\'t recognize R.A. data of object '
-                                 + self._name)
-
-        # Declination can be empty for NonEx objects only
-        if self._type == "Nonexistent object" and objectData[4] == "":
-            self._dec = None
-        else:
-            try:
-                self._dec = np.array([float(x) for x in objectData[4].split(':')])
-            except Exception:
-                raise ValueError('There must be some error in the database: '
-                                 + 'I can\'t recognize Declination data of object '
-                                 + self._name)
-
+        self._ra = objectData[3]
+        self._dec = objectData[4]
         self._const = objectData[5]
 
         # These properties may be empty
@@ -216,6 +195,31 @@ class Dso(object):
         """
         if self._ra is None or self._dec is None:
             raise ValueError('Object named ' + self._name + ' has no coordinates in database.')
+
+        ra = np.empty(3)
+        ra[0] = np.trunc(np.rad2deg(self._ra) / 15)
+        ms = ((np.rad2deg(self._ra) / 15) - ra[0]) * 60
+        ra[1] = np.trunc(ms)
+        ra[2] = (ms - ra[1]) * 60
+
+        dec = np.empty(3)
+        dec[0] = np.trunc(np.rad2deg(np.abs(self._dec)))
+        ms = (np.rad2deg(np.abs(self._dec)) - dec[0]) * 60
+        dec[1] = np.trunc(ms)
+        dec[2] = (ms - dec[1]) * 60
+        dec[0] = dec[0] * -1 if np.signbit(self._dec) else dec[0]
+        return np.array([ra, dec, ])
+
+    def getCoordsRad(self):
+        """Returns the coordinates of the object in radians as numpy array.
+
+        :returns: array([RA, Dec])
+
+                >>> s = Dso("ngc1")
+                >>> s.getCoordsRad()
+                array([0.03169518, 0.48359728])
+
+        """
         return np.array([self._ra, self._dec, ])
 
     def getCStarData(self):
@@ -261,7 +265,7 @@ class Dso(object):
 
         """
         if self._dec is not None:
-            return '{:+03.0f}:{:02.0f}:{:04.1f}'.format(*self._dec)
+            return '{:+03.0f}:{:02.0f}:{:04.1f}'.format(*self.getCoords()[1])
         else:
             return 'N/A'
 
@@ -425,7 +429,7 @@ class Dso(object):
 
         """
         if self._ra is not None:
-            return '{:02.0f}:{:02.0f}:{:05.2f}'.format(*self._ra)
+            return '{:02.0f}:{:02.0f}:{:05.2f}'.format(*self.getCoords()[0])
         else:
             return 'N/A'
 
@@ -522,22 +526,16 @@ class Dso(object):
 def _distance(coords1, coords2):
     """Calculate distance between two points in the sky.
 
-    :param coords1: A.R. and Dec of the first point as numpy array
-                    array([[HH., MM., SS.ss],[DD., MM., SS.ss]])
-    :param coords2: A.R. and Dec of the second point as numpy array
-                    array([[HH., MM., SS.ss],[DD., MM., SS.ss]])
+    :param coords1: A.R. and Dec expressed in radians of the first point as numpy array
+                    array([RA, Dec])
+    :param coords2: A.R. and Dec expressed in radians of the second point as numpy array
+                    array([RA, Dec])
     :returns: (float: angular separation, float: difference in A.R, float: difference in Dec)
     """
-    a1 = np.radians(np.sum(coords1[0] * [15, 1/4, 1/240]))
-    a2 = np.radians(np.sum(coords2[0] * [15, 1/4, 1/240]))
-    if np.signbit(coords1[1][0]):
-        d1 = np.radians(np.sum(coords1[1] * [1, -1/60, -1/3600]))
-    else:
-        d1 = np.radians(np.sum(coords1[1] * [1, 1/60, 1/3600]))
-    if np.signbit(coords2[1][0]):
-        d2 = np.radians(np.sum(coords2[1] * [1, -1/60, -1/3600]))
-    else:
-        d2 = np.radians(np.sum(coords2[1] * [1, 1/60, 1/3600]))
+    a1 = coords1[0]
+    a2 = coords2[0]
+    d1 = coords1[1]
+    d2 = coords2[1]
 
     # separation = np.arccos(np.sin(d1)*np.sin(d2) + np.cos(d1)*np.cos(d2)*np.cos(a1-a2))
     # Better precision formula
@@ -551,47 +549,47 @@ def _distance(coords1, coords2):
 def _limiting_coords(coords, radius):
     """Write query filters for limiting search to specific area of the sky.
 
-    :param coords: A.R. and Dec of the point in the sky
+    :param coords: A.R. and Dec of the point in the sky.
+                   They can be expressed as a numpy array of H:M:S/D:M:S
                     array([[HH., MM., SS.ss],[DD., MM., SS.ss]])
+                   or as numpy array of radians
+                    array([RA, Dec])
     :param int radius: radius in degrees
     :returns string: parameters to be added to query
 
     This is a quick method to exclude objects farther than a specified distance
     from the starting point, but it's not meant to be precise.
     """
-    ra_lower_limit_deg = np.sum(coords[0] * [15, 1/4, 1/240]) - radius
-    if ra_lower_limit_deg < 0:
-        ra_lower_limit_deg += 360
-    ra_lower_limit_hour = np.floor_divide(ra_lower_limit_deg, 15)
-    ra_upper_limit_deg = np.sum(coords[0] * [15, 1/4, 1/240]) + radius
-    if ra_upper_limit_deg > 360:
-        ra_upper_limit_deg -= 360
-    ra_upper_limit_hour = np.floor_divide(ra_upper_limit_deg, 15)
-    if coords[0][0] == ra_lower_limit_hour or coords[0][0] == ra_upper_limit_hour:
-        params = (' AND (ra LIKE "{:02.0f}:%"'
-                  ' OR ra LIKE "{:02.0f}:%")'.format(ra_lower_limit_hour,
-                                                     ra_upper_limit_hour))
+    if coords.shape == (2, 3):
+        rad_coords = np.empty(2)
+        rad_coords[0] = np.radians(np.sum(coords[0] * [15, 1/4, 1/240]))
+        if np.signbit(coords[1][0]):
+            rad_coords[1] = np.radians(np.sum(coords[1] * [1, -1/60, -1/3600]))
+        else:
+            rad_coords[1] = np.radians(np.sum(coords[1] * [1, 1/60, 1/3600]))
     else:
-        params = (' AND (ra LIKE "{:02.0f}:%"'
-                  ' OR ra LIKE "{:02.0f}:%"'
-                  ' OR ra LIKE "{:02.0f}:%")'.format(ra_lower_limit_hour,
-                                                     coords[0][0],
-                                                     ra_upper_limit_hour))
+        rad_coords = coords
 
-    if np.signbit(coords[1][0]):
-        dec_lower_limit = np.sum(coords[1] * [1, -1/60, -1/3600]) - radius
-        dec_upper_limit = np.sum(coords[1] * [1, -1/60, -1/3600]) + radius
+    radius_rad = np.radians(radius)
+    ra_lower_limit = rad_coords[0] - radius_rad
+    ra_upper_limit = rad_coords[0] + radius_rad
+    if ra_lower_limit < 0:
+        ra_lower_limit += 2 * np.pi
+        params = ' AND (ra <= {} OR ra >= {})'.format(ra_upper_limit, ra_lower_limit)
+    elif ra_upper_limit > 2 * np.pi:
+        ra_upper_limit -= 2 * np.pi
+        params = ' AND (ra <= {} OR ra >= {})'.format(ra_upper_limit, ra_lower_limit)
     else:
-        dec_lower_limit = np.sum(coords[1] * [1, 1/60, 1/3600]) - radius
-        dec_upper_limit = np.sum(coords[1] * [1, 1/60, 1/3600]) + radius
-    dec_lower_limit_str = '{:+03.0f}'.format(np.trunc(dec_lower_limit))
-    dec_upper_limit_str = '{:+03.0f}'.format(np.trunc(dec_upper_limit))
-    obj_limit_str = '{:+03.0f}'.format(coords[1][0])
-    params += (' AND (dec LIKE "{}_:%"'
-               ' OR dec LIKE "{}_:%"'
-               ' OR dec LIKE "{}_:%")'.format(dec_lower_limit_str[:2],
-                                              obj_limit_str[:2],
-                                              dec_upper_limit_str[:2]))
+        params = ' AND (ra BETWEEN {} AND {})'.format(ra_lower_limit, ra_upper_limit)
+
+    dec_lower_limit = rad_coords[1] - radius_rad
+    if dec_lower_limit < -1/2 * np.pi:
+        dec_lower_limit = -1/2 * np.pi
+    dec_upper_limit = rad_coords[1] + radius_rad
+    if dec_upper_limit > 1/2 * np.pi:
+        dec_upper_limit = 1/2 * np.pi
+
+    params += ' AND (dec BETWEEN {} AND {})'.format(dec_lower_limit, dec_upper_limit)
     return params
 
 
@@ -655,20 +653,26 @@ def _queryFetchMany(cols, tables, params):
 
 
 def _str_to_coords(text):
-    """Convert a string to coordinates
+    """Convert a string to coordinates in radians
 
     :param string text: a string expressing coordinates in the form
                         "HH:MM:SS.ss +/-DD:MM:SS.s"
-    :returns: array([[HH., MM., SS.ss],[DD., MM., SS.ss]])
+    :returns: array([RA, Dec])
     """
     pattern = re.compile(r'^(?:(\d{1,2}):(\d{1,2}):(\d{1,2}(?:\.\d{1,2})?))\s'
                          r'(?:([+-]\d{1,2}):(\d{1,2}):(\d{1,2}(?:\.\d{1,2})?))$')
     result = pattern.match(text)
 
     if result:
-        return np.array([np.array([float(x) for x in result.groups()[0:3]]),
-                         np.array([float(x) for x in result.groups()[3:6]])
-                         ])
+        hms = np.array([float(x) for x in result.groups()[0:3]])
+        ra = np.radians(np.sum(hms * [15, 1/4, 1/240]))
+        dms = np.array([float(x) for x in result.groups()[3:6]])
+        if np.signbit(dms[0]):
+            dec = np.radians(np.sum(dms * [1, -1/60, -1/3600]))
+        else:
+            dec = np.radians(np.sum(dms * [1, 1/60, 1/3600]))
+
+        return np.array([ra, dec])
     else:
         raise ValueError('This text cannot be recognized as coordinates: ' + text)
 
@@ -718,7 +722,7 @@ def getNeighbors(obj, separation, catalog="all"):
     if catalog.upper() in ["NGC", "IC"]:
         params += ' AND name LIKE "{}%"'.format(catalog.upper())
 
-    objCoords = obj.getCoords()
+    objCoords = obj.getCoordsRad()
     params += _limiting_coords(objCoords, np.ceil(separation / 60))
 
     neighbors = []
@@ -774,12 +778,12 @@ def getSeparation(obj1, obj2, style="raw"):
             raise TypeError('Wrong type obj1. Either a Dso or string type was expected.')
     if not isinstance(obj2, Dso):
         if isinstance(obj2, str):
-                        obj2 = Dso(obj2)
+            obj2 = Dso(obj2)
         else:
             raise TypeError('Wrong type obj2. Either a Dso or string type was expected.')
 
-    coordsObj1 = obj1.getCoords()
-    coordsObj2 = obj2.getCoords()
+    coordsObj1 = obj1.getCoordsRad()
+    coordsObj2 = obj2.getCoordsRad()
 
     separation = _distance(coordsObj1, coordsObj2)
 
@@ -805,6 +809,10 @@ def listObjects(**kwargs):
                                    OR MajAx not available
     :param optional float uptobmag: filter for objects with B-Mag brighter than value
     :param optional float uptovmag: filter for objects with V-Mag brighter than value
+    :param optional float minra: filter for objects with RA degrees greater than value
+    :param optional float maxra: filter for objects with RA degrees lower than value
+    :param optional float mindec: filter for objects above specified Dec degrees
+    :param optional float maxdec: filter for objects below specified Dec degrees
     :param optional bool withname: filter for objects with common names
     :returns: [Dso,]
 
@@ -841,6 +849,10 @@ def listObjects(**kwargs):
                          'maxsize',
                          'uptobmag',
                          'uptovmag',
+                         'minra',
+                         'maxra',
+                         'mindec',
+                         'maxdec',
                          'withname']
     cols = 'objects.name'
     tables = 'objects'
@@ -862,16 +874,47 @@ def listObjects(**kwargs):
             raise ValueError('Wrong value for catalog filter. [NGC|IC|M]')
     if "type" in kwargs:
         paramslist.append('type = "' + kwargs["type"] + '"')
+
     if "constellation" in kwargs:
         paramslist.append('const = "' + kwargs["constellation"].capitalize() + '"')
+
     if "minsize" in kwargs:
         paramslist.append('majax >= ' + str(kwargs["minsize"]))
+
     if "maxsize" in kwargs:
         paramslist.append('(majax < ' + str(kwargs["maxsize"]) + ' OR majax is NULL)')
+
     if "uptobmag" in kwargs:
         paramslist.append('bmag <= ' + str(kwargs["uptobmag"]))
+
     if "uptovmag" in kwargs:
         paramslist.append('vmag <= ' + str(kwargs["uptovmag"]))
+
+    if "minra" in kwargs and "maxra" in kwargs:
+        if kwargs["maxra"] > kwargs["minra"]:
+            paramslist.append('ra BETWEEN '
+                              + str(np.radians(kwargs["minra"]))
+                              + ' AND '
+                              + str(np.radians(kwargs["maxra"])))
+        else:
+            paramslist.append('ra >= ' + str(np.radians(kwargs["minra"]))
+                              + ' OR ra <= ' + str(np.radians(kwargs["maxra"])))
+    elif "minra" in kwargs:
+        paramslist.append('ra >= ' + str(np.radians(kwargs["minra"])))
+    elif "maxra" in kwargs:
+        paramslist.append('ra <= ' + str(np.radians(kwargs["maxra"])))
+
+    if "mindec" in kwargs and "maxdec" in kwargs:
+        if kwargs["maxdec"] > kwargs["mindec"]:
+            paramslist.append('dec BETWEEN '
+                              + str(np.radians(kwargs["mindec"]))
+                              + ' AND '
+                              + str(np.radians(kwargs["maxdec"])))
+    elif "mindec" in kwargs:
+        paramslist.append('dec >= ' + str(np.radians(kwargs["mindec"])))
+    elif "maxdec" in kwargs:
+        paramslist.append('dec <= ' + str(np.radians(kwargs["maxdec"])))
+
     if "withname" in kwargs and kwargs["withname"] is True:
         paramslist.append('commonnames != ""')
     elif "withname" in kwargs and kwargs["withname"] is False:
@@ -925,7 +968,7 @@ def nearby(coords_string, separation=60, catalog="all"):
     neighbors = []
     for item in _queryFetchMany(cols, tables, params):
         possibleNeighbor = Dso(item[0])
-        distance = _distance(coords, possibleNeighbor.getCoords())[0]
+        distance = _distance(coords, possibleNeighbor.getCoordsRad())[0]
         if distance <= (separation / 60):
             neighbors.append((possibleNeighbor, distance))
 
