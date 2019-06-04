@@ -778,7 +778,7 @@ def getSeparation(obj1, obj2, style="raw"):
             raise TypeError('Wrong type obj1. Either a Dso or string type was expected.')
     if not isinstance(obj2, Dso):
         if isinstance(obj2, str):
-                        obj2 = Dso(obj2)
+            obj2 = Dso(obj2)
         else:
             raise TypeError('Wrong type obj2. Either a Dso or string type was expected.')
 
@@ -809,6 +809,10 @@ def listObjects(**kwargs):
                                    OR MajAx not available
     :param optional float uptobmag: filter for objects with B-Mag brighter than value
     :param optional float uptovmag: filter for objects with V-Mag brighter than value
+    :param optional float minra: filter for objects with RA degrees greater than value
+    :param optional float maxra: filter for objects with RA degrees lower than value
+    :param optional float mindec: filter for objects above specified Dec degrees
+    :param optional float maxdec: filter for objects below specified Dec degrees
     :param optional bool withname: filter for objects with common names
     :returns: [Dso,]
 
@@ -845,6 +849,10 @@ def listObjects(**kwargs):
                          'maxsize',
                          'uptobmag',
                          'uptovmag',
+                         'minra',
+                         'maxra',
+                         'mindec',
+                         'maxdec',
                          'withname']
     cols = 'objects.name'
     tables = 'objects'
@@ -866,16 +874,47 @@ def listObjects(**kwargs):
             raise ValueError('Wrong value for catalog filter. [NGC|IC|M]')
     if "type" in kwargs:
         paramslist.append('type = "' + kwargs["type"] + '"')
+
     if "constellation" in kwargs:
         paramslist.append('const = "' + kwargs["constellation"].capitalize() + '"')
+
     if "minsize" in kwargs:
         paramslist.append('majax >= ' + str(kwargs["minsize"]))
+
     if "maxsize" in kwargs:
         paramslist.append('(majax < ' + str(kwargs["maxsize"]) + ' OR majax is NULL)')
+
     if "uptobmag" in kwargs:
         paramslist.append('bmag <= ' + str(kwargs["uptobmag"]))
+
     if "uptovmag" in kwargs:
         paramslist.append('vmag <= ' + str(kwargs["uptovmag"]))
+
+    if "minra" in kwargs and "maxra" in kwargs:
+        if kwargs["maxra"] > kwargs["minra"]:
+            paramslist.append('ra BETWEEN '
+                              + str(np.radians(kwargs["minra"]))
+                              + ' AND '
+                              + str(np.radians(kwargs["maxra"])))
+        else:
+            paramslist.append('ra >= ' + str(np.radians(kwargs["minra"]))
+                              + ' OR ra <= ' + str(np.radians(kwargs["maxra"])))
+    elif "minra" in kwargs:
+        paramslist.append('ra >= ' + str(np.radians(kwargs["minra"])))
+    elif "maxra" in kwargs:
+        paramslist.append('ra <= ' + str(np.radians(kwargs["maxra"])))
+
+    if "mindec" in kwargs and "maxdec" in kwargs:
+        if kwargs["maxdec"] > kwargs["mindec"]:
+            paramslist.append('dec BETWEEN '
+                              + str(np.radians(kwargs["mindec"]))
+                              + ' AND '
+                              + str(np.radians(kwargs["maxdec"])))
+    elif "mindec" in kwargs:
+        paramslist.append('dec >= ' + str(np.radians(kwargs["mindec"])))
+    elif "maxdec" in kwargs:
+        paramslist.append('dec <= ' + str(np.radians(kwargs["maxdec"])))
+
     if "withname" in kwargs and kwargs["withname"] is True:
         paramslist.append('commonnames != ""')
     elif "withname" in kwargs and kwargs["withname"] is False:

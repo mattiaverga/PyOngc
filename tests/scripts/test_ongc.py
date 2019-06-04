@@ -228,6 +228,52 @@ def test_search_with_uptovmag_filter():
     assert result.output.endswith('NGC7686, Open Cluster in And\n')
 
 
+def test_search_with_minra_filter():
+    runner = CliRunner()
+    result = runner.invoke(ongc.search, ['--minra=23:52:00.00'])
+    assert result.exit_code == 0
+    assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
+    assert result.output.endswith('NGC7800, Galaxy in Peg\n')
+
+
+def test_search_with_maxra_filter():
+    runner = CliRunner()
+    result = runner.invoke(ongc.search, ['--maxra=0:8:0'])
+    assert result.exit_code == 0
+    assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
+    assert result.output.endswith('NGC7840, Galaxy in Psc\n')
+
+
+def test_search_with_minra_maxra_filter():
+    runner = CliRunner()
+    result = runner.invoke(ongc.search, ['--minra=23:56:0', '--maxra=0:4:0'])
+    assert result.exit_code == 0
+    assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
+    assert result.output.endswith('NGC7822, HII Ionized region in Cep\n')
+
+
+def test_search_with_mindec_filter():
+    runner = CliRunner()
+    result = runner.invoke(ongc.search, ['--mindec=85:00:00.00'])
+    assert result.exit_code == 0
+    assert result.output.endswith('NGC3172, Galaxy in UMi\n')
+
+
+def test_search_with_maxdec_filter():
+    runner = CliRunner()
+    result = runner.invoke(ongc.search, ['--maxdec=-85:0:0'])
+    assert result.exit_code == 0
+    assert result.output.endswith('NGC6438A, Galaxy in Oct\n')
+
+
+def test_search_with_mindec_maxdec_filter():
+    runner = CliRunner()
+    result = runner.invoke(ongc.search, ['--mindec=-1:00:00', '--maxdec=+1:0:0'])
+    assert result.exit_code == 0
+    assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
+    assert result.output.endswith('NGC7787, Galaxy in Psc\n')
+
+
 def test_search_with_common_name():
     runner = CliRunner()
     result = runner.invoke(ongc.search, ['--constellation=aql', '-N'])

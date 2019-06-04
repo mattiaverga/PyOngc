@@ -406,6 +406,48 @@ class TestDsoMethods(unittest.TestCase):
 
         self.assertEqual(len(objectList), 168)
 
+    def test_list_objects_filter_minra(self):
+        """List objects with RA greater than minra."""
+        objectList = ongc.listObjects(minra=358)
+
+        self.assertEqual(len(objectList), 55)
+
+    def test_list_objects_filter_maxra(self):
+        """List objects with RA lower than maxra."""
+        objectList = ongc.listObjects(maxra=2)
+
+        self.assertEqual(len(objectList), 64)
+
+    def test_list_objects_filter_ra_between(self):
+        """List objects with RA between minra and maxra."""
+        objectList = ongc.listObjects(minra=1, maxra=2)
+
+        self.assertEqual(len(objectList), 30)
+
+    def test_list_objects_filter_ra_between_crossing_zero(self):
+        """List objects with RA between minra and maxra crossing 0h."""
+        objectList = ongc.listObjects(minra=359, maxra=1)
+
+        self.assertEqual(len(objectList), 68)
+
+    def test_list_objects_filter_mindec(self):
+        """List objects with Dec above mindec."""
+        objectList = ongc.listObjects(mindec=85)
+
+        self.assertEqual(len(objectList), 9)
+
+    def test_list_objects_filter_maxdec(self):
+        """List objects with RA below maxdec."""
+        objectList = ongc.listObjects(maxdec=-85)
+
+        self.assertEqual(len(objectList), 4)
+
+    def test_list_objects_filter_dec_between(self):
+        """List objects with Dec between mindec and maxdec."""
+        objectList = ongc.listObjects(mindec=-1, maxdec=1)
+
+        self.assertEqual(len(objectList), 263)
+
     def test_list_objects_with_name(self):
         """Test the listObjects() method to list objects with common name."""
         objectList = ongc.listObjects(withname=True)
