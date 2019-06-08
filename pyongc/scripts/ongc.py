@@ -57,9 +57,9 @@ def view(name, details):
         if details:
             click.echo(ongc.printDetails(ongc.Dso(name)))
         else:
-            click.secho(str(ongc.Dso(name)), bold=True)
+            click.secho(f'{ongc.Dso(name)}', bold=True)
     except Exception as e:
-        click.echo(click.style('ERROR: ', fg='red', bold=True) + str(e))
+        click.echo(f'{click.style("ERROR:", fg="red", bold=True)} {e}')
 
 
 @cli.command()
@@ -67,17 +67,15 @@ def stats():
     """Show database statistics."""
     try:
         informations = ongc.stats()
-        click.echo(click.style('\nPyONGC version: ', bold=True)
-                   + ongc.__version__)
-        click.echo(click.style('Database version: ', bold=True)
-                   + str(informations[1]))
-        click.echo(click.style('Total number of objects in database: ', bold=True)
-                   + str(informations[2]))
+        click.echo(f'\n{click.style("PyONGC version:", bold=True)} {ongc.__version__}')
+        click.echo(f'{click.style("Database version:", bold=True)} {informations[1]}')
+        click.echo(f'{click.style("Total number of objects in database:", bold=True)} '
+                   f'{informations[2]}')
         click.secho('Object types statistics:', bold=True)
         for objType, objCount in informations[3]:
-            click.echo('\t{:29}'.format(objType) + '-> ' + str(objCount))
+            click.echo(f'\t{objType:29}-> {objCount}')
     except Exception as e:
-        click.echo(click.style('ERROR: ', fg='red', bold=True) + str(e))
+        click.echo(f'{click.style("ERROR:", fg="red", bold=True)} {e}')
 
 
 @cli.command()
@@ -98,21 +96,20 @@ def neighbors(name, radius, catalog):
         if len(object_list) > 20:
             if click.confirm(click.style('WARNING: ', fg='yellow', bold=True)
                              + 'the result list is long. Do you want to see it via a pager?'):
-                click.echo_via_pager('\n'.join('{:.2f}° --> {}'.format(dso[1], dso[0])
+                click.echo_via_pager('\n'.join(f'{dso[1]:.2f}° --> {dso[0]}'
                                                for dso in object_list))
                 return
 
-        click.secho('\n' + start_obj.getName() + ' neighbors from nearest to farthest:', bold=True)
+        click.secho(f'\n{start_obj.getName()} neighbors from nearest to farthest:', bold=True)
         for dso in object_list:
-            click.echo('{:.2f}° --> {}'.format(dso[1], dso[0]))
+            click.echo(f'{dso[1]:.2f}° --> {dso[0]}')
         if catalog != 'all':
-            search_filter = ' and showing ' + catalog + ' objects only'
+            search_filter = f' and showing {catalog} objects only'
         else:
             search_filter = ''
-        click.secho('(using a search radius of {} arcmin{})\n'.format(radius, search_filter),
-                    fg='cyan')
+        click.secho(f'(using a search radius of {radius} arcmin{search_filter})\n', fg='cyan')
     except Exception as e:
-        click.echo(click.style('ERROR: ', fg='red', bold=True) + str(e))
+        click.echo(f'{click.style("ERROR:", fg="red", bold=True)} {e}')
 
 
 @cli.command()
@@ -130,7 +127,7 @@ def separation(obj1, obj2):
                    + ' is:')
         click.secho(ongc.getSeparation(obj1, obj2, style="text"), bold=True)
     except Exception as e:
-        click.echo(click.style('ERROR: ', fg='red', bold=True) + str(e))
+        click.echo(f'{click.style("ERROR:", fg="red", bold=True)} {e}')
 
 
 @cli.command()
@@ -194,7 +191,7 @@ def search(out_file, **kwargs):
             for dso in object_list:
                 click.echo(str(dso))
     except Exception as e:
-        click.echo(click.style('ERROR: ', fg='red', bold=True) + str(e))
+        click.echo(f'{click.style("ERROR:", fg="red", bold=True)} {e}')
 
 
 @cli.command(context_settings={"ignore_unknown_options": True})
@@ -219,7 +216,7 @@ def nearby(ra, dec, radius, catalog):
         if len(object_list) > 20:
             if click.confirm(click.style('WARNING: ', fg='yellow', bold=True)
                              + 'the result list is long. Do you want to see it via a pager?'):
-                click.echo_via_pager('\n'.join('{:.2f}° --> {}'.format(dso[1], dso[0])
+                click.echo_via_pager('\n'.join(f'{dso[1]:.2f}° --> {dso[0]}'
                                                for dso in object_list))
                 return
 
@@ -227,15 +224,14 @@ def nearby(ra, dec, radius, catalog):
                    + click.style(coords, fg='cyan')
                    + click.style(' from nearest to farthest:', bold=True))
         for dso in object_list:
-            click.echo('{:.2f}° --> {}'.format(dso[1], dso[0]))
+            click.echo(f'{dso[1]:.2f}° --> {dso[0]}')
         if catalog != 'all':
-            search_filter = ' and showing ' + catalog + ' objects only'
+            search_filter = f' and showing {catalog} objects only'
         else:
             search_filter = ''
-        click.secho('(using a search radius of {} arcmin{})\n'.format(radius, search_filter),
-                    fg='cyan')
+        click.secho(f'(using a search radius of {radius} arcmin{search_filter})\n', fg='cyan')
     except Exception as e:
-        click.echo(click.style('ERROR: ', fg='red', bold=True) + str(e))
+        click.echo(f'{click.style("ERROR:", fg="red", bold=True)} {e}')
 
 
 @cli.command()
@@ -245,7 +241,7 @@ def translate(name):
     try:
         click.secho(str(ongc.searchAltId(name)), bold=True)
     except Exception as e:
-        click.echo(click.style('ERROR: ', fg='red', bold=True) + str(e))
+        click.echo(f'{click.style("ERROR:", fg="red", bold=True)} {e}')
 
 
 if __name__ == '__main__':

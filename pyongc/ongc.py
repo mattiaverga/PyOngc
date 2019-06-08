@@ -92,41 +92,36 @@ class Dso(object):
             # User searches for a sub-object
             if nameParts.group(4) is not None:
                 # User searches for a NED suffixed component
-                objectname = (nameParts.group(1).strip()
-                              + '{:0>4}'.format(nameParts.group(2))
-                              + ' '
-                              + nameParts.group(4)
-                              + '{:0>2}'.format(nameParts.group(5))
-                              )
+                objectname = f'{nameParts.group(1).strip()}' \
+                             f'{nameParts.group(2):0>4}' \
+                             f' {nameParts.group(4)}' \
+                             f'{nameParts.group(5):0>2}'
             else:
                 # User searches a letter suffixed component
-                objectname = (nameParts.group(1).strip()
-                              + '{:0>4}'.format(nameParts.group(2))
-                              + nameParts.group(3).strip()
-                              )
+                objectname = f'{nameParts.group(1).strip()}' \
+                             f'{nameParts.group(2):0>4}' \
+                             f'{nameParts.group(3).strip()}'
         else:
-            objectname = (nameParts.group(1).strip()
-                          + '{:0>4}'.format(nameParts.group(2))
-                          )
+            objectname = f'{nameParts.group(1).strip()}{nameParts.group(2):0>4}'
 
         cols = ('objects.id, objects.type, objTypes.typedesc, ra, dec, const, majax, minax, '
                 'pa, bmag, vmag, jmag,hmag, kmag, sbrightn, hubble, cstarumag, cstarbmag, '
                 'cstarvmag, messier, ngc, ic, cstarnames,identifiers, commonnames, nednotes, '
                 'ongcnotes')
         tables = 'objects JOIN objTypes ON objects.type = objTypes.type'
-        params = 'name="' + objectname + '"'
+        params = f'name="{objectname}"'
         objectData = _queryFetchOne(cols, tables, params)
 
         if objectData is None:
-            raise ValueError('Object named ' + objectname + ' not found in the database.')
+            raise ValueError(f'Object named {objectname} not found in the database.')
 
         # If object is a duplicate then return the main object
         if objectData[1] == "Dup" and not returndup:
             if objectData[20] != "":
-                objectname = "NGC" + str(objectData[20])
+                objectname = f'NGC{objectData[20]}'
             else:
-                objectname = "IC" + str(objectData[21])
-            params = 'name="' + objectname + '"'
+                objectname = f'IC{objectData[21]}'
+            params = f'name="{objectname}"'
             objectData = _queryFetchOne(cols, tables, params)
 
         # Assign object properties
@@ -168,7 +163,7 @@ class Dso(object):
                 NGC0001, Galaxy in Peg
 
         """
-        return (self._name + ", " + self._type + " in " + self._const)
+        return f'{self._name}, {self._type} in {self._const}'
 
     def getConstellation(self):
         """Returns the constellation where the object is located.
@@ -194,7 +189,7 @@ class Dso(object):
 
         """
         if self._ra is None or self._dec is None:
-            raise ValueError('Object named ' + self._name + ' has no coordinates in database.')
+            raise ValueError(f'Object named {self._name} has no coordinates in database.')
 
         ra = np.empty(3)
         ra[0] = np.trunc(np.rad2deg(self._ra) / 15)
@@ -323,19 +318,19 @@ class Dso(object):
         if self._messier == "":
             messier = None
         else:
-            messier = "M" + self._messier
+            messier = f'M{self._messier}'
 
         if self._ngc == "":
             ngc = None
         else:
             ngc = list(map(str.strip, self._ngc.split(",")))
-            ngc = list(map(lambda number: "NGC" + number, ngc))
+            ngc = list(map(lambda number: f'NGC{number}', ngc))
 
         if self._ic == "":
             ic = None
         else:
             ic = list(map(str.strip, self._ic.split(",")))
-            ic = list(map(lambda number: "IC" + number, ic))
+            ic = list(map(lambda number: f'IC{number}', ic))
 
         if self._commonnames == "":
             commonNames = None
@@ -575,12 +570,12 @@ def _limiting_coords(coords, radius):
     ra_upper_limit = rad_coords[0] + radius_rad
     if ra_lower_limit < 0:
         ra_lower_limit += 2 * np.pi
-        params = ' AND (ra <= {} OR ra >= {})'.format(ra_upper_limit, ra_lower_limit)
+        params = f' AND (ra <= {ra_upper_limit} OR ra >= {ra_lower_limit})'
     elif ra_upper_limit > 2 * np.pi:
         ra_upper_limit -= 2 * np.pi
-        params = ' AND (ra <= {} OR ra >= {})'.format(ra_upper_limit, ra_lower_limit)
+        params = f' AND (ra <= {ra_upper_limit} OR ra >= {ra_lower_limit})'
     else:
-        params = ' AND (ra BETWEEN {} AND {})'.format(ra_lower_limit, ra_upper_limit)
+        params = f' AND (ra BETWEEN {ra_lower_limit} AND {ra_upper_limit})'
 
     dec_lower_limit = rad_coords[1] - radius_rad
     if dec_lower_limit < -1/2 * np.pi:
@@ -589,7 +584,7 @@ def _limiting_coords(coords, radius):
     if dec_upper_limit > 1/2 * np.pi:
         dec_upper_limit = 1/2 * np.pi
 
-    params += ' AND (dec BETWEEN {} AND {})'.format(dec_lower_limit, dec_upper_limit)
+    params += f' AND (dec BETWEEN {dec_lower_limit} AND {dec_upper_limit})'
     return params
 
 
@@ -602,15 +597,15 @@ def _queryFetchOne(cols, tables, params):
     :returns: tuple with selected row data from database
     """
     try:
-        db = sqlite3.connect('file:' + DBPATH + '?mode=ro', uri=True)
+        db = sqlite3.connect(f'file:{DBPATH}?mode=ro', uri=True)
     except sqlite3.Error:
-        raise OSError('There was a problem accessing database file at ' + DBPATH)
+        raise OSError(f'There was a problem accessing database file at {DBPATH}')
 
     try:
         cursor = db.cursor()
-        cursor.execute('SELECT ' + cols
-                       + ' FROM ' + tables
-                       + ' WHERE ' + params
+        cursor.execute(f'SELECT {cols} '
+                       f'FROM {tables} '
+                       f'WHERE {params}'
                        )
         objectData = cursor.fetchone()
     except Exception as err:
@@ -630,16 +625,16 @@ def _queryFetchMany(cols, tables, params):
     :returns: generator object yielding a tuple with selected row data from database
     """
     try:
-        db = sqlite3.connect('file:' + DBPATH + '?mode=ro', uri=True)
+        db = sqlite3.connect(f'file:{DBPATH}?mode=ro', uri=True)
     except sqlite3.Error:
-        raise OSError('There was a problem accessing database file at ' + DBPATH)
+        raise OSError(f'There was a problem accessing database file at {DBPATH}')
 
     try:
         cursor = db.cursor()
 
-        cursor.execute('SELECT ' + cols
-                       + ' FROM ' + tables
-                       + ' WHERE ' + params
+        cursor.execute(f'SELECT {cols} '
+                       f'FROM {tables} '
+                       f'WHERE {params}'
                        )
         while True:
             objectList = cursor.fetchmany()
@@ -674,7 +669,7 @@ def _str_to_coords(text):
 
         return np.array([ra, dec])
     else:
-        raise ValueError('This text cannot be recognized as coordinates: ' + text)
+        raise ValueError(f'This text cannot be recognized as coordinates: {text}')
 
 
 def getNeighbors(obj, separation, catalog="all"):
@@ -718,9 +713,9 @@ def getNeighbors(obj, separation, catalog="all"):
 
     cols = 'objects.name'
     tables = 'objects'
-    params = 'type != "Dup" AND name !="{}"'.format(obj.getName())
+    params = f'type != "Dup" AND name !="{obj.getName()}"'
     if catalog.upper() in ["NGC", "IC"]:
-        params += ' AND name LIKE "{}%"'.format(catalog.upper())
+        params += f' AND name LIKE "{catalog.upper()}%"'
 
     objCoords = obj.getCoordsRad()
     params += _limiting_coords(objCoords, np.ceil(separation / 60))
@@ -792,7 +787,7 @@ def getSeparation(obj1, obj2, style="raw"):
         md = abs(separation[0] - d) * 60
         m = int(md)
         s = (md - m) * 60
-        return str(d) + "° " + str(m) + "m " + "{:.2f}".format(s) + "s"
+        return f'{d:d}° {m:d}m {s:.2f}s'
     else:
         return separation
 
@@ -867,53 +862,54 @@ def listObjects(**kwargs):
     paramslist = []
     if "catalog" in kwargs:
         if kwargs["catalog"].upper() == "NGC" or kwargs["catalog"].upper() == "IC":
-            paramslist.append('name LIKE "' + kwargs["catalog"].upper() + '%"')
+            paramslist.append(f'name LIKE "{kwargs["catalog"].upper()}%"')
         elif kwargs["catalog"].upper() == "M":
             paramslist.append('messier != ""')
         else:
             raise ValueError('Wrong value for catalog filter. [NGC|IC|M]')
     if "type" in kwargs:
-        paramslist.append('type = "' + kwargs["type"] + '"')
+        paramslist.append(f'type = "{kwargs["type"]}"')
 
     if "constellation" in kwargs:
-        paramslist.append('const = "' + kwargs["constellation"].capitalize() + '"')
+        paramslist.append(f'const = "{kwargs["constellation"].capitalize()}"')
 
     if "minsize" in kwargs:
-        paramslist.append('majax >= ' + str(kwargs["minsize"]))
+        paramslist.append(f'majax >= {kwargs["minsize"]}')
 
     if "maxsize" in kwargs:
-        paramslist.append('(majax < ' + str(kwargs["maxsize"]) + ' OR majax is NULL)')
+        paramslist.append(f'(majax < {kwargs["maxsize"]} OR majax is NULL)')
 
     if "uptobmag" in kwargs:
-        paramslist.append('bmag <= ' + str(kwargs["uptobmag"]))
+        paramslist.append(f'bmag <= {kwargs["uptobmag"]}')
 
     if "uptovmag" in kwargs:
-        paramslist.append('vmag <= ' + str(kwargs["uptovmag"]))
+        paramslist.append(f'vmag <= {kwargs["uptovmag"]}')
 
     if "minra" in kwargs and "maxra" in kwargs:
         if kwargs["maxra"] > kwargs["minra"]:
-            paramslist.append('ra BETWEEN '
-                              + str(np.radians(kwargs["minra"]))
-                              + ' AND '
-                              + str(np.radians(kwargs["maxra"])))
+            paramslist.append(f'ra BETWEEN '
+                              f'{np.radians(kwargs["minra"])} '
+                              f'AND {np.radians(kwargs["maxra"])}'
+                              )
         else:
-            paramslist.append('ra >= ' + str(np.radians(kwargs["minra"]))
-                              + ' OR ra <= ' + str(np.radians(kwargs["maxra"])))
+            paramslist.append(f'ra >= {np.radians(kwargs["minra"])} '
+                              f'OR ra <= {np.radians(kwargs["maxra"])}'
+                              )
     elif "minra" in kwargs:
-        paramslist.append('ra >= ' + str(np.radians(kwargs["minra"])))
+        paramslist.append(f'ra >= {np.radians(kwargs["minra"])}')
     elif "maxra" in kwargs:
-        paramslist.append('ra <= ' + str(np.radians(kwargs["maxra"])))
+        paramslist.append(f'ra <= {np.radians(kwargs["maxra"])}')
 
     if "mindec" in kwargs and "maxdec" in kwargs:
         if kwargs["maxdec"] > kwargs["mindec"]:
-            paramslist.append('dec BETWEEN '
-                              + str(np.radians(kwargs["mindec"]))
-                              + ' AND '
-                              + str(np.radians(kwargs["maxdec"])))
+            paramslist.append(f'dec BETWEEN '
+                              f'{np.radians(kwargs["mindec"])} '
+                              f'AND {np.radians(kwargs["maxdec"])}'
+                              )
     elif "mindec" in kwargs:
-        paramslist.append('dec >= ' + str(np.radians(kwargs["mindec"])))
+        paramslist.append(f'dec >= {np.radians(kwargs["mindec"])}')
     elif "maxdec" in kwargs:
-        paramslist.append('dec <= ' + str(np.radians(kwargs["maxdec"])))
+        paramslist.append(f'dec <= {np.radians(kwargs["maxdec"])}')
 
     if "withname" in kwargs and kwargs["withname"] is True:
         paramslist.append('commonnames != ""')
@@ -961,7 +957,7 @@ def nearby(coords_string, separation=60, catalog="all"):
     tables = 'objects'
     params = 'type != "Dup"'
     if catalog.upper() in ["NGC", "IC"]:
-        params += ' AND name LIKE "{}%"'.format(catalog.upper())
+        params += f' AND name LIKE "{catalog.upper()}%"'
 
     params += _limiting_coords(coords, np.ceil(separation / 60))
 
@@ -1024,11 +1020,11 @@ def printDetails(dso):
                 line.append(chunk)
                 continue
             else:
-                text_returned += ('{:5}{:73}{}'.format("|", " ".join(line), "|\n"))
+                text_returned += f'|    {" ".join(line):73}|\n'
                 del line[:]
                 line.append(chunk)
                 lineLength = len(chunk) + 1
-        text_returned += ('{:5}{:73}{}'.format("|", " ".join(line), "|\n"))
+        text_returned += f'|    {" ".join(line):73}|\n'
         return text_returned
 
     if not isinstance(dso, Dso):
@@ -1038,26 +1034,26 @@ def printDetails(dso):
             raise TypeError('Wrong type as parameter. Either a Dso or string type was expected.')
 
     objType = dso.getType()
-    separator = ("+" + "-" * 77 + "+\n")
+    separator = (f'+{"-" * 77}+\n')
     obj_string = separator
-    obj_string += ('{:2}{:14}{:24}{:38}{}'.format(
-                                            "|",
-                                            "Id: " + str(dso.getId()),
-                                            "Name: " + dso.getName(),
-                                            "Type: " + objType,
-                                            "|\n"))
-    obj_string += ('{:2}{:23}{:23}{:30}{}'.format(
-                                            "|",
-                                            "R.A.: " + dso.getRA(),
-                                            "Dec.: " + dso.getDec(),
-                                            "Constellation: " + dso.getConstellation(),
-                                            "|\n"))
+    obj_string += ('| '
+                   f'Id: {str(dso.getId()):10}'
+                   f'Name: {dso.getName():18}'
+                   f'Type: {objType:32}'
+                   '|\n'
+                   )
+    obj_string += ('| '
+                   f'R.A.: {dso.getRA():17}'
+                   f'Dec.: {dso.getDec():17}'
+                   f'Constellation: {dso.getConstellation():15}'
+                   '|\n'
+                   )
 
     identifiers = dso.getIdentifiers()
     if (identifiers[0] is not None or
             identifiers[1] is not None or
             identifiers[2] is not None):
-        obj_string += ('{:2}{:76}{}'.format("|", "Also known as: ", "|\n"))
+        obj_string += f'| {"Also known as:":76}|\n'
         knownAs = []
         if identifiers[0] is not None:
             knownAs.append(identifiers[0])
@@ -1068,7 +1064,7 @@ def printDetails(dso):
         obj_string += _justifyText(", ".join(knownAs))
 
     if identifiers[3] is not None:
-        obj_string += ('{:2}{:76}{}'.format("|", "Common names: ", "|\n"))
+        obj_string += f'| {"Common names:":76}|\n'
         obj_string += _justifyText(", ".join(identifiers[3]))
     obj_string += separator
 
@@ -1082,12 +1078,12 @@ def printDetails(dso):
         dimensions.append("N/A")
     else:
         dimensions.append(str(dso.getDimensions()[2]) + "°")
-    obj_string += ('{:2}{:23}{:23}{:30}{}'.format(
-                                            "|",
-                                            "Major axis: " + dimensions[0],
-                                            "Minor axis: " + dimensions[1],
-                                            "Position angle: " + dimensions[2],
-                                            "|\n"))
+    obj_string += ('| '
+                   f'Major axis: {dimensions[0]:11}'
+                   f'Minor axis: {dimensions[1]:11}'
+                   f'Position angle: {dimensions[2]:14}'
+                   '|\n'
+                   )
 
     magnitudes = []
     for bandValue in dso.getMagnitudes():
@@ -1095,57 +1091,59 @@ def printDetails(dso):
             magnitudes.append("N/A")
         else:
             magnitudes.append(str(bandValue))
-    obj_string += ('{:2}{:15}{:15}{:15}{:15}{:16}{}'.format(
-                                                        "|",
-                                                        "B-mag: " + magnitudes[0],
-                                                        "V-mag: " + magnitudes[1],
-                                                        "J-mag: " + magnitudes[2],
-                                                        "H-mag: " + magnitudes[3],
-                                                        "K-mag: " + magnitudes[4],
-                                                        "|\n"))
-    obj_string += ("|" + " " * 77 + "|\n")
+    obj_string += ('| '
+                   f'B-mag: {magnitudes[0]:8}'
+                   f'V-mag: {magnitudes[1]:8}'
+                   f'J-mag: {magnitudes[2]:8}'
+                   f'H-mag: {magnitudes[3]:8}'
+                   f'K-mag: {magnitudes[4]:9}'
+                   '|\n'
+                   )
+
+    obj_string += (f'|{" " * 77}|\n')
 
     if objType == "Galaxy":
-        obj_string += ('{:2}{:30}{:46}{}'.format(
-                                        "|",
-                                        "Surface brightness: " + str(dso.getSurfaceBrightness()),
-                                        "Hubble classification: " + dso.getHubble(),
-                                        "|\n"))
+        obj_string += ('| '
+                       f'Surface brightness: {str(dso.getSurfaceBrightness()):10}'
+                       f'Hubble classification: {dso.getHubble():23}'
+                       '|\n'
+                       )
 
     if objType == "Planetary Nebula":
         centralStar = dso.getCStarData()
         if centralStar[0] is not None:
-            obj_string += ('{:2}{:76}{}'.format("|", "Central star identifiers: ", "|\n"))
-            obj_string += ('{:5}{:73}{}'.format("|", ", ".join(centralStar[0]), "|\n"))
-            obj_string += ("|" + " " * 77 + "|\n")
+            obj_string += f'| {"Central star identifiers:":76}|\n'
+            obj_string += f'|    {", ".join(centralStar[0]):73}|\n'
+            obj_string += f'|{" " * 77}|\n'
         cStarMagnitudes = []
         for i in range(1, 4):
             if centralStar[i] is None:
                 cStarMagnitudes.append("N/A")
             else:
                 cStarMagnitudes.append(str(centralStar[i]))
-        obj_string += ('{:2}{:76}{}'.format("|", "Central star magnitudes: ", "|\n"))
-        obj_string += ('{:5}{:24}{:24}{:25}{}'.format(
-                                                "|",
-                                                "U-mag: " + cStarMagnitudes[0],
-                                                "B-mag: " + cStarMagnitudes[1],
-                                                "V-mag: " + cStarMagnitudes[2],
-                                                "|\n"))
+        obj_string += f'| {"Central star magnitudes:":76}|\n'
+        obj_string += ('|    '
+                       f'U-mag: {cStarMagnitudes[0]:17}'
+                       f'B-mag: {cStarMagnitudes[1]:17}'
+                       f'V-mag: {cStarMagnitudes[2]:18}'
+                       '|\n'
+                       )
+
     obj_string += separator
 
     if identifiers[4] is not None:
-        obj_string += ('{:2}{:76}{}'.format("|", "Other identifiers: ", "|\n"))
+        obj_string += f'| {"Other identifiers:":76}|\n'
         obj_string += _justifyText(", ".join(identifiers[4]))
         obj_string += separator
 
     notes = dso.getNotes()
     if notes[0] != "":
-        obj_string += ('{:2}{:76}{}'.format("|", "NED notes: ", "|\n"))
+        obj_string += f'| {"NED notes:":76}|\n'
         obj_string += _justifyText(notes[0])
         obj_string += separator
 
     if notes[1] != "":
-        obj_string += ('{:2}{:76}{}'.format("|", "OpenNGC notes: ", "|\n"))
+        obj_string += f'| {"OpenNGC notes:":76}|\n'
         obj_string += _justifyText(notes[1])
         obj_string += separator
     return obj_string
@@ -1195,15 +1193,15 @@ MWSC or UGC catalogs.
         if nameParts[2] == "102":
             constraint = 'messier="101"'
         else:
-            constraint = 'messier="' + "{:0>3}".format(nameParts[2]) + '"'
+            constraint = f'messier="{nameParts[2]:0>3}"'
     elif nameParts[1] == 'PGC':  # 6 digits format
-        constraint = 'identifiers LIKE "%PGC ' + "{:0>6}".format(nameParts[2]) + '%"'
+        constraint = f'identifiers LIKE "%PGC {nameParts[2]:0>6}%"'
     elif nameParts[1] == 'UGC':  # 5 digits format
-        constraint = 'identifiers LIKE "%UGC ' + "{:0>5}".format(nameParts[2]) + '%"'
+        constraint = f'identifiers LIKE "%UGC {nameParts[2]:0>5}%"'
     elif nameParts[1] == 'MWSC':  # 4 digits format
-        constraint = 'identifiers LIKE "%MWSC ' + "{:0>4}".format(nameParts[2]) + '%"'
+        constraint = f'identifiers LIKE "%MWSC {nameParts[2]:0>4}%"'
     elif nameParts[1] == 'LBN':  # 3 digits format
-        constraint = 'identifiers LIKE "%LBN ' + "{:0>3}".format(nameParts[2]) + '%"'
+        constraint = f'identifiers LIKE "%LBN {nameParts[2]:0>3}%"'
     objectData = _queryFetchOne(selectWhat, fromWhere, constraint)
 
     if objectData is not None:
@@ -1214,9 +1212,9 @@ MWSC or UGC catalogs.
 
 def stats():
     try:
-        db = sqlite3.connect('file:' + DBPATH + '?mode=ro', uri=True)
+        db = sqlite3.connect(f'file:{DBPATH}?mode=ro', uri=True)
     except sqlite3.Error:
-        raise OSError('There was a problem accessing database file at ' + DBPATH)
+        raise OSError(f'There was a problem accessing database file at {DBPATH}')
 
     try:
         cursor = db.cursor()
