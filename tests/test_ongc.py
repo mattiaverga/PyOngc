@@ -168,10 +168,69 @@ class TestDsoClass(unittest.TestCase):
 
     def test_xephem_format(self):
         """Test object representation in XEphem format."""
-        obj = ongc.Dso('NGC1')
-        expected = 'NGC0001,f|G,00:07:15.84,+27:42:29.1,13.4,,94.2|64.2|1.07'
+        # Galaxy pair
+        obj = ongc.Dso('IC1008')
+        expected = 'IC1008|IC4414,f|A,14:23:42.59,+28:20:52.3,,48.00||'
         self.assertEqual(obj.xephemFormat(), expected)
 
+        # Globular cluster
+        obj = ongc.Dso('NGC1904')
+        expected = 'NGC1904|M079,f|C,05:24:10.59,-24:31:27.2,9.21,,432.00||'
+        self.assertEqual(obj.xephemFormat(), expected)
+
+        # Double star
+        obj = ongc.Dso('IC470')
+        expected = 'IC0470,f|D,07:23:31.50,+46:04:43.2,13.89,,||'
+        self.assertEqual(obj.xephemFormat(), expected)
+
+        # Nebula
+        obj = ongc.Dso('IC2087')
+        expected = 'IC2087,f|F,04:39:59.97,+25:44:32.0,10.67,,240.00|240.00|'
+        self.assertEqual(obj.xephemFormat(), expected)
+
+        # Spiral galaxy
+        obj = ongc.Dso('NGC1')
+        expected = 'NGC0001,f|G,00:07:15.84,+27:42:29.1,13.4,,94.20|64.20|112'
+        self.assertEqual(obj.xephemFormat(), expected)
+
+        # Elliptical galaxy
+        obj = ongc.Dso('IC3')
+        expected = 'IC0003,f|H,00:12:06.09,-00:24:54.8,15.1,,55.80|40.20|53'
+        self.assertEqual(obj.xephemFormat(), expected)
+
+        # Emission nebula
+        obj = ongc.Dso('NGC1936')
+        expected = 'NGC1936|IC2127,f|N,05:22:13.96,-67:58:41.9,11.6,,60.00|60.00|'
+        self.assertEqual(obj.xephemFormat(), expected)
+
+        # Open cluster
+        obj = ongc.Dso('IC4725')
+        expected = 'IC4725|M025,f|O,18:31:46.77,-19:06:53.8,5.29,,846.00||'
+        self.assertEqual(obj.xephemFormat(), expected)
+
+        # Planetary nebula
+        obj = ongc.Dso('NGC650')
+        expected = 'NGC0650|M076|NGC0651|Barbell Nebula|Cork Nebula|Little Dumbbell Nebula,f|P,' \
+            '01:42:19.69,+51:34:31.7,12.2,,67.20||'
+        self.assertEqual(obj.xephemFormat(), expected)
+
+        # SNR
+        obj = ongc.Dso('NGC1952')
+        expected = 'NGC1952|M001,f|R,05:34:31.97,+22:00:52.1,8.4,,480.00|240.00|'
+        self.assertEqual(obj.xephemFormat(), expected)
+
+        # Star
+        obj = ongc.Dso('IC117')
+        expected = 'IC0117,f|S,01:27:25.41,-01:51:36.7,11.22,,||'
+        self.assertEqual(obj.xephemFormat(), expected)
+
+        # Star cluster + nebula
+        obj = ongc.Dso('NGC1976')
+        expected = 'NGC1976|M042|Great Orion Nebula|Orion Nebula,f|U,' \
+            '05:35:16.48,-05:23:22.8,4.0,,5400.00|3600.00|'
+        self.assertEqual(obj.xephemFormat(), expected)
+
+        # Unknown - other
         obj = ongc.Dso('NGC405')
         expected = 'NGC0405,f,01:08:34.11,-46:40:06.6,7.17,,||'
         self.assertEqual(obj.xephemFormat(), expected)

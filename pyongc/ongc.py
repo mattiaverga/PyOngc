@@ -505,14 +505,9 @@ class Dso(object):
         dimensions = []
         # Xephem format wants axes espressed in arcsec, we have arcmin
         for value in (self.getDimensions()[0], self.getDimensions()[1]):
-            if value is not None:
-                dimensions.append(str(value*60))
-            else:
-                dimensions.append("")
-        if self.getDimensions()[2] is not None:
-            dimensions.append(str(value))
-        else:
-            dimensions.append("")
+            dimensions.append(f'{value*60:.2f}') if value is not None else dimensions.append("")
+        for value in (self.getDimensions()[2], ):
+            dimensions.append(str(value)) if value is not None else dimensions.append("")
         line.append("|".join(dimensions))
 
         return ",".join(line)
