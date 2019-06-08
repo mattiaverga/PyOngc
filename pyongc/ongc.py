@@ -83,13 +83,16 @@ class Dso(object):
             raise TypeError('Wrong type as parameter. A string type was expected.')
 
         # Make sure object name is written in correct form
-        nameParts = re.match(r'^((?:NGC|IC)\s?)(\d{1,4})\s?((NED)(\d{1,2})|[A-Z]{1,2})?$',
+        nameParts = re.match(r'^((?:NGC|IC|M)\s?)(\d{1,4})\s?((NED)(\d{1,2})|[A-Z]{1,2})?$',
                              name.upper())
         if nameParts is None:
-            raise ValueError('Wrong object name. Please insert a valid NGC or IC object name.')
+            raise ValueError('Wrong object name. Please insert a valid NGC, IC or Messier object name.')
 
         if nameParts.group(3) is not None:
             # User searches for a sub-object
+            if name.upper().startswith('M'):
+                raise ValueError('Wrong object name. Please insert a valid NGC, IC or Messier '
+                                 'object name.')
             if nameParts.group(4) is not None:
                 # User searches for a NED suffixed component
                 objectname = f'{nameParts.group(1).strip()}' \
@@ -97,63 +100,71 @@ class Dso(object):
                              f' {nameParts.group(4)}' \
                              f'{nameParts.group(5):0>2}'
             else:
-                # User searches a letter suffixed component
+                # User searches for a letter suffixed component
                 objectname = f'{nameParts.group(1).strip()}' \
                              f'{nameParts.group(2):0>4}' \
                              f'{nameParts.group(3).strip()}'
         else:
-            objectname = f'{nameParts.group(1).strip()}{nameParts.group(2):0>4}'
+            if name.upper().startswith('M'):
+                # User searches for a Messier object
+                messier = f'{nameParts.group(2):0>3}'
+            else:
+                # User searches for a plain NGC or IC object
+                objectname = f'{nameParts.group(1).strip()}{nameParts.group(2):0>4}'
 
-        cols = ('objects.id, objects.type, objTypes.typedesc, ra, dec, const, majax, minax, '
-                'pa, bmag, vmag, jmag,hmag, kmag, sbrightn, hubble, cstarumag, cstarbmag, '
+        cols = ('objects.id, name, objects.type, objTypes.typedesc, ra, dec, const, majax, '
+                'minax, pa, bmag, vmag, jmag,hmag, kmag, sbrightn, hubble, cstarumag, cstarbmag, '
                 'cstarvmag, messier, ngc, ic, cstarnames,identifiers, commonnames, nednotes, '
                 'ongcnotes')
         tables = 'objects JOIN objTypes ON objects.type = objTypes.type'
-        params = f'name="{objectname}"'
+        if 'messier' in locals():
+            params = f'messier="{messier}"'
+        else:
+            params = f'name="{objectname}"'
         objectData = _queryFetchOne(cols, tables, params)
 
         if objectData is None:
             raise ValueError(f'Object named {objectname} not found in the database.')
 
         # If object is a duplicate then return the main object
-        if objectData[1] == "Dup" and not returndup:
-            if objectData[20] != "":
-                objectname = f'NGC{objectData[20]}'
+        if objectData[2] == "Dup" and not returndup:
+            if objectData[21] != "":
+                objectname = f'NGC{objectData[21]}'
             else:
-                objectname = f'IC{objectData[21]}'
+                objectname = f'IC{objectData[22]}'
             params = f'name="{objectname}"'
             objectData = _queryFetchOne(cols, tables, params)
 
         # Assign object properties
         self._id = objectData[0]
-        self._name = objectname
-        self._type = objectData[2]
-        self._ra = objectData[3]
-        self._dec = objectData[4]
-        self._const = objectData[5]
+        self._name = objectData[1]
+        self._type = objectData[3]
+        self._ra = objectData[4]
+        self._dec = objectData[5]
+        self._const = objectData[6]
 
         # These properties may be empty
-        self._majax = objectData[6]
-        self._minax = objectData[7]
-        self._pa = objectData[8]
-        self._bmag = objectData[9]
-        self._vmag = objectData[10]
-        self._jmag = objectData[11]
-        self._hmag = objectData[12]
-        self._kmag = objectData[13]
-        self._sbrightn = objectData[14]
-        self._hubble = objectData[15]
-        self._cstarumag = objectData[16]
-        self._cstarbmag = objectData[17]
-        self._cstarvmag = objectData[18]
-        self._messier = objectData[19]
-        self._ngc = objectData[20]
-        self._ic = objectData[21]
-        self._cstarnames = objectData[22]
-        self._identifiers = objectData[23]
-        self._commonnames = objectData[24]
-        self._nednotes = objectData[25]
-        self._ongcnotes = objectData[26]
+        self._majax = objectData[7]
+        self._minax = objectData[8]
+        self._pa = objectData[9]
+        self._bmag = objectData[10]
+        self._vmag = objectData[11]
+        self._jmag = objectData[12]
+        self._hmag = objectData[13]
+        self._kmag = objectData[14]
+        self._sbrightn = objectData[15]
+        self._hubble = objectData[16]
+        self._cstarumag = objectData[17]
+        self._cstarbmag = objectData[18]
+        self._cstarvmag = objectData[19]
+        self._messier = objectData[20]
+        self._ngc = objectData[21]
+        self._ic = objectData[22]
+        self._cstarnames = objectData[23]
+        self._identifiers = objectData[24]
+        self._commonnames = objectData[25]
+        self._nednotes = objectData[26]
+        self._ongcnotes = objectData[27]
 
     def __str__(self):
         """Returns basic data of the object.

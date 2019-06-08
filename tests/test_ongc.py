@@ -56,10 +56,12 @@ class TestDsoClass(unittest.TestCase):
         self.assertEqual(ongc.Dso('ic 1')._name, 'IC0001')
         self.assertEqual(ongc.Dso('ic80 ned1')._name, 'IC0080 NED01')
         self.assertEqual(ongc.Dso('ngc61a')._name, 'NGC0061A')
-        self.assertRaisesRegex(ValueError, 'Wrong object name', ongc.Dso, 'M15')
+        self.assertEqual(ongc.Dso('M15')._name, 'NGC7078')
+        self.assertRaisesRegex(ValueError, 'Wrong object name', ongc.Dso, 'C15')
         self.assertRaisesRegex(ValueError, 'Wrong object name', ongc.Dso, 'NGC77777')
         self.assertRaisesRegex(ValueError, 'Wrong object name', ongc.Dso, 'NGC0001ABC')
         self.assertRaisesRegex(ValueError, 'not found in the database', ongc.Dso, 'NGC0001A')
+        self.assertRaisesRegex(ValueError, 'Wrong object name', ongc.Dso, 'M15A')
 
     def test_duplicate_resolving(self):
         """Test that a duplicated object is returned as himself when asked to do so."""

@@ -70,7 +70,7 @@ def test_view_bad_name():
     result = runner.invoke(ongc.view, ['bad'])
     assert result.exit_code == 0
     assert result.output == ('ERROR: Wrong object name. '
-                             'Please insert a valid NGC or IC object name.\n')
+                             'Please insert a valid NGC, IC or Messier object name.\n')
 
 
 def test_stats():
@@ -137,7 +137,7 @@ def test_neighbors_bad_name():
     result = runner.invoke(ongc.neighbors, ['bad'])
     assert result.exit_code == 0
     assert result.output == ('ERROR: Wrong object name. '
-                             'Please insert a valid NGC or IC object name.\n')
+                             'Please insert a valid NGC, IC or Messier object name.\n')
 
 
 def test_neighbors_with_pager():
@@ -161,7 +161,7 @@ def test_separation_bad_name():
     result = runner.invoke(ongc.separation, ['ngc1', 'bad'])
     assert result.exit_code == 0
     assert result.output == ('ERROR: Wrong object name. '
-                             'Please insert a valid NGC or IC object name.\n')
+                             'Please insert a valid NGC, IC or Messier object name.\n')
 
 
 def test_search():
