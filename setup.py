@@ -40,5 +40,5 @@ setup(
     ''',
     tests_require=TESTS_REQUIRE,
     extras_require={'tests': TESTS_REQUIRE},
-    python_requires=">=3",
+    python_requires=">=3.6",
 )
