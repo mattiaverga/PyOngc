@@ -48,18 +48,65 @@ class TestDsoClass(unittest.TestCase):
         """Test we get a type error if user doesn't input a string."""
         self.assertRaisesRegex(TypeError, 'Wrong type as parameter', ongc.Dso, 1234)
 
-    def test_name_recognition(self):
-        """Test the regex used to convert the name of the object inputted by the user
-        to the correct form.
-        """
+    def test_name_recognition_NGC(self):
+        """Test the recognition of a NGC/IC identifier."""
         self.assertEqual(ongc.Dso('ngc1')._name, 'NGC0001')
         self.assertEqual(ongc.Dso('ic 1')._name, 'IC0001')
         self.assertEqual(ongc.Dso('ic80 ned1')._name, 'IC0080 NED01')
         self.assertEqual(ongc.Dso('ngc61a')._name, 'NGC0061A')
-        self.assertRaisesRegex(ValueError, 'Wrong object name', ongc.Dso, 'M15')
-        self.assertRaisesRegex(ValueError, 'Wrong object name', ongc.Dso, 'NGC77777')
-        self.assertRaisesRegex(ValueError, 'Wrong object name', ongc.Dso, 'NGC0001ABC')
+        self.assertRaisesRegex(ValueError, 'not recognized', ongc.Dso, 'NGC77777')
+        self.assertRaisesRegex(ValueError, 'not recognized', ongc.Dso, 'NGC0001ABC')
         self.assertRaisesRegex(ValueError, 'not found in the database', ongc.Dso, 'NGC0001A')
+
+    def test_name_recognition_Barnard(self):
+        """Test the recognition of a Barnard identifier."""
+        self.assertEqual(ongc.Dso('b33')._name, 'B033')
+
+    def test_name_recognition_Caldwell(self):
+        """Test the recognition of a Caldwell identifier."""
+        self.assertEqual(ongc.Dso('c9')._name, 'C009')
+
+    def test_name_recognition_ESO(self):
+        """Test the recognition of a ESO identifier."""
+        self.assertEqual(ongc.Dso('eso56-115')._name, 'ESO056-115')
+
+    def test_name_recognition_Harvard(self):
+        """Test the recognition of a Harvard identifier."""
+        self.assertEqual(ongc.Dso('H5')._name, 'H05')
+
+    def test_name_recognition_Hickson(self):
+        """Test the recognition of a HCG identifier."""
+        self.assertEqual(ongc.Dso('hcg79')._name, 'HCG079')
+
+    def test_name_recognition_LBN(self):
+        """Test the recognition of a LBN identifier."""
+        self.assertEqual(ongc.Dso('LBN741')._name, 'NGC1333')
+
+    def test_name_recognition_Melotte(self):
+        """Test the recognition of a Mel identifier."""
+        self.assertEqual(ongc.Dso('mel111')._name, 'Mel111')
+
+    def test_name_recognition_Messier(self):
+        """Test the recognition of a Messier identifier."""
+        self.assertEqual(ongc.Dso('M1')._name, 'NGC1952')
+        self.assertRaisesRegex(ValueError, 'not recognized', ongc.Dso, 'M15A')
+
+    def test_name_recognition_M102(self):
+        """Test M102 == M101."""
+        self.assertEqual(ongc.Dso('M102')._name, ongc.Dso('M101')._name)
+
+    def test_name_recognition_MWSC(self):
+        """Test the recognition of a MWSC identifier."""
+        self.assertEqual(ongc.Dso('MWSC146')._name, 'IC0166')
+
+    def test_name_recognition_PGC(self):
+        """Test the recognition of a PGC identifier."""
+        self.assertEqual(ongc.Dso('PGC10540')._name, 'IC0255')
+        self.assertEqual(ongc.Dso('leda 10540')._name, 'IC0255')
+
+    def test_name_recognition_UGC(self):
+        """Test the recognition of a UGC identifier."""
+        self.assertEqual(ongc.Dso('UGC9965')._name, 'IC1132')
 
     def test_duplicate_resolving(self):
         """Test that a duplicated object is returned as himself when asked to do so."""
@@ -196,6 +243,11 @@ class TestDsoClass(unittest.TestCase):
         # Elliptical galaxy
         obj = ongc.Dso('IC3')
         expected = 'IC0003,f|H,00:12:06.09,-00:24:54.8,15.1,,55.80|40.20|53'
+        self.assertEqual(obj.xephemFormat(), expected)
+
+        # Dark nebula
+        obj = ongc.Dso('B33')
+        expected = 'B033|Horsehead Nebula,f|K,05:40:59.00,-02:27:30.0,,360.00|240.00|90'
         self.assertEqual(obj.xephemFormat(), expected)
 
         # Emission nebula
@@ -411,7 +463,7 @@ class TestDsoMethods(unittest.TestCase):
         """
         objectList = ongc.listObjects()
 
-        self.assertEqual(len(objectList), 13954)
+        self.assertEqual(len(objectList), 13974)
         self.assertIsInstance(objectList[0], ongc.Dso)
 
     def test_list_objects_filter_catalog_NGC(self):
@@ -430,7 +482,7 @@ class TestDsoMethods(unittest.TestCase):
         """Test the listObjects() method with catalog filter applied."""
         objectList = ongc.listObjects(catalog='M')
 
-        self.assertEqual(len(objectList), 107)
+        self.assertEqual(len(objectList), 109)
 
     def test_list_objects_filter_type(self):
         """Test the listObjects() method with type filter applied.
@@ -457,19 +509,19 @@ class TestDsoMethods(unittest.TestCase):
         """Test the listObjects() method to list objects without size."""
         objectList = ongc.listObjects(maxsize=0)
 
-        self.assertEqual(len(objectList), 2015)
+        self.assertEqual(len(objectList), 2017)
 
     def test_list_objects_filter_mag(self):
         """Test the listObjects() method with magnitudes filters applied."""
         objectList = ongc.listObjects(uptobmag=8, uptovmag=10)
 
-        self.assertEqual(len(objectList), 168)
+        self.assertEqual(len(objectList), 173)
 
     def test_list_objects_filter_minra(self):
         """List objects with RA greater than minra."""
         objectList = ongc.listObjects(minra=358)
 
-        self.assertEqual(len(objectList), 55)
+        self.assertEqual(len(objectList), 56)
 
     def test_list_objects_filter_maxra(self):
         """List objects with RA lower than maxra."""
@@ -511,13 +563,13 @@ class TestDsoMethods(unittest.TestCase):
         """Test the listObjects() method to list objects with common name."""
         objectList = ongc.listObjects(withname=True)
 
-        self.assertEqual(len(objectList), 121)
+        self.assertEqual(len(objectList), 132)
 
     def test_list_objects_without_name(self):
         """Test the listObjects() method to list objects without common name."""
         objectList = ongc.listObjects(withname=False)
 
-        self.assertEqual(len(objectList), 13833)
+        self.assertEqual(len(objectList), 13842)
 
     def test_list_objects_wrong_filter(self):
         """Test the listObjects() method when an unsupported filter is used."""
@@ -608,7 +660,7 @@ class TestDsoMethods(unittest.TestCase):
             "|    U-mag: 11.14            B-mag: 11.82            V-mag: 11.58             |\n"
             "+-----------------------------------------------------------------------------+\n"
             "| Other identifiers:                                                          |\n"
-            "|    C2, IRAS 00102+7214, PN G120.0+09.8                                      |\n"
+            "|    C 002, IRAS 00102+7214, PN G120.0+09.8                                   |\n"
             "+-----------------------------------------------------------------------------+\n"
             )
 
@@ -642,42 +694,6 @@ class TestDsoMethods(unittest.TestCase):
             )
 
         self.assertEqual(obj_details, expected)
-
-    def test_search_for_LBN(self):
-        """Test the searchAltId by passing a LBN identifier."""
-        obj = ongc.searchAltId("LBN741")
-
-        self.assertEqual(obj.getName(), 'NGC1333')
-
-    def test_search_for_Messier(self):
-        """Test the searchAltId by passing a Messier identifier."""
-        obj = ongc.searchAltId("M1")
-
-        self.assertEqual(obj.getName(), 'NGC1952')
-
-    def test_search_for_M102(self):
-        """M102 is M101."""
-        obj = ongc.searchAltId("M102")
-
-        self.assertEqual(obj.getName(), 'NGC5457')
-
-    def test_search_for_MWSC(self):
-        """Test the searchAltId by passing a MWSC identifier."""
-        obj = ongc.searchAltId("MWSC146")
-
-        self.assertEqual(obj.getName(), 'IC0166')
-
-    def test_search_for_PGC(self):
-        """Test the searchAltId by passing a PGC identifier."""
-        obj = ongc.searchAltId("PGC10540")
-
-        self.assertEqual(obj.getName(), 'IC0255')
-
-    def test_search_for_UGC(self):
-        """Test the searchAltId by passing a UGC identifier."""
-        obj = ongc.searchAltId("UGC9965")
-
-        self.assertEqual(obj.getName(), 'IC1132')
 
 
 class TestDatabaseIntegrity(unittest.TestCase):

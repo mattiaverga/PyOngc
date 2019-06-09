@@ -69,8 +69,7 @@ def test_view_bad_name():
     runner = CliRunner()
     result = runner.invoke(ongc.view, ['bad'])
     assert result.exit_code == 0
-    assert result.output == ('ERROR: Wrong object name. '
-                             'Please insert a valid NGC or IC object name.\n')
+    assert result.output == ('ERROR: The name "BAD" is not recognized.\n')
 
 
 def test_stats():
@@ -136,8 +135,7 @@ def test_neighbors_bad_name():
     runner = CliRunner()
     result = runner.invoke(ongc.neighbors, ['bad'])
     assert result.exit_code == 0
-    assert result.output == ('ERROR: Wrong object name. '
-                             'Please insert a valid NGC or IC object name.\n')
+    assert result.output == ('ERROR: The name "BAD" is not recognized.\n')
 
 
 def test_neighbors_with_pager():
@@ -160,8 +158,7 @@ def test_separation_bad_name():
     runner = CliRunner()
     result = runner.invoke(ongc.separation, ['ngc1', 'bad'])
     assert result.exit_code == 0
-    assert result.output == ('ERROR: Wrong object name. '
-                             'Please insert a valid NGC or IC object name.\n')
+    assert result.output == ('ERROR: The name "BAD" is not recognized.\n')
 
 
 def test_search():
@@ -177,7 +174,7 @@ def test_search_with_catalog_filter():
     result = runner.invoke(ongc.search, ['--catalog=M'])
     assert result.exit_code == 0
     assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
-    assert result.output.endswith('NGC7654, Open Cluster in Cas\n')
+    assert result.output.endswith('NGC0205, Galaxy in And\n')
 
 
 def test_search_with_type_filter():
@@ -201,7 +198,7 @@ def test_search_with_minsize_filter():
     result = runner.invoke(ongc.search, ['--minsize=5'])
     assert result.exit_code == 0
     assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
-    assert result.output.endswith('NGC7822, HII Ionized region in Cep\n')
+    assert result.output.endswith('Mel111, Open Cluster in Com\n')
 
 
 def test_search_with_maxsize_filter():
@@ -209,7 +206,7 @@ def test_search_with_maxsize_filter():
     result = runner.invoke(ongc.search, ['--maxsize=0.5'])
     assert result.exit_code == 0
     assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
-    assert result.output.endswith('NGC7839, Double star in Peg\n')
+    assert result.output.endswith('M040, Double star in UMa\n')
 
 
 def test_search_with_uptobmag_filter():
@@ -217,7 +214,7 @@ def test_search_with_uptobmag_filter():
     result = runner.invoke(ongc.search, ['--uptobmag=8'])
     assert result.exit_code == 0
     assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
-    assert result.output.endswith('NGC7789, Open Cluster in Cas\n')
+    assert result.output.endswith('Mel071, Open Cluster in Pup\n')
 
 
 def test_search_with_uptovmag_filter():
@@ -225,7 +222,7 @@ def test_search_with_uptovmag_filter():
     result = runner.invoke(ongc.search, ['--uptovmag=6'])
     assert result.exit_code == 0
     assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
-    assert result.output.endswith('NGC7686, Open Cluster in And\n')
+    assert result.output.endswith('Mel022, Open Cluster in Tau\n')
 
 
 def test_search_with_minra_filter():
@@ -233,7 +230,7 @@ def test_search_with_minra_filter():
     result = runner.invoke(ongc.search, ['--minra=23:52:00.00'])
     assert result.exit_code == 0
     assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
-    assert result.output.endswith('NGC7800, Galaxy in Peg\n')
+    assert result.output.endswith('H21, Open Cluster in Cas\n')
 
 
 def test_search_with_maxra_filter():
@@ -301,7 +298,7 @@ def test_search_with_pager():
     result = runner.invoke(ongc.search, ['--catalog=M'], input='y')
     assert result.exit_code == 0
     assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
-    assert result.output.endswith('NGC7654, Open Cluster in Cas\n')
+    assert result.output.endswith('NGC0205, Galaxy in And\n')
 
 
 @mock.patch('pyongc.ongc.DBPATH', 'badpath')
@@ -369,25 +366,3 @@ def test_nearby_with_pager():
     assert result.exit_code == 0
     assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
     assert '\nObjects in proximity of 11:08:44 -00:09:01.3' not in result.output
-
-
-def test_translate():
-    runner = CliRunner()
-    result = runner.invoke(ongc.translate, ['pgc1234'])
-    assert result.exit_code == 0
-    assert result.output == ('IC0008, Galaxy in Psc\n')
-
-
-def test_translate_not_found():
-    runner = CliRunner()
-    result = runner.invoke(ongc.translate, ['m112'])
-    assert result.exit_code == 0
-    assert result.output == ('Object not found.\n')
-
-
-def test_translate_bad_name():
-    runner = CliRunner()
-    result = runner.invoke(ongc.translate, ['pgs1234'])
-    assert result.exit_code == 0
-    assert result.output == ('ERROR: Wrong object name. Search can be performed '
-                             'for Messier, PGC, LBN, MWSC or UGC catalogs.\n')
