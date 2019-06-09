@@ -206,6 +206,11 @@ class TestDsoClass(unittest.TestCase):
         expected = 'IC0003,f|H,00:12:06.09,-00:24:54.8,15.1,,55.80|40.20|53'
         self.assertEqual(obj.xephemFormat(), expected)
 
+        # Dark nebula
+        obj = ongc.Dso('B33')
+        expected = 'B033|Horsehead Nebula,f|K,05:40:59.00,-02:27:30.0,,360.00|240.00|90'
+        self.assertEqual(obj.xephemFormat(), expected)
+
         # Emission nebula
         obj = ongc.Dso('NGC1936')
         expected = 'NGC1936|IC2127,f|N,05:22:13.96,-67:58:41.9,11.6,,60.00|60.00|'
@@ -678,7 +683,9 @@ class TestDsoMethods(unittest.TestCase):
     def test_search_for_PGC(self):
         """Test the searchAltId by passing a PGC identifier."""
         obj = ongc.searchAltId("PGC10540")
+        self.assertEqual(obj.getName(), 'IC0255')
 
+        obj = ongc.searchAltId("leda 10540")
         self.assertEqual(obj.getName(), 'IC0255')
 
     def test_search_for_UGC(self):
