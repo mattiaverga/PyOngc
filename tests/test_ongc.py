@@ -476,7 +476,7 @@ class TestDsoMethods(unittest.TestCase):
         """Test the listObjects() method with magnitudes filters applied."""
         objectList = ongc.listObjects(uptobmag=8, uptovmag=10)
 
-        self.assertEqual(len(objectList), 172)
+        self.assertEqual(len(objectList), 173)
 
     def test_list_objects_filter_minra(self):
         """List objects with RA greater than minra."""

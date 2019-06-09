@@ -42,7 +42,7 @@ import re
 import sqlite3
 
 __version__ = '0.3.1'
-DBDATE = 20190604  # Version of database data
+DBDATE = 20190609  # Version of database data
 DBPATH = resource_filename(__name__, 'ongc.db')
 PATTERNS = {'NGC|IC': r'^((?:NGC|IC)\s?)(\d{1,4})\s?((NED)(\d{1,2})|[A-Z]{1,2})?$',
             'Messier': r'^(M\s?)(\d{1,3})$',
