@@ -44,6 +44,16 @@ import sqlite3
 __version__ = '0.3.1'
 DBDATE = 20190604  # Version of database data
 DBPATH = resource_filename(__name__, 'ongc.db')
+PATTERNS = {'NGC|IC': r'^((?:NGC|IC)\s?)(\d{1,4})\s?((NED)(\d{1,2})|[A-Z]{1,2})?$',
+            'Messier': r'^(M\s?)(\d{1,3})$',
+            'Barnard': r'^(B\s?)(\d{1,3})$',
+            'Caldwell': r'^(C\s?)(\d{1,3})$',
+            'Collinder': r'^(CL\s?)(\d{1,3})$',
+            'ESO': r'^(ESO\s?)(\d{1,3})-(\d{1,3})$',
+            'Harvard': r'^(H\s?)(\d{1,2})$',
+            'Hickson': r'^(HCG\s?)(\d{1,3})$',
+            'Melotte': r'^(MEL\s?)(\d{1,3})$',
+            }
 
 
 class Dso(object):
@@ -78,55 +88,11 @@ class Dso(object):
         :param string name: identifier of the NGC or IC object
         :optional param returndup: if True don't resolve Dup objects
         """
-        def recognize_name(text):
-            """Recognize catalog and object id."""
-            patterns = {'NGC|IC': r'^((?:NGC|IC)\s?)(\d{1,4})\s?((NED)(\d{1,2})|[A-Z]{1,2})?$',
-                        'Messier': r'^(M\s?)(\d{1,3})$',
-                        'Barnard': r'^(B\s?)(\d{1,3})$',
-                        'Caldwell': r'^(C\s?)(\d{1,3})$',
-                        'Collinder': r'^(CL\s?)(\d{1,3})$',
-                        'ESO': r'^(ESO\s?)(\d{1,3})-(\d{1,3})$',
-                        'Harvard': r'^(H\s?)(\d{1,2})$',
-                        'Hickson': r'^(HCG\s?)(\d{1,3})$',
-                        'Melotte': r'^(MEL\s?)(\d{1,3})$',
-                        }
-            for cat, pat in patterns.items():
-                name_parts = re.match(pat, text)
-                if name_parts is not None:
-                    if cat == 'NGC|IC' and name_parts.group(3) is not None:
-                        # User searches for a sub-object
-                        if name_parts.group(4) is not None:
-                            # User searches for a NED suffixed component
-                            objectname = f'{name_parts.group(1).strip()}' \
-                                         f'{name_parts.group(2):0>4}' \
-                                         f' {name_parts.group(4)}' \
-                                         f'{name_parts.group(5):0>2}'
-                        else:
-                            # User searches for a letter suffixed component
-                            objectname = f'{name_parts.group(1).strip()}' \
-                                         f'{name_parts.group(2):0>4}' \
-                                         f'{name_parts.group(3).strip()}'
-                    elif cat == 'NGC|IC':
-                        # User searches for a NGC or IC object without suffixes
-                        objectname = f'{name_parts.group(1).strip()}{name_parts.group(2):0>4}'
-                    elif cat == 'ESO':
-                        objectname = f'{name_parts.group(1).strip()}{name_parts.group(2):0>3}-' \
-                                     f'{name_parts.group(3):0>3}'
-                    elif cat == 'Harvard':
-                        objectname = f'{name_parts.group(1).strip()}{name_parts.group(2):0>2}'
-                    elif cat == 'Messier':
-                        # We need to return only the numeric part of the name
-                        objectname = f'{name_parts.group(2):0>3}'
-                    else:
-                        objectname = f'{name_parts.group(1).strip()}{name_parts.group(2):0>3}'
-                    return cat, objectname
-            raise ValueError(f'The name "{text}" is not recognized.')
-
         # Make sure user passed a string as parameter
         if not isinstance(name, str):
             raise TypeError('Wrong type as parameter. A string type was expected.')
 
-        catalog, objectname = recognize_name(name.upper())
+        catalog, objectname = _recognize_name(name.upper())
 
         cols = ('objects.id, objects.name, objects.type, objTypes.typedesc, ra, dec, const, '
                 'majax, minax, pa, bmag, vmag, jmag,hmag, kmag, sbrightn, hubble, cstarumag, '
@@ -670,6 +636,45 @@ def _queryFetchMany(cols, tables, params, order=''):
         raise err
     finally:
         db.close()
+
+
+def _recognize_name(text):
+    """Recognize catalog and object id.
+
+    :param string text: the object name in input
+    :returns: tuple (catalog name, re.match object) or ValueError
+    """
+    for cat, pat in PATTERNS.items():
+        name_parts = re.match(pat, text)
+        if name_parts is not None:
+            if cat == 'NGC|IC' and name_parts.group(3) is not None:
+                # User searches for a sub-object
+                if name_parts.group(4) is not None:
+                    # User searches for a NED suffixed component
+                    objectname = f'{name_parts.group(1).strip()}' \
+                                 f'{name_parts.group(2):0>4}' \
+                                 f' {name_parts.group(4)}' \
+                                 f'{name_parts.group(5):0>2}'
+                else:
+                    # User searches for a letter suffixed component
+                    objectname = f'{name_parts.group(1).strip()}' \
+                                 f'{name_parts.group(2):0>4}' \
+                                 f'{name_parts.group(3).strip()}'
+            elif cat == 'NGC|IC':
+                # User searches for a NGC or IC object without suffixes
+                objectname = f'{name_parts.group(1).strip()}{name_parts.group(2):0>4}'
+            elif cat == 'ESO':
+                objectname = f'{name_parts.group(1).strip()}{name_parts.group(2):0>3}-' \
+                             f'{name_parts.group(3):0>3}'
+            elif cat == 'Harvard':
+                objectname = f'{name_parts.group(1).strip()}{name_parts.group(2):0>2}'
+            elif cat == 'Messier':
+                # We need to return only the numeric part of the name
+                objectname = f'{name_parts.group(2):0>3}'
+            else:
+                objectname = f'{name_parts.group(1).strip()}{name_parts.group(2):0>3}'
+            return cat, objectname
+    raise ValueError(f'The name "{text}" is not recognized.')
 
 
 def _str_to_coords(text):
