@@ -386,5 +386,4 @@ def test_translate_bad_name():
     runner = CliRunner()
     result = runner.invoke(ongc.translate, ['pgs1234'])
     assert result.exit_code == 0
-    assert result.output == ('ERROR: Wrong object name. Search can be performed '
-                             'for Messier, PGC, LBN, MWSC or UGC catalogs.\n')
+    assert result.output == ('ERROR: The name "PGS1234" is not recognized.\n')
