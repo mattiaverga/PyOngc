@@ -52,7 +52,11 @@ PATTERNS = {'NGC|IC': r'^((?:NGC|IC)\s?)(\d{1,4})\s?((NED)(\d{1,2})|[A-Z]{1,2})?
             'ESO': r'^(ESO\s?)(\d{1,3})-(\d{1,3})$',
             'Harvard': r'^(H\s?)(\d{1,2})$',
             'Hickson': r'^(HCG\s?)(\d{1,3})$',
+            'LBN': r'^(LBN\s?)(\d{1,3})$',
             'Melotte': r'^(MEL\s?)(\d{1,3})$',
+            'MWSC': r'^(MWSC\s?)(\d{1,4})$',
+            'PGC': r'^((?:PGC|LEDA)\s?)(\d{1,6})$',
+            'UGC': r'^(UGC\s?)(\d{1,5})$',
             }
 
 
@@ -648,7 +652,7 @@ def _recognize_name(text):
         name_parts = re.match(pat, text)
         if name_parts is not None:
             if cat == 'NGC|IC' and name_parts.group(3) is not None:
-                # User searches for a sub-object
+                # User searches for a NGC/IC sub-object
                 if name_parts.group(4) is not None:
                     # User searches for a NED suffixed component
                     objectname = f'{name_parts.group(1).strip()}' \
@@ -660,8 +664,7 @@ def _recognize_name(text):
                     objectname = f'{name_parts.group(1).strip()}' \
                                  f'{name_parts.group(2):0>4}' \
                                  f'{name_parts.group(3).strip()}'
-            elif cat == 'NGC|IC':
-                # User searches for a NGC or IC object without suffixes
+            elif cat in ('NGC|IC', 'MWSC'):
                 objectname = f'{name_parts.group(1).strip()}{name_parts.group(2):0>4}'
             elif cat == 'ESO':
                 objectname = f'{name_parts.group(1).strip()}{name_parts.group(2):0>3}-' \
@@ -671,6 +674,11 @@ def _recognize_name(text):
             elif cat == 'Messier':
                 # We need to return only the numeric part of the name
                 objectname = f'{name_parts.group(2):0>3}'
+            elif cat == 'UGC':
+                objectname = f'{name_parts.group(1).strip()}{name_parts.group(2):0>5}'
+            elif cat == 'PGC':
+                # Fixed catalog name to recognize also LEDA prefix
+                objectname = f'{cat}{name_parts.group(2):0>6}'
             else:
                 objectname = f'{name_parts.group(1).strip()}{name_parts.group(2):0>3}'
             return cat, objectname
@@ -1190,7 +1198,7 @@ def searchAltId(name):
     This function searches the name passed as parameter in the "alternative identifiers" field
     of the database.
     Currently it supports searching for identifiers from these catalogs: LBN, Messier, MWSC,
-    PGC, UGC.
+    PGC (LEDA), UGC.
     The function return the founded Dso object.
 
             >>> searchAltId("pgc5") #doctest: +ELLIPSIS
@@ -1199,8 +1207,7 @@ def searchAltId(name):
             >>> searchAltId("pc5")
             Traceback (most recent call last):
             ...
-            ValueError: Wrong object name. Search can be performed for Messier, PGC, LBN, \
-MWSC or UGC catalogs.
+            ValueError: ValueError: The name "PC5" is not recognized.
 
     If no object has been found, it returns a string:
 
@@ -1212,28 +1219,20 @@ MWSC or UGC catalogs.
     if not isinstance(name, str):
         raise TypeError('Wrong type as parameter. A string type was expected.')
 
-    # Extract catalog name and object number to make sure we search the name in correct form
-    nameParts = re.match(r'(LBN|M|MWSC|PGC|UGC)\s?(\d+)', name.upper())
-    if nameParts is None:
-        raise ValueError('Wrong object name. Search can be performed for Messier, '
-                         'PGC, LBN, MWSC or UGC catalogs.')
+    catalog, objectname = _recognize_name(name.upper())
 
     selectWhat = 'objects.name'
     fromWhere = 'objects'
-    if nameParts[1] == 'M':
+    if catalog == 'Messier':
         # M102 == M101
-        if nameParts[2] == "102":
+        if objectname == "102":
             constraint = 'messier="101"'
         else:
-            constraint = f'messier="{nameParts[2]:0>3}"'
-    elif nameParts[1] == 'PGC':  # 6 digits format
-        constraint = f'identifiers LIKE "%PGC {nameParts[2]:0>6}%"'
-    elif nameParts[1] == 'UGC':  # 5 digits format
-        constraint = f'identifiers LIKE "%UGC {nameParts[2]:0>5}%"'
-    elif nameParts[1] == 'MWSC':  # 4 digits format
-        constraint = f'identifiers LIKE "%MWSC {nameParts[2]:0>4}%"'
-    elif nameParts[1] == 'LBN':  # 3 digits format
-        constraint = f'identifiers LIKE "%LBN {nameParts[2]:0>3}%"'
+            constraint = f'messier="{objectname}"'
+    else:
+        # Insert space between catalog name and id
+        identifier = re.sub(r'(\D+)(\d+)', r'\1 \2', objectname)
+        constraint = f'identifiers LIKE "%{identifier}%"'
     objectData = _queryFetchOne(selectWhat, fromWhere, constraint)
 
     if objectData is not None:
