@@ -366,24 +366,3 @@ def test_nearby_with_pager():
     assert result.exit_code == 0
     assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
     assert '\nObjects in proximity of 11:08:44 -00:09:01.3' not in result.output
-
-
-def test_translate():
-    runner = CliRunner()
-    result = runner.invoke(ongc.translate, ['pgc1234'])
-    assert result.exit_code == 0
-    assert result.output == ('IC0008, Galaxy in Psc\n')
-
-
-def test_translate_not_found():
-    runner = CliRunner()
-    result = runner.invoke(ongc.translate, ['m112'])
-    assert result.exit_code == 0
-    assert result.output == ('Object not found.\n')
-
-
-def test_translate_bad_name():
-    runner = CliRunner()
-    result = runner.invoke(ongc.translate, ['pgs1234'])
-    assert result.exit_code == 0
-    assert result.output == ('ERROR: The name "PGS1234" is not recognized.\n')

@@ -1191,57 +1191,6 @@ def printDetails(dso):
     return obj_string
 
 
-def searchAltId(name):
-    """Search in the database using an alternative identifier.
-
-    :param string name: alternative identifier to search for
-    :returns: Dso object
-
-    This function searches the name passed as parameter in the "alternative identifiers" field
-    of the database.
-    Currently it supports searching for identifiers from these catalogs: LBN, Messier, MWSC,
-    PGC (LEDA), UGC.
-    The function return the founded Dso object.
-
-            >>> searchAltId("pgc5") #doctest: +ELLIPSIS
-            <__main__.Dso object at 0x...>
-
-            >>> searchAltId("pc5")
-            Traceback (most recent call last):
-            ...
-            ValueError: The name "PC5" is not recognized.
-
-    If no object has been found, it returns a string:
-
-            >>> searchAltId("pgc555")
-            'Object not found.'
-
-    """
-    # Make sure user passed a string as parameter
-    if not isinstance(name, str):
-        raise TypeError('Wrong type as parameter. A string type was expected.')
-
-    catalog, objectname = _recognize_name(name.upper())
-    selectWhat = 'name'
-
-    if catalog == 'Messier':
-        fromWhere = 'objects'
-        # M102 == M101
-        if objectname == "102":
-            constraint = 'messier="101"'
-        else:
-            constraint = f'messier="{objectname}"'
-    else:
-        fromWhere = 'objIdentifiers'
-        constraint = f'identifier="{objectname}"'
-    objectData = _queryFetchOne(selectWhat, fromWhere, constraint)
-
-    if objectData is not None:
-        return Dso(objectData[0])
-    else:
-        return "Object not found."
-
-
 def stats():
     try:
         db = sqlite3.connect(f'file:{DBPATH}?mode=ro', uri=True)

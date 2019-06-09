@@ -234,15 +234,5 @@ def nearby(ra, dec, radius, catalog):
         click.echo(f'{click.style("ERROR:", fg="red", bold=True)} {e}')
 
 
-@cli.command()
-@click.argument('name')
-def translate(name):
-    """Search objects with alternative identifiers and return NGC or IC designation."""
-    try:
-        click.secho(str(ongc.searchAltId(name)), bold=True)
-    except Exception as e:
-        click.echo(f'{click.style("ERROR:", fg="red", bold=True)} {e}')
-
-
 if __name__ == '__main__':
     cli()
