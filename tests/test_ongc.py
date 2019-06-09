@@ -48,26 +48,65 @@ class TestDsoClass(unittest.TestCase):
         """Test we get a type error if user doesn't input a string."""
         self.assertRaisesRegex(TypeError, 'Wrong type as parameter', ongc.Dso, 1234)
 
-    def test_name_recognition(self):
-        """Test the regex used to convert the name of the object inputted by the user
-        to the correct form.
-        """
+    def test_name_recognition_NGC(self):
+        """Test the recognition of a NGC/IC identifier."""
         self.assertEqual(ongc.Dso('ngc1')._name, 'NGC0001')
         self.assertEqual(ongc.Dso('ic 1')._name, 'IC0001')
         self.assertEqual(ongc.Dso('ic80 ned1')._name, 'IC0080 NED01')
         self.assertEqual(ongc.Dso('ngc61a')._name, 'NGC0061A')
-        self.assertEqual(ongc.Dso('M15')._name, 'NGC7078')
-        self.assertEqual(ongc.Dso('M 45')._name, 'Mel022')
-        self.assertEqual(ongc.Dso('b33')._name, 'B033')
-        self.assertEqual(ongc.Dso('C9')._name, 'C009')
-        self.assertEqual(ongc.Dso('eso56-115')._name, 'ESO056-115')
-        self.assertEqual(ongc.Dso('H5')._name, 'H05')
-        self.assertEqual(ongc.Dso('hcg79')._name, 'HCG079')
-        self.assertEqual(ongc.Dso('mel111')._name, 'Mel111')
         self.assertRaisesRegex(ValueError, 'not recognized', ongc.Dso, 'NGC77777')
         self.assertRaisesRegex(ValueError, 'not recognized', ongc.Dso, 'NGC0001ABC')
         self.assertRaisesRegex(ValueError, 'not found in the database', ongc.Dso, 'NGC0001A')
+
+    def test_name_recognition_Barnard(self):
+        """Test the recognition of a Barnard identifier."""
+        self.assertEqual(ongc.Dso('b33')._name, 'B033')
+
+    def test_name_recognition_Caldwell(self):
+        """Test the recognition of a Caldwell identifier."""
+        self.assertEqual(ongc.Dso('c9')._name, 'C009')
+
+    def test_name_recognition_ESO(self):
+        """Test the recognition of a ESO identifier."""
+        self.assertEqual(ongc.Dso('eso56-115')._name, 'ESO056-115')
+
+    def test_name_recognition_Harvard(self):
+        """Test the recognition of a Harvard identifier."""
+        self.assertEqual(ongc.Dso('H5')._name, 'H05')
+
+    def test_name_recognition_Hickson(self):
+        """Test the recognition of a HCG identifier."""
+        self.assertEqual(ongc.Dso('hcg79')._name, 'HCG079')
+
+    def test_name_recognition_LBN(self):
+        """Test the recognition of a LBN identifier."""
+        self.assertEqual(ongc.Dso('LBN741')._name, 'NGC1333')
+
+    def test_name_recognition_Melotte(self):
+        """Test the recognition of a Mel identifier."""
+        self.assertEqual(ongc.Dso('mel111')._name, 'Mel111')
+
+    def test_name_recognition_Messier(self):
+        """Test the recognition of a Messier identifier."""
+        self.assertEqual(ongc.Dso('M1')._name, 'NGC1952')
         self.assertRaisesRegex(ValueError, 'not recognized', ongc.Dso, 'M15A')
+
+    def test_name_recognition_M102(self):
+        """Test M102 == M101."""
+        self.assertEqual(ongc.Dso('M102')._name, ongc.Dso('M101')._name)
+
+    def test_name_recognition_MWSC(self):
+        """Test the recognition of a MWSC identifier."""
+        self.assertEqual(ongc.Dso('MWSC146')._name, 'IC0166')
+
+    def test_name_recognition_PGC(self):
+        """Test the recognition of a PGC identifier."""
+        self.assertEqual(ongc.Dso('PGC10540')._name, 'IC0255')
+        self.assertEqual(ongc.Dso('leda 10540')._name, 'IC0255')
+
+    def test_name_recognition_UGC(self):
+        """Test the recognition of a UGC identifier."""
+        self.assertEqual(ongc.Dso('UGC9965')._name, 'IC1132')
 
     def test_duplicate_resolving(self):
         """Test that a duplicated object is returned as himself when asked to do so."""
@@ -655,44 +694,6 @@ class TestDsoMethods(unittest.TestCase):
             )
 
         self.assertEqual(obj_details, expected)
-
-    def test_search_for_LBN(self):
-        """Test the searchAltId by passing a LBN identifier."""
-        obj = ongc.searchAltId("LBN741")
-
-        self.assertEqual(obj.getName(), 'NGC1333')
-
-    def test_search_for_Messier(self):
-        """Test the searchAltId by passing a Messier identifier."""
-        obj = ongc.searchAltId("M1")
-
-        self.assertEqual(obj.getName(), 'NGC1952')
-
-    def test_search_for_M102(self):
-        """M102 is M101."""
-        obj = ongc.searchAltId("M102")
-
-        self.assertEqual(obj.getName(), 'NGC5457')
-
-    def test_search_for_MWSC(self):
-        """Test the searchAltId by passing a MWSC identifier."""
-        obj = ongc.searchAltId("MWSC146")
-
-        self.assertEqual(obj.getName(), 'IC0166')
-
-    def test_search_for_PGC(self):
-        """Test the searchAltId by passing a PGC identifier."""
-        obj = ongc.searchAltId("PGC10540")
-        self.assertEqual(obj.getName(), 'IC0255')
-
-        obj = ongc.searchAltId("leda 10540")
-        self.assertEqual(obj.getName(), 'IC0255')
-
-    def test_search_for_UGC(self):
-        """Test the searchAltId by passing a UGC identifier."""
-        obj = ongc.searchAltId("UGC9965")
-
-        self.assertEqual(obj.getName(), 'IC1132')
 
 
 class TestDatabaseIntegrity(unittest.TestCase):

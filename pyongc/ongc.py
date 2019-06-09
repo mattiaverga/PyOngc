@@ -673,7 +673,9 @@ def _recognize_name(text):
                 objectname = f'{name_parts.group(1).strip()}{name_parts.group(2):0>2}'
             elif cat == 'Messier':
                 # We need to return only the numeric part of the name
-                objectname = f'{name_parts.group(2):0>3}'
+                objectname = (f'101' if name_parts.group(2) == '102'
+                              else f'{name_parts.group(2):0>3}'
+                              )
             elif cat == 'UGC':
                 objectname = f'{name_parts.group(1).strip()}{name_parts.group(2):0>5}'
             elif cat == 'PGC':
@@ -1220,19 +1222,18 @@ def searchAltId(name):
         raise TypeError('Wrong type as parameter. A string type was expected.')
 
     catalog, objectname = _recognize_name(name.upper())
+    selectWhat = 'name'
 
-    selectWhat = 'objects.name'
-    fromWhere = 'objects'
     if catalog == 'Messier':
+        fromWhere = 'objects'
         # M102 == M101
         if objectname == "102":
             constraint = 'messier="101"'
         else:
             constraint = f'messier="{objectname}"'
     else:
-        # Insert space between catalog name and id
-        identifier = re.sub(r'(\D+)(\d+)', r'\1 \2', objectname)
-        constraint = f'identifiers LIKE "%{identifier}%"'
+        fromWhere = 'objIdentifiers'
+        constraint = f'identifier="{objectname}"'
     objectData = _queryFetchOne(selectWhat, fromWhere, constraint)
 
     if objectData is not None:
