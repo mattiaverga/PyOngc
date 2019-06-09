@@ -437,7 +437,7 @@ class Dso(object):
 
                 >>> s = Dso("ngc1")
                 >>> s.xephemFormat()
-                'NGC0001,f|G,00:07:15.84,+27:42:29.1,13.4,,94.2|64.2|1.07'
+                'NGC0001,f|G,00:07:15.84,+27:42:29.1,13.4,,94.20|64.20|112'
 
         """
         line = []
@@ -854,7 +854,7 @@ def listObjects(**kwargs):
 
             >>> objectList = listObjects()
             >>> len(objectList)
-            13954
+            13974
 
     Filters are combined with "AND" in the query; only one value for filter is allowed:
 
@@ -872,7 +872,7 @@ def listObjects(**kwargs):
 
             >>> objectList = listObjects(maxsize=0)
             >>> len(objectList)
-            2015
+            2017
 
     """
     available_filters = ['catalog',
@@ -1207,7 +1207,7 @@ def searchAltId(name):
             >>> searchAltId("pc5")
             Traceback (most recent call last):
             ...
-            ValueError: ValueError: The name "PC5" is not recognized.
+            ValueError: The name "PC5" is not recognized.
 
     If no object has been found, it returns a string:
 
