@@ -105,40 +105,53 @@ try:
                    'nednotes TEXT, '
                    'ongcnotes TEXT)')
 
-    with open('NGC.csv', 'r') as csvFile:
-        reader = csv.reader(csvFile, delimiter=';')
-        # List of columns that are not text and should be transformed in NULL if empty
-        columns_maybe_null = [5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 16, 17]
-        for line in reader:
-            for column in columns_maybe_null:
-                if line[column] == '':
-                    line[column] = None
+    # Create object identifiers table
+    cursor.execute('DROP TABLE IF EXISTS objIdentifiers')
+    cursor.execute('CREATE TABLE IF NOT EXISTS objIdentifiers('
+                   'id INTEGER PRIMARY KEY NOT NULL, '
+                   'name TEXT NOT NULL UNIQUE, '
+                   'identifier TEXT NOT NULL UNIQUE)')
 
-            # Convert RA and Dec in radians
-            if line[2] != '':
-                ra_array = np.array([float(x) for x in line[2].split(':')])
-                ra_rad = np.radians(np.sum(ra_array * [15, 1/4, 1/240]))
-            else:
-                ra_rad = None
-            if line[3] != '':
-                dec_array = np.array([float(x) for x in line[3].split(':')])
-                if np.signbit(dec_array[0]):
-                    dec_rad = np.radians(np.sum(dec_array * [1, -1/60, -1/3600]))
+    for filename in ('NGC.csv', 'addendum.csv'):
+        with open(filename, 'r') as csvFile:
+            reader = csv.reader(csvFile, delimiter=';')
+            # List of columns that are not text and should be transformed in NULL if empty
+            columns_maybe_null = [5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 16, 17]
+            for line in reader:
+                for column in columns_maybe_null:
+                    if line[column] == '':
+                        line[column] = None
+
+                # Convert RA and Dec in radians
+                if line[2] != '':
+                    ra_array = np.array([float(x) for x in line[2].split(':')])
+                    ra_rad = np.radians(np.sum(ra_array * [15, 1/4, 1/240]))
                 else:
-                    dec_rad = np.radians(np.sum(dec_array * [1, 1/60, 1/3600]))
-            else:
-                dec_rad = None
+                    ra_rad = None
+                if line[3] != '':
+                    dec_array = np.array([float(x) for x in line[3].split(':')])
+                    if np.signbit(dec_array[0]):
+                        dec_rad = np.radians(np.sum(dec_array * [1, -1/60, -1/3600]))
+                    else:
+                        dec_rad = np.radians(np.sum(dec_array * [1, 1/60, 1/3600]))
+                else:
+                    dec_rad = None
 
-            cursor.execute('INSERT INTO objects(name,type,ra,dec,const,majax,minax,pa,bmag,vmag,'
-                           'jmag,hmag,kmag,sbrightn,hubble,cstarumag,cstarbmag,cstarvmag,messier,'
-                           'ngc,ic,cstarnames,identifiers,commonnames,nednotes,ongcnotes) '
-                           'VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
-                           (line[0], line[1], ra_rad, dec_rad, line[4], line[5], line[6],
-                            line[7], line[8], line[9], line[10], line[11], line[12], line[13],
-                            line[14], line[15], line[16], line[17], line[18], line[19], line[20],
-                            line[21], line[22], line[23], line[24], line[25])
-                           )
+                cursor.execute('INSERT INTO objects(name,type,ra,dec,const,majax,minax,pa,bmag,'
+                               'vmag,jmag,hmag,kmag,sbrightn,hubble,cstarumag,cstarbmag,'
+                               'cstarvmag,messier,ngc,ic,cstarnames,identifiers,commonnames,'
+                               'nednotes,ongcnotes) '
+                               'VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+                               (line[0], line[1], ra_rad, dec_rad, line[4], line[5], line[6],
+                                line[7], line[8], line[9], line[10], line[11], line[12], line[13],
+                                line[14], line[15], line[16], line[17], line[18], line[19],
+                                line[20], line[21], line[22], line[23], line[24], line[25])
+                               )
+                cursor.execute('INSERT INTO objIdentifiers(name,identifier) VALUES(?,?)',
+                               (line[0], line[0].upper())
+                               )
 
+    cursor.execute('CREATE UNIQUE INDEX "idx_identifiers" ON "objIdentifiers" ("identifier");')
     db.commit()
 
 except Exception as e:

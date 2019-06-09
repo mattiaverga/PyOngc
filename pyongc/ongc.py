@@ -42,7 +42,7 @@ import re
 import sqlite3
 
 __version__ = '0.3.1'
-DBDATE = 20190303  # Version of database data
+DBDATE = 20190604  # Version of database data
 DBPATH = resource_filename(__name__, 'ongc.db')
 
 
@@ -78,49 +78,66 @@ class Dso(object):
         :param string name: identifier of the NGC or IC object
         :optional param returndup: if True don't resolve Dup objects
         """
+        def recognize_name(text):
+            """Recognize catalog and object id."""
+            patterns = {'NGC|IC': r'^((?:NGC|IC)\s?)(\d{1,4})\s?((NED)(\d{1,2})|[A-Z]{1,2})?$',
+                        'Messier': r'^(M\s?)(\d{1,3})$',
+                        'Barnard': r'^(B\s?)(\d{1,3})$',
+                        'Caldwell': r'^(C\s?)(\d{1,3})$',
+                        'Collinder': r'^(CL\s?)(\d{1,3})$',
+                        'ESO': r'^(ESO\s?)(\d{1,3})-(\d{1,3})$',
+                        'Harvard': r'^(H\s?)(\d{1,2})$',
+                        'Hickson': r'^(HCG\s?)(\d{1,3})$',
+                        'Melotte': r'^(MEL\s?)(\d{1,3})$',
+                        }
+            for cat, pat in patterns.items():
+                name_parts = re.match(pat, text)
+                if name_parts is not None:
+                    if cat == 'NGC|IC' and name_parts.group(3) is not None:
+                        # User searches for a sub-object
+                        if name_parts.group(4) is not None:
+                            # User searches for a NED suffixed component
+                            objectname = f'{name_parts.group(1).strip()}' \
+                                         f'{name_parts.group(2):0>4}' \
+                                         f' {name_parts.group(4)}' \
+                                         f'{name_parts.group(5):0>2}'
+                        else:
+                            # User searches for a letter suffixed component
+                            objectname = f'{name_parts.group(1).strip()}' \
+                                         f'{name_parts.group(2):0>4}' \
+                                         f'{name_parts.group(3).strip()}'
+                    elif cat == 'NGC|IC':
+                        # User searches for a NGC or IC object without suffixes
+                        objectname = f'{name_parts.group(1).strip()}{name_parts.group(2):0>4}'
+                    elif cat == 'ESO':
+                        objectname = f'{name_parts.group(1).strip()}{name_parts.group(2):0>3}-' \
+                                     f'{name_parts.group(3):0>3}'
+                    elif cat == 'Harvard':
+                        objectname = f'{name_parts.group(1).strip()}{name_parts.group(2):0>2}'
+                    elif cat == 'Messier':
+                        # We need to return only the numeric part of the name
+                        objectname = f'{name_parts.group(2):0>3}'
+                    else:
+                        objectname = f'{name_parts.group(1).strip()}{name_parts.group(2):0>3}'
+                    return cat, objectname
+            raise ValueError(f'The name "{text}" is not recognized.')
+
         # Make sure user passed a string as parameter
         if not isinstance(name, str):
             raise TypeError('Wrong type as parameter. A string type was expected.')
 
-        # Make sure object name is written in correct form
-        nameParts = re.match(r'^((?:NGC|IC|M)\s?)(\d{1,4})\s?((NED)(\d{1,2})|[A-Z]{1,2})?$',
-                             name.upper())
-        if nameParts is None:
-            raise ValueError('Wrong object name. Please insert a valid NGC, IC or Messier object name.')
+        catalog, objectname = recognize_name(name.upper())
 
-        if nameParts.group(3) is not None:
-            # User searches for a sub-object
-            if name.upper().startswith('M'):
-                raise ValueError('Wrong object name. Please insert a valid NGC, IC or Messier '
-                                 'object name.')
-            if nameParts.group(4) is not None:
-                # User searches for a NED suffixed component
-                objectname = f'{nameParts.group(1).strip()}' \
-                             f'{nameParts.group(2):0>4}' \
-                             f' {nameParts.group(4)}' \
-                             f'{nameParts.group(5):0>2}'
-            else:
-                # User searches for a letter suffixed component
-                objectname = f'{nameParts.group(1).strip()}' \
-                             f'{nameParts.group(2):0>4}' \
-                             f'{nameParts.group(3).strip()}'
+        cols = ('objects.id, objects.name, objects.type, objTypes.typedesc, ra, dec, const, '
+                'majax, minax, pa, bmag, vmag, jmag,hmag, kmag, sbrightn, hubble, cstarumag, '
+                'cstarbmag, cstarvmag, messier, ngc, ic, cstarnames,identifiers, commonnames, '
+                'nednotes, ongcnotes')
+        tables = ('objects JOIN objTypes ON objects.type = objTypes.type '
+                  'JOIN objIdentifiers ON objects.name = objIdentifiers.name')
+        if catalog == 'Messier':
+            params = f'messier="{objectname}"'
         else:
-            if name.upper().startswith('M'):
-                # User searches for a Messier object
-                messier = f'{nameParts.group(2):0>3}'
-            else:
-                # User searches for a plain NGC or IC object
-                objectname = f'{nameParts.group(1).strip()}{nameParts.group(2):0>4}'
-
-        cols = ('objects.id, name, objects.type, objTypes.typedesc, ra, dec, const, majax, '
-                'minax, pa, bmag, vmag, jmag,hmag, kmag, sbrightn, hubble, cstarumag, cstarbmag, '
-                'cstarvmag, messier, ngc, ic, cstarnames,identifiers, commonnames, nednotes, '
-                'ongcnotes')
-        tables = 'objects JOIN objTypes ON objects.type = objTypes.type'
-        if 'messier' in locals():
-            params = f'messier="{messier}"'
-        else:
-            params = f'name="{objectname}"'
+            params = f'objIdentifiers.identifier="{objectname}"'
         objectData = _queryFetchOne(cols, tables, params)
 
         if objectData is None:
@@ -132,7 +149,7 @@ class Dso(object):
                 objectname = f'NGC{objectData[21]}'
             else:
                 objectname = f'IC{objectData[22]}'
-            params = f'name="{objectname}"'
+            params = f'objIdentifiers.identifier="{objectname}"'
             objectData = _queryFetchOne(cols, tables, params)
 
         # Assign object properties
@@ -622,12 +639,13 @@ def _queryFetchOne(cols, tables, params):
     return objectData
 
 
-def _queryFetchMany(cols, tables, params):
+def _queryFetchMany(cols, tables, params, order=''):
     """Search many rows in database.
 
     :param string cols: the SELECT field of the query
     :param string tables: the FROM field of the query
     :param string params: the WHERE field of the query
+    :param string optional order: the ORDER clause of the query
     :returns: generator object yielding a tuple with selected row data from database
     """
     try:
@@ -641,6 +659,7 @@ def _queryFetchMany(cols, tables, params):
         cursor.execute(f'SELECT {cols} '
                        f'FROM {tables} '
                        f'WHERE {params}'
+                       f'{" ORDER BY " + order if order != "" else ""}'
                        )
         while True:
             objectList = cursor.fetchmany()
@@ -866,11 +885,13 @@ def listObjects(**kwargs):
             raise ValueError("Wrong filter name.")
 
     paramslist = []
+    order = ''
     if "catalog" in kwargs:
         if kwargs["catalog"].upper() == "NGC" or kwargs["catalog"].upper() == "IC":
             paramslist.append(f'name LIKE "{kwargs["catalog"].upper()}%"')
         elif kwargs["catalog"].upper() == "M":
             paramslist.append('messier != ""')
+            order = 'messier ASC'
         else:
             raise ValueError('Wrong value for catalog filter. [NGC|IC|M]')
     if "type" in kwargs:
@@ -923,7 +944,7 @@ def listObjects(**kwargs):
         paramslist.append('commonnames = ""')
 
     params = " AND ".join(paramslist)
-    return [Dso(item[0], True) for item in _queryFetchMany(cols, tables, params)]
+    return [Dso(item[0], True) for item in _queryFetchMany(cols, tables, params, order)]
 
 
 def nearby(coords_string, separation=60, catalog="all"):

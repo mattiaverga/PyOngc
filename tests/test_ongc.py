@@ -57,11 +57,17 @@ class TestDsoClass(unittest.TestCase):
         self.assertEqual(ongc.Dso('ic80 ned1')._name, 'IC0080 NED01')
         self.assertEqual(ongc.Dso('ngc61a')._name, 'NGC0061A')
         self.assertEqual(ongc.Dso('M15')._name, 'NGC7078')
-        self.assertRaisesRegex(ValueError, 'Wrong object name', ongc.Dso, 'C15')
-        self.assertRaisesRegex(ValueError, 'Wrong object name', ongc.Dso, 'NGC77777')
-        self.assertRaisesRegex(ValueError, 'Wrong object name', ongc.Dso, 'NGC0001ABC')
+        self.assertEqual(ongc.Dso('M 45')._name, 'Mel022')
+        self.assertEqual(ongc.Dso('b33')._name, 'B033')
+        self.assertEqual(ongc.Dso('C9')._name, 'C009')
+        self.assertEqual(ongc.Dso('eso56-115')._name, 'ESO056-115')
+        self.assertEqual(ongc.Dso('H5')._name, 'H05')
+        self.assertEqual(ongc.Dso('hcg79')._name, 'HCG079')
+        self.assertEqual(ongc.Dso('mel111')._name, 'Mel111')
+        self.assertRaisesRegex(ValueError, 'not recognized', ongc.Dso, 'NGC77777')
+        self.assertRaisesRegex(ValueError, 'not recognized', ongc.Dso, 'NGC0001ABC')
         self.assertRaisesRegex(ValueError, 'not found in the database', ongc.Dso, 'NGC0001A')
-        self.assertRaisesRegex(ValueError, 'Wrong object name', ongc.Dso, 'M15A')
+        self.assertRaisesRegex(ValueError, 'not recognized', ongc.Dso, 'M15A')
 
     def test_duplicate_resolving(self):
         """Test that a duplicated object is returned as himself when asked to do so."""
@@ -413,7 +419,7 @@ class TestDsoMethods(unittest.TestCase):
         """
         objectList = ongc.listObjects()
 
-        self.assertEqual(len(objectList), 13954)
+        self.assertEqual(len(objectList), 13974)
         self.assertIsInstance(objectList[0], ongc.Dso)
 
     def test_list_objects_filter_catalog_NGC(self):
@@ -432,7 +438,7 @@ class TestDsoMethods(unittest.TestCase):
         """Test the listObjects() method with catalog filter applied."""
         objectList = ongc.listObjects(catalog='M')
 
-        self.assertEqual(len(objectList), 107)
+        self.assertEqual(len(objectList), 109)
 
     def test_list_objects_filter_type(self):
         """Test the listObjects() method with type filter applied.
@@ -459,19 +465,19 @@ class TestDsoMethods(unittest.TestCase):
         """Test the listObjects() method to list objects without size."""
         objectList = ongc.listObjects(maxsize=0)
 
-        self.assertEqual(len(objectList), 2015)
+        self.assertEqual(len(objectList), 2017)
 
     def test_list_objects_filter_mag(self):
         """Test the listObjects() method with magnitudes filters applied."""
         objectList = ongc.listObjects(uptobmag=8, uptovmag=10)
 
-        self.assertEqual(len(objectList), 168)
+        self.assertEqual(len(objectList), 172)
 
     def test_list_objects_filter_minra(self):
         """List objects with RA greater than minra."""
         objectList = ongc.listObjects(minra=358)
 
-        self.assertEqual(len(objectList), 55)
+        self.assertEqual(len(objectList), 56)
 
     def test_list_objects_filter_maxra(self):
         """List objects with RA lower than maxra."""
@@ -513,13 +519,13 @@ class TestDsoMethods(unittest.TestCase):
         """Test the listObjects() method to list objects with common name."""
         objectList = ongc.listObjects(withname=True)
 
-        self.assertEqual(len(objectList), 121)
+        self.assertEqual(len(objectList), 132)
 
     def test_list_objects_without_name(self):
         """Test the listObjects() method to list objects without common name."""
         objectList = ongc.listObjects(withname=False)
 
-        self.assertEqual(len(objectList), 13833)
+        self.assertEqual(len(objectList), 13842)
 
     def test_list_objects_wrong_filter(self):
         """Test the listObjects() method when an unsupported filter is used."""
@@ -610,7 +616,7 @@ class TestDsoMethods(unittest.TestCase):
             "|    U-mag: 11.14            B-mag: 11.82            V-mag: 11.58             |\n"
             "+-----------------------------------------------------------------------------+\n"
             "| Other identifiers:                                                          |\n"
-            "|    C2, IRAS 00102+7214, PN G120.0+09.8                                      |\n"
+            "|    C 002, IRAS 00102+7214, PN G120.0+09.8                                   |\n"
             "+-----------------------------------------------------------------------------+\n"
             )
 
