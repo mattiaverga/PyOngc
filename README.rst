@@ -25,11 +25,12 @@ and IC objects.
 The data is based on OpenNGC database
 https://github.com/mattiaverga/OpenNGC.
 
-It is composed by a main module and a command line utility named
-ongcbrowse which can be used to print object details in a terminal.
+It is composed by a python module and a command line interface named
+(guess what) ongc, which can be used to quickly see object details or build
+object lists based on several parameters.
 
-PyOngc data can provide data to PyEphem in a simple way to get
-ephemerides of NGC/IC objects. See the documentation about
+PyOngc can pass data to PyEphem in a simple way to get
+ephemerides of NGC/IC objects: see the documentation about
 ongc.xephemFormat method.
 
 Usage
@@ -59,7 +60,7 @@ Object data is easily available from command line also:
         |                                                                             |
         +-----------------------------------------------------------------------------+
         | Other identifiers:                                                          |
-        |    C20, LBN 373                                                             |
+        |    C 020, LBN 373                                                           |
         +-----------------------------------------------------------------------------+
         | OpenNGC notes:                                                              |
         |    B-Mag taken from LEDA                                                    |

@@ -29,11 +29,11 @@ Classes provided:
     * Dso: the main class which describe a single row (object) from OpenNGC database.
 
 Methods provided:
-    * getNeighbors: Find all neighbors of a object within a user selected range.
+    * getNeighbors: Find all neighbors of an object within a user selected range.
     * getSeparation: Calculate the apparent angular separation between two objects.
     * listObjects: Query DB for DSObjects with specific parameters.
+    * nearby: Search for objects around given coordinates and range.
     * printDetails: Prints a detailed description of the object in a formatted output.
-    * searchAltId: Search a object in the database using an alternative identifier.
 """
 
 from pkg_resources import resource_filename
@@ -61,36 +61,41 @@ PATTERNS = {'NGC|IC': r'^((?:NGC|IC)\s?)(\d{1,4})\s?((NED)(\d{1,2})|[A-Z]{1,2})?
 
 
 class Dso(object):
-    """Defines a single Deep Sky Object from ONGC database.
-
-    A DSO object represents a single row from OpenNGC database, which corresponds to
-    a Deep Sky Object from NGC or IC catalogs.
+    """Describes a Deep Sky Object from ONGC database.
 
     The class provides the following methods to access object data:
-        * __init__: Object constructor.
-        * __str__: Returns basic data of the object as a formatted string.
-        * getConstellation: Returns the constellation where the object is located.
-        * getCoords: Returns the coordinates of the object in J2000 Epoch as numpy array.
-        * getCStarData: Returns data about central star of planetary nebulaes.
-        * getDec: Returns the Declination in J2000 Epoch in string format.
-        * getDimensions: Returns object axes dimensions and position angle.
-        * getHubble: Returns the Hubble classification of the galaxy.
-        * getId: Returns the database Id of the object.
-        * getIdentifiers: Returns the alternative identifiers of the object.
-        * getMagnitudes: Returns the magnitudes of the object.
-        * getName: Returns the main identifier of the object.
-        * getNotes: Returns notes from NED and from ONGC author.
-        * getSurfaceBrightness: Returns the surface brightness value of the galaxy.
-        * getType: Returns the type of the object.
-        * getRA: Returns the Right Ascension in J2000 Epoch in string format.
-        * xephemFormat: Returns object data in Xephem format.
+
+    * __init__: Object constructor.
+    * __str__: Returns a basic description of the object.
+    * getConstellation: Returns the constellation where the object is located.
+    * getCoords: Returns object coordinates in HMS and DMS as numpy array.
+    * getCoordsRad: Returns object coordinates in radians as numpy array.
+    * getCStarData: Returns data about central star of planetary nebulaes.
+    * getDec: Returns object Declination in a easy to read format as string.
+    * getDimensions: Returns object axes dimensions and position angle.
+    * getHubble: Returns the Hubble classification of a galaxy.
+    * getId: Returns the database Id of the object.
+    * getIdentifiers: Returns all alternative identifiers of the object.
+    * getMagnitudes: Returns object magnitudes.
+    * getName: Returns the main identifier of the object.
+    * getNotes: Returns notes from NED and from ONGC.
+    * getSurfaceBrightness: Returns the surface brightness value of a galaxy.
+    * getType: Returns object typet.
+    * getRA: Returns object Right Ascension in a easy to read format as string.
+    * xephemFormat: Returns object data in Xephem format.
+
     """
 
     def __init__(self, name, returndup=False):
         """Object constructor.
 
-        :param string name: identifier of the NGC or IC object
-        :optional param returndup: if True don't resolve Dup objects
+        Args:
+            name (str): Object identifier (ex.: 'NGC1', 'M15').
+            returndup (bool, optional): If set to True, don't resolve Dup objects.
+                Default is False.
+
+        Raises:
+            ValueError: If the object identifier is not found in the database.
         """
         # Make sure user passed a string as parameter
         if not isinstance(name, str):
@@ -154,7 +159,7 @@ class Dso(object):
         self._ongcnotes = objectData[27]
 
     def __str__(self):
-        """Returns basic data of the object.
+        """Returns a basic description of the object.
 
                 >>> s = Dso("ngc1")
                 >>> print(s)
@@ -166,7 +171,8 @@ class Dso(object):
     def getConstellation(self):
         """Returns the constellation where the object is located.
 
-        :returns: 'constellation'
+        Returns:
+            str: Name of the constellation in IAU 3-letter form.
 
                 >>> s = Dso("ngc1")
                 >>> s.getConstellation()
@@ -176,9 +182,11 @@ class Dso(object):
         return self._const
 
     def getCoords(self):
-        """Returns the coordinates of the object in J2000 Epoch as numpy array.
+        """Returns object coordinates in HMS and DMS as numpy array.
 
-        :returns: array([[HH., MM., SS.ss],[DD., MM., SS.ss]])
+        Returns:
+            numpy.ndarray: A numpy array of shape (2, 3) with R.A. and Declination
+            values expressed in HMS and DMS.
 
                 >>> s = Dso("ngc1")
                 >>> s.getCoords()
@@ -204,9 +212,11 @@ class Dso(object):
         return np.array([ra, dec, ])
 
     def getCoordsRad(self):
-        """Returns the coordinates of the object in radians as numpy array.
+        """Returns object coordinates in radians as numpy array.
 
-        :returns: array([RA, Dec])
+        Returns:
+            numpy.ndarray: A numpy array of shape (2,) with R.A. and Declination
+            values expressed in radians.
 
                 >>> s = Dso("ngc1")
                 >>> s.getCoordsRad()
@@ -217,8 +227,6 @@ class Dso(object):
 
     def getCStarData(self):
         """Returns data about central star of planetary nebulaes.
-
-        :returns: ([cstar identifiers], cstar UMag, cstar BMag, cstar VMag)
 
         If the DSO object is a Planetary Nebulae, this method will return a tuple with
         the central star identifiers and its magnitudes in U-B-V bands:
@@ -233,6 +241,9 @@ class Dso(object):
                 >>> s.getCStarData()
                 (None, None, None, None)
 
+        Returns:
+            tuple: ([cstar identifiers], cstar UMag, cstar BMag, cstar VMag)
+
         """
         if self._cstarnames != "":
             identifiers = list(map(str.strip, self._cstarnames.split(",")))
@@ -242,11 +253,12 @@ class Dso(object):
         return identifiers, self._cstarumag, self._cstarbmag, self._cstarvmag
 
     def getDec(self):
-        """Returns the Declination in J2000 Epoch in string format.
+        """Returns object Declination in a easy to read format as string.
 
-        :returns: '+/-DD:MM:SS.s'
+        If you need the raw data to use in calculations use getCoords() method instead.
 
-        If you need the raw data use getCoords() method.
+        Returns:
+            string: `+/-DD:MM:SS.s` or `N/A` if the object has no coordinates.
 
                 >>> s = Dso("ngc1")
                 >>> s.getDec()
@@ -263,11 +275,12 @@ class Dso(object):
             return 'N/A'
 
     def getDimensions(self):
-        """Returns a tuple with object axes dimensions (float) and position angle (int).
+        """Returns object axes dimensions and position angle.
 
-        :returns: (MajAx, MinAx, P.A.)
+        Where a value is not available a None type is returned.
 
-        Where values are not available a None type is returned.
+        Returns:
+            tuple: (MajAx, MinAx, P.A.)
 
                 >>> s = Dso("ngc1")
                 >>> s.getDimensions()
@@ -277,9 +290,10 @@ class Dso(object):
         return self._majax, self._minax, self._pa
 
     def getHubble(self):
-        """Returns the Hubble classification of the object.
+        """Returns the Hubble classification of a galaxy.
 
-        :returns: string
+        Returns:
+            string: The Hubble classifgication code of a galaxy or empty string.
 
                 >>> s = Dso("ngc1")
                 >>> s.getHubble()
@@ -291,7 +305,8 @@ class Dso(object):
     def getId(self):
         """Returns the database Id of the object.
 
-        :returns: int
+        Returns:
+            int: The internal database id of the object.
 
                 >>> s = Dso("ngc1")
                 >>> s.getId()
@@ -301,16 +316,24 @@ class Dso(object):
         return self._id
 
     def getIdentifiers(self):
-        """Returns a tuple of alternative identifiers of the object.
+        """Returns all alternative identifiers of the object.
 
-        :returns: ('Messier', [NGC], [IC], [common names], [other])
+        The tuple returned by this method will list all the alternative identifiers
+        associated to the object.
+        The first element of the tuple will be a string with the Messier name or None.
+        The other fields will be lists of cross identifiers or None.
 
-        If a field is empty a None type is returned:
+        Returns:
+            tuple: ('Messier', [NGC], [IC], [common names], [other])
 
-                >>> s = Dso("ngc1")
+                >>> s = Dso("ngc1976")
                 >>> s.getIdentifiers()
-                (None, None, None, None, ['2MASX J00071582+2742291', 'IRAS 00047+2725', \
-'MCG +04-01-025', 'PGC 000564', 'UGC 00057'])
+                ('M042', None, None, ['Great Orion Nebula', 'Orion Nebula'], \
+['LBN 974', 'MWSC 0582'])
+
+                >>> s = Dso("mel22")
+                >>> s.getIdentifiers()
+                ('M045', None, None, ['Pleiades'], ['MWSC 0305'])
 
         """
         if self._messier == "":
@@ -343,11 +366,12 @@ class Dso(object):
         return messier, ngc, ic, commonNames, other
 
     def getMagnitudes(self):
-        """Returns the magnitudes of the object as a tuple of floats.
+        """Returns object magnitudes.
 
-        :returns: (Bmag, Vmag, Jmag, Hmag, Kmag)
+        Where a value is not available a None type is returned
 
-        Where values are not available a None type is returned:
+        Returns:
+            tuple: (Bmag, Vmag, Jmag, Hmag, Kmag)
 
                 >>> s = Dso("ngc1")
                 >>> s.getMagnitudes()
@@ -359,19 +383,22 @@ class Dso(object):
     def getName(self):
         """Returns the main identifier of the object.
 
-        :returns: string
+        Returns:
+            string: The main identifier of the object, as listed in ONGC database
+            or its addendum.
 
-                >>> s = Dso("ngc1")
+                >>> s = Dso("m45")
                 >>> s.getName()
-                'NGC0001'
+                'Mel022'
 
         """
         return self._name
 
     def getNotes(self):
-        """Returns notes from NED and from ONGC author.
+        """Returns notes from NED and from ONGC.
 
-        :returns: ('nednotes', 'ongcnotes')
+        Returns:
+            tuple: ('nednotes', 'ongcnotes')
 
                 >>> s = Dso("ngc6543")
                 >>> s.getNotes()
@@ -382,9 +409,10 @@ class Dso(object):
         return self._nednotes, self._ongcnotes
 
     def getSurfaceBrightness(self):
-        """Returns the surface brightness value of the object.
+        """Returns the surface brightness value of a galaxy.
 
-        :returns: float or None
+        Returns:
+            float or None: Object surface brightness
 
                 >>> s = Dso("ngc1")
                 >>> s.getSurfaceBrightness()
@@ -394,9 +422,10 @@ class Dso(object):
         return self._sbrightn
 
     def getType(self):
-        """Returns the type of the object.
+        """Returns object type.
 
-        :returns: string
+        Returns:
+            string: Object type
 
                 >>> s = Dso("ngc1")
                 >>> s.getType()
@@ -406,11 +435,12 @@ class Dso(object):
         return self._type
 
     def getRA(self):
-        """Returns the Right Ascension in J2000 Epoch in string format.
+        """Returns object Right Ascension in a easy to read format as string.
 
-        :returns: 'HH:MM:SS.ss'
+        If you need the raw data to use in calculations use getCoords() method instead.
 
-        If you need the raw data use getCoords() method.
+        Returns:
+            string: `HH:MM:SS.ss` or `N/A` if the object has no coordinates.
 
                 >>> s = Dso("ngc1")
                 >>> s.getRA()
@@ -429,8 +459,6 @@ class Dso(object):
     def xephemFormat(self):
         """Returns object data in Xephem format.
 
-        :returns: string
-
         This function will produce a string containing information about the object
         suitable to be imported in other software that accept Xephem format
         (for example: PyEphem).
@@ -438,6 +466,9 @@ class Dso(object):
                 >>> s = Dso("ngc1")
                 >>> s.xephemFormat()
                 'NGC0001,f|G,00:07:15.84,+27:42:29.1,13.4,,94.20|64.20|112'
+
+        Returns:
+            string: Xephem format object description
 
         """
         line = []
@@ -514,11 +545,29 @@ class Dso(object):
 def _distance(coords1, coords2):
     """Calculate distance between two points in the sky.
 
-    :param coords1: A.R. and Dec expressed in radians of the first point as numpy array
-                    array([RA, Dec])
-    :param coords2: A.R. and Dec expressed in radians of the second point as numpy array
-                    array([RA, Dec])
-    :returns: (float: angular separation, float: difference in A.R, float: difference in Dec)
+    With p1 = '01:00:00 +15:30:00' and p2 = '01:30:00 +10:30:00':
+
+            >>> import numpy as np
+            >>> p1 = np.array([0.26179939, 0.27052603])
+            >>> p2 = np.array([0.39269908, 0.18325957])
+            >>> _distance(p1, p2)
+            (8.852139937970884, 7.499999776570824, -4.999999851047216)
+
+    Args:
+        coords1 (numpy.ndarray): R.A. and Dec expressed in radians of the first point as 
+            numpy array with shape(2,)
+        coords2 (numpy.ndarray): R.A. and Dec expressed in radians of the second point as 
+            numpy array with shape(2,)
+
+    Returns:
+        tuple: `(angular separation, difference in A.R, difference in Dec)`
+
+        This function will return three float values, which are the apparent total 
+        angular separation between the two objects, the difference in Right Ascension and the 
+        difference in Declination.
+
+        All values are expressed in degrees.
+        
     """
     a1 = coords1[0]
     a2 = coords2[0]
@@ -537,16 +586,29 @@ def _distance(coords1, coords2):
 def _limiting_coords(coords, radius):
     """Write query filters for limiting search to specific area of the sky.
 
-    :param coords: A.R. and Dec of the point in the sky.
-                   They can be expressed as a numpy array of H:M:S/D:M:S
-                    array([[HH., MM., SS.ss],[DD., MM., SS.ss]])
-                   or as numpy array of radians
-                    array([RA, Dec])
-    :param int radius: radius in degrees
-    :returns string: parameters to be added to query
-
     This is a quick method to exclude objects farther than a specified distance
     from the starting point, but it's not meant to be precise.
+
+            >>> start = Dso('ngc1').getCoords()
+            >>> _limiting_coords(start, 2)
+            ' AND (ra <= 0.06660176425610362 OR ra >= 6.279973901355917) AND \
+(dec BETWEEN 0.44869069854374555 AND 0.5185038686235187)'
+
+    Args:
+        coords (numpy.ndarray): R.A. and Dec of the starting point in the sky.
+
+            It can be expressed as a numpy array of H:M:S/D:M:S
+
+            `array([[HH., MM., SS.ss],[DD., MM., SS.ss]])`
+
+            or as numpy array of radians
+
+            `array([RA, Dec])`
+        radius (int): radius of the search in degrees
+
+    Returns:
+        string: parameters to be added to query
+
     """
     if coords.shape == (2, 3):
         rad_coords = np.empty(2)
@@ -584,10 +646,23 @@ def _limiting_coords(coords, radius):
 def _queryFetchOne(cols, tables, params):
     """Search one row in database.
 
-    :param string cols: the SELECT field of the query
-    :param string tables: the FROM field of the query
-    :param string params: the WHERE field of the query
-    :returns: tuple with selected row data from database
+    Be sure to use a WHERE clause which is very specific, otherwise the query
+    will return the first row that matches.
+
+            >>> cols = 'type'
+            >>> tables = 'objects'
+            >>> params = 'name="NGC0001"'
+            >>> _queryFetchOne(cols, tables, params)
+            ('G',)
+
+    Args:
+        cols (string): the `SELECT` field of the query
+        tables (string): the `FROM` field of the query
+        params (string): the `WHERE` field of the query
+
+    Returns:
+        tuple: selected row data from database
+
     """
     try:
         db = sqlite3.connect(f'file:{DBPATH}?mode=ro', uri=True)
@@ -612,11 +687,21 @@ def _queryFetchOne(cols, tables, params):
 def _queryFetchMany(cols, tables, params, order=''):
     """Search many rows in database.
 
-    :param string cols: the SELECT field of the query
-    :param string tables: the FROM field of the query
-    :param string params: the WHERE field of the query
-    :param string optional order: the ORDER clause of the query
-    :returns: generator object yielding a tuple with selected row data from database
+            >>> cols = 'name'
+            >>> tables = 'objects'
+            >>> params = 'type="G"'
+            >>> _queryFetchMany(cols, tables, params) #doctest: +ELLIPSIS
+            <generator object _queryFetchMany at 0x...>
+
+    Args:
+        cols (string): the `SELECT` field of the query
+        tables (string): the `FROM` field of the query
+        params (string): the `WHERE` field of the query
+        order (string, optional): the `ORDER` clause of the query
+
+    Yields:
+        tuple: selected row data from database
+
     """
     try:
         db = sqlite3.connect(f'file:{DBPATH}?mode=ro', uri=True)
@@ -645,8 +730,18 @@ def _queryFetchMany(cols, tables, params, order=''):
 def _recognize_name(text):
     """Recognize catalog and object id.
 
-    :param string text: the object name in input
-    :returns: tuple (catalog name, re.match object) or ValueError
+            >>> _recognize_name('NGC1')
+            ('NGC|IC', 'NGC0001')
+
+    Args:
+        text (string): the object name in input. Must be uppercase.
+
+    Returns:
+        tuple: (catalog name, object name)
+
+    Raises:
+        ValueError: If the text cannot be recognized as a valid object name.
+
     """
     for cat, pat in PATTERNS.items():
         name_parts = re.match(pat, text)
@@ -688,11 +783,19 @@ def _recognize_name(text):
 
 
 def _str_to_coords(text):
-    """Convert a string to coordinates in radians
+    """Recognize coordinates as string and return them as radians.
 
-    :param string text: a string expressing coordinates in the form
-                        "HH:MM:SS.ss +/-DD:MM:SS.s"
-    :returns: array([RA, Dec])
+    Args:
+        text (string): a string expressing coordinates in the form `HH:MM:SS.ss +/-DD:MM:SS.s`
+
+    Returns:
+        numpy.ndarray: array([RA, Dec])
+
+        A numpy array of shape (2,) with coordinates expressed in radians.
+
+    Raises:
+        ValueError: If the text cannot be recognized as valid coordinates.
+
     """
     pattern = re.compile(r'^(?:(\d{1,2}):(\d{1,2}):(\d{1,2}(?:\.\d{1,2})?))\s'
                          r'(?:([+-]\d{1,2}):(\d{1,2}):(\d{1,2}(?:\.\d{1,2})?))$')
@@ -713,17 +816,13 @@ def _str_to_coords(text):
 
 
 def getNeighbors(obj, separation, catalog="all"):
-    """Find all neighbors of a object within a user selected range.
+    """Find all neighbors of an object within a user selected range.
 
-    :param object: a Dso object or a string which identifies the object
-    :param float separation: maximum distance from the object expressed in arcmin
-    :param optional string catalog: filter for "NGC" or "IC" objects - default is all
-    :returns: list of Dso objects within limits ordered by distance [(Dso, separation),]
-
-    This function is used to find all objects within a specified range from a given object.
     It requires an object as the starting point of the search (either a string containing
     the name or a Dso type) and a search radius expressed in arcmins.
+
     The maximum allowed search radius is 600 arcmin (10 degrees).
+
     It returns a list of of tuples with the Dso objects found in range and its distance,
     or an empty list if no object is found:
 
@@ -739,6 +838,20 @@ def getNeighbors(obj, separation, catalog="all"):
 
             >>> getNeighbors("ngc521", 15, catalog="NGC") #doctest: +ELLIPSIS
             [(<__main__.Dso object at 0x...>, 0.24140243942744602)]
+
+    Args:
+        object (ongc.Dso or string): a Dso object or a string which identifies the object
+        separation (float): maximum distance from the object expressed in arcmin
+        catalog (string, optional): filter for "NGC" or "IC" objects - default is all
+
+    Returns:
+        list: [(Dso, separation),]
+
+        A list of tuples with the Dso object found and its distance from the starting point, 
+        ordered by distance. 
+
+    Raises:
+        ValueError: If the search radius exceeds 10 degrees.
 
     """
     if not isinstance(obj, Dso):
@@ -773,15 +886,9 @@ def getNeighbors(obj, separation, catalog="all"):
 def getSeparation(obj1, obj2, style="raw"):
     """Finds the apparent angular separation between two objects.
 
-    :param obj1: first Dso object or string identifier
-    :param obj2: second Dso object or string identifier
-    :param opt string style: use "text" to return a string with degrees, minutes and seconds
-    :returns: if style="raw": (float: angular separation, float: difference in A.R,
-                               float: difference in Dec)
-    :returns: if style="text": 'DD° MMm SS.SSs'
-
     This function will compute the apparent angular separation between two objects,
     either identified with their names as strings or directly as Dso type.
+
     By default it returns a tuple containing the angular separation and the differences in A.R.
     and Declination expressed in degrees:
 
@@ -793,7 +900,7 @@ def getSeparation(obj1, obj2, style="raw"):
             >>> getSeparation("ngc1", "ngc2")
             (0.03008927371519897, 0.005291666666666788, -0.02972222222221896)
 
-    With the optional parameter "style" set to "text", it returns a formatted string:
+    With the optional parameter `style` set to `text`, it returns a formatted string:
 
             >>> getSeparation("ngc1", "ngc2", style="text")
             '0° 1m 48.32s'
@@ -804,6 +911,19 @@ def getSeparation(obj1, obj2, style="raw"):
             Traceback (most recent call last):
             ...
             ValueError: Object named NGC0001A not found in the database.
+
+    Args:
+        obj1 (ongc.Dso or string): first Dso object or string identifier
+        obj2 (ongc.Dso or string): second Dso object or string identifier
+        style (string, optional): use "text" to return a string with degrees, minutes and seconds
+
+    Returns:
+        tuple or string: By default the return value is a tuple with values expressed in degrees
+
+        (angular separation, difference in A.R, difference in Dec)
+
+        With the `style` parameter set to `text` we get a more readable output in the form 
+        `'DD° MMm SS.SSs'`
 
     """
     if not isinstance(obj1, Dso):
@@ -835,22 +955,6 @@ def getSeparation(obj1, obj2, style="raw"):
 def listObjects(**kwargs):
     """Query the database for DSObjects with specific parameters.
 
-    :param optional string catalog: filter for catalog. [NGC|IC|M]
-    :param optional string type: filter for object type. See OpenNGC types list.
-    :param optional string constellation: filter for constellation
-                                          (three letter latin form - e.g. "And")
-    :param optional float minsize: filter for objects with MajAx >= minSize(arcmin)
-    :param optional float maxsize: filter for objects with MajAx < maxSize(arcmin)
-                                   OR MajAx not available
-    :param optional float uptobmag: filter for objects with B-Mag brighter than value
-    :param optional float uptovmag: filter for objects with V-Mag brighter than value
-    :param optional float minra: filter for objects with RA degrees greater than value
-    :param optional float maxra: filter for objects with RA degrees lower than value
-    :param optional float mindec: filter for objects above specified Dec degrees
-    :param optional float maxdec: filter for objects below specified Dec degrees
-    :param optional bool withname: filter for objects with common names
-    :returns: [Dso,]
-
     This function returns a list of all DSObjects that match user defined parameters.
     If no argument is passed to the function, it returns all the objects from the database:
 
@@ -875,6 +979,29 @@ def listObjects(**kwargs):
             >>> objectList = listObjects(maxsize=0)
             >>> len(objectList)
             2017
+
+    Args:
+        catalog (string, optional): filter for catalog. [NGC|IC|M]
+        type (string, optional): filter for object type. See OpenNGC types list.
+        constellation (string, optional): filter for constellation 
+            (three letter latin form - e.g. "And")
+        minsize (float, optional): filter for objects with MajAx >= minSize(arcmin)
+        maxsize (float, optional): filter for objects with MajAx < maxSize(arcmin) 
+            OR MajAx not available
+        uptobmag (float, optional): filter for objects with B-Mag brighter than value
+        uptovmag (float, optional): filter for objects with V-Mag brighter than value
+        minra (float, optional): filter for objects with RA degrees greater than value
+        maxra (float, optional): filter for objects with RA degrees lower than value
+        mindec (float, optional): filter for objects above specified Dec degrees
+        maxdec (float, optional): filter for objects below specified Dec degrees
+        withname (bool, optional): filter for objects with common names
+
+    Returns:
+        list: A list of ongc.Dso objects.
+
+    Raises:
+        ValueError: If a filter name other than those expected is inserted.
+        ValueError: If an unrecognized catalog name is entered. Only [NGC|IC|M] are permitted.
 
     """
     available_filters = ['catalog',
@@ -965,11 +1092,6 @@ def listObjects(**kwargs):
 def nearby(coords_string, separation=60, catalog="all"):
     """Search for objects around given coordinates.
 
-    :param string coords: A.R. and Dec of the center of search
-    :param float separation: search radius expressed in arcmin - default 60
-    :param optional string catalog: filter for "NGC" or "IC" objects - default is all
-    :returns: list of Dso objects within limits ordered by distance [(Dso, separation),]
-
     Returns all objects around a point expressed by the coords parameter and within a search
     radius expressed by the separation parameter.
     Coordinates must be Right Ascension and Declination expressed as a string in the
@@ -989,6 +1111,21 @@ def nearby(coords_string, separation=60, catalog="all"):
 
             >>> nearby('11:08:44 -00:09:01.3', separation=60, catalog='NGC') #doctest: +ELLIPSIS
             [(<__main__.Dso object at 0x...>, 0.7398295985600021)]
+
+    Args:
+        coords (string): R.A. and Dec of search center
+        separation (float): search radius expressed in arcmin - default 60
+        catalog (string, optional): filter for "NGC" or "IC" objects - default is all
+
+    Returns:
+        list: [(Dso, separation),]
+
+        A list of tuples with the Dso object found and its distance from the starting point, 
+        ordered by distance. 
+
+    Raises:
+        ValueError: If the search radius exceeds 10 degrees.
+
     """
     if separation > 600:
         raise ValueError('The maximum search radius allowed is 10 degrees.')
@@ -1015,9 +1152,6 @@ def nearby(coords_string, separation=60, catalog="all"):
 
 def printDetails(dso):
     """Prints a detailed description of the object in a formatted output.
-
-    :param dso: a Dso object or a string with the NGC/IC identifier
-    :returns: string
 
     This function returns a string with all the available details of the object,
     formatted in a way to fit a 80cols display.
@@ -1046,11 +1180,19 @@ def printDetails(dso):
             ...
             ValueError: Object named NGC0001A not found in the database.
 
+    Args:
+        dso (ongc.Dso or string): a Dso object or a string identifier
+
+    Returns:
+        string: All the object data ready to be printed on a 80cols terminal output.
+
     """
     def _justifyText(text):
         """Prints the text on multiple lines if length is more than 73 chars.
 
-        :param string text: text to be printed
+        Args:
+            text (text): text to be sliced
+
         """
         text_returned = ''
         chunks = text.split()
