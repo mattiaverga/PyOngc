@@ -36,12 +36,12 @@ Methods provided:
     * printDetails: Prints a detailed description of the object in a formatted output.
 """
 
-from pkg_resources import resource_filename
+from pkg_resources import get_distribution, resource_filename
 import numpy as np
 import re
 import sqlite3
 
-__version__ = '0.3.90'
+__version__ = get_distribution("pyongc").version
 DBDATE = 20190609  # Version of database data
 DBPATH = resource_filename(__name__, 'ongc.db')
 PATTERNS = {'NGC|IC': r'^((?:NGC|IC)\s?)(\d{1,4})\s?((NED)(\d{1,2})|[A-Z]{1,2})?$',
