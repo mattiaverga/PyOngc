@@ -1,5 +1,7 @@
 from setuptools import setup, find_packages
 
+from pyongc import ongc
+
 TESTS_REQUIRE = ['pytest', 'mock', 'nose', 'coveralls']
 
 CLASSIFIERS = [
@@ -20,7 +22,7 @@ LONG_DESCRIPTION = open('README.rst').read()
 
 setup(
     name='PyOngc',
-    version='0.4.0',
+    version=ongc.__version__,
     author='Mattia Verga',
     author_email='mattia.verga@tiscali.it',
     url='https://github.com/mattiaverga/PyOngc',
