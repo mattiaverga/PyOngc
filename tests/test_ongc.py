@@ -559,6 +559,13 @@ class TestDsoMethods(unittest.TestCase):
 
         self.assertEqual(len(objectList), 263)
 
+    def test_list_objects_by_name(self):
+        """Test the listObjects() method to list objects with the provided common name."""
+        objectList = ongc.listObjects(cname='california')
+
+        self.assertEqual(len(objectList), 1)
+        self.assertEqual(str(objectList[0]), 'NGC1499, Nebula in Per')
+
     def test_list_objects_with_name(self):
         """Test the listObjects() method to list objects with common name."""
         objectList = ongc.listObjects(withname=True)

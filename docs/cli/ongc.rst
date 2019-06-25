@@ -133,7 +133,11 @@ If the ouput exceed 20 objects, the user can choose to view the list in a pager.
         Allows to list only objects with a Declination lower than the specified value. 
         It accepts an input in the form `+/-DD:MM:SS(.S)`
 
-    ``-N, --named``
+    ``-n, --named TEXT``
+
+        Allows to search an object by its common name (or part of it).
+
+    ``-N, --withname``
 
         Allows to list only objects with a common name.
 

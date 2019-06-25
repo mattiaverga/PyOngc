@@ -994,6 +994,7 @@ def listObjects(**kwargs):
         maxra (float, optional): filter for objects with RA degrees lower than value
         mindec (float, optional): filter for objects above specified Dec degrees
         maxdec (float, optional): filter for objects below specified Dec degrees
+        cname (string, optional): filter for objects with common name like input value
         withname (bool, optional): filter for objects with common names
 
     Returns:
@@ -1015,6 +1016,7 @@ def listObjects(**kwargs):
                          'maxra',
                          'mindec',
                          'maxdec',
+                         'cname',
                          'withname']
     cols = 'objects.name'
     tables = 'objects'
@@ -1079,6 +1081,9 @@ def listObjects(**kwargs):
         paramslist.append(f'dec >= {np.radians(kwargs["mindec"])}')
     elif "maxdec" in kwargs:
         paramslist.append(f'dec <= {np.radians(kwargs["maxdec"])}')
+
+    if "cname" in kwargs:
+        paramslist.append(f'commonnames LIKE "%{kwargs["cname"]}%"')
 
     if "withname" in kwargs and kwargs["withname"] is True:
         paramslist.append('commonnames != ""')
