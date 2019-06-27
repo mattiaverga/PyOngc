@@ -153,7 +153,8 @@ def separation(obj1, obj2):
               help='List only objects above specified Declination +/-DD:MM:SS[.ss]')
 @click.option('--maxdec',
               help='List only objects below specified Declination +/-DD:MM:SS[.ss]')
-@click.option('--named', '-N', 'withname', is_flag=True, help='List only objects with common name')
+@click.option('--named', '-n', 'cname', help='List only objects with a common name like the input')
+@click.option('--withname', '-N', is_flag=True, help='List only objects with common name')
 @click.option('--out_file', '-O', type=click.File('w'),
               help='Output results to text file')
 def search(out_file, **kwargs):

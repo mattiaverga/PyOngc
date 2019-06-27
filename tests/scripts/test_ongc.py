@@ -271,6 +271,13 @@ def test_search_with_mindec_maxdec_filter():
     assert result.output.endswith('NGC7787, Galaxy in Psc\n')
 
 
+def test_search_by_common_name():
+    runner = CliRunner()
+    result = runner.invoke(ongc.search, ['--named=california'])
+    assert result.exit_code == 0
+    assert result.output == 'NGC1499, Nebula in Per\n'
+
+
 def test_search_with_common_name():
     runner = CliRunner()
     result = runner.invoke(ongc.search, ['--constellation=aql', '-N'])
