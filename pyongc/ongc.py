@@ -982,8 +982,8 @@ def listObjects(**kwargs):
 
     Args:
         catalog (string, optional): filter for catalog. [NGC|IC|M]
-        type (string, optional): filter for object type. See OpenNGC types list.
-        constellation (string, optional): filter for constellation 
+        type (list, optional): filter for object type. See OpenNGC types list.
+        constellation (list, optional): filter for constellation 
             (three letter latin form - e.g. "And")
         minsize (float, optional): filter for objects with MajAx >= minSize(arcmin)
         maxsize (float, optional): filter for objects with MajAx < maxSize(arcmin) 
@@ -1039,10 +1039,12 @@ def listObjects(**kwargs):
         else:
             raise ValueError('Wrong value for catalog filter. [NGC|IC|M]')
     if "type" in kwargs:
-        paramslist.append(f'type = "{kwargs["type"]}"')
+        types = [f'"{t}"' for t in kwargs["type"]]
+        paramslist.append(f'type IN ({",".join(types)})')
 
     if "constellation" in kwargs:
-        paramslist.append(f'const = "{kwargs["constellation"].capitalize()}"')
+        constellations = [f'"{c.capitalize()}"' for c in kwargs["constellation"]]
+        paramslist.append(f'const IN ({",".join(constellations)})')
 
     if "minsize" in kwargs:
         paramslist.append(f'majax >= {kwargs["minsize"]}')

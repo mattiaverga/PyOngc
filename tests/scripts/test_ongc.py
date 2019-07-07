@@ -185,12 +185,28 @@ def test_search_with_type_filter():
     assert result.output.endswith('NGC7830, Star in Psc\n')
 
 
+def test_search_with_multiple_types_filter():
+    runner = CliRunner()
+    result = runner.invoke(ongc.search, ['--type=*,**'])
+    assert result.exit_code == 0
+    assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
+    assert result.output.endswith('M040, Double star in UMa\n')
+
+
 def test_search_with_constellation_filter():
     runner = CliRunner()
     result = runner.invoke(ongc.search, ['--constellation=aql'])
     assert result.exit_code == 0
     assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
     assert result.output.endswith('NGC6941, Galaxy in Aql\n')
+
+
+def test_search_with_multiple_constellations_filter():
+    runner = CliRunner()
+    result = runner.invoke(ongc.search, ['--constellation=aql,cyg'])
+    assert result.exit_code == 0
+    assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
+    assert result.output.endswith('NGC7175, Open Cluster in Cyg\n')
 
 
 def test_search_with_minsize_filter():

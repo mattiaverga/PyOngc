@@ -134,9 +134,11 @@ def separation(obj1, obj2):
 @click.option('--catalog', type=click.Choice(['NGC', 'IC', 'M']),
               help='List only objects from specific catalog')
 @click.option('--type',
-              help='List only objects of specific type. See OpenNGC types list.')
+              help=('List only objects of specific types. Accept multiple comma separated values. '
+                    'See OpenNGC types list.'))
 @click.option('--constellation',
-              help='List only objects in specific constellation.')
+              help=('List only objects in specific constellations. '
+                    'Accept multiple comma separated values.'))
 @click.option('--minsize', type=float,
               help='List only objects with major axis >= minsize (arcmin)')
 @click.option('--maxsize', type=float,
@@ -175,6 +177,11 @@ def search(out_file, **kwargs):
                     kwargs[d] = dms[0] + dms[1] * -1/60 + dms[2] * -1/3600
                 else:
                     kwargs[d] = dms[0] + dms[1] * 1/60 + dms[2] * 1/3600
+
+        for v in ['type', 'constellation']:
+            if kwargs[v] is not None:
+                kwargs[v] = [x.strip() for x in kwargs[v].split(',')]
+
         object_list = ongc.listObjects(**{k: v for k, v in kwargs.items() if (v is not None
                                                                               and v is not False)})
         if len(object_list) == 0:
