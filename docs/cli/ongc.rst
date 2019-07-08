@@ -86,12 +86,14 @@ If the ouput exceed 20 objects, the user can choose to view the list in a pager.
 
     ``--type TEXT``
 
-        Allows to list only objects of a kind. It accepts one of the object types listed in 
-        the `OpenNGC guide <https://github.com/mattiaverga/OpenNGC/blob/master/NGC_guide.txt>`_.
+        Allows to list only objects of specific kinds. It accepts multiple comma separated values 
+        of the object types listed in the 
+        `OpenNGC guide <https://github.com/mattiaverga/OpenNGC/blob/master/NGC_guide.txt>`_.
 
     ``--constellation TEXT``
 
-        Allows to list only objects within a constellation boundaries. Use IAU 3-letter form.
+        Allows to list only objects within some constellations boundaries. It accepts multiple comma 
+        separated values. Use IAU 3-letter form.
 
     ``--minsize FLOAT``
 

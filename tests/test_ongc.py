@@ -488,16 +488,22 @@ class TestDsoMethods(unittest.TestCase):
         """Test the listObjects() method with type filter applied.
         Duplicated objects are not resolved to the main object.
         """
-        objectList = ongc.listObjects(type='Dup')
+        objectList = ongc.listObjects(type=['Dup', ])
 
         self.assertEqual(len(objectList), 634)
         self.assertEqual(str(objectList[0]), 'IC0011, Duplicated record in Cas')
 
+    def test_list_objects_filter_multiple_types(self):
+        """Test the listObjects() method with multiple types filter."""
+        objectList = ongc.listObjects(type=['*', '**', ])
+
+        self.assertEqual(len(objectList), 792)
+
     def test_list_objects_filter_constellation(self):
         """Test the listObjects() method with constellation filter applied."""
-        objectList = ongc.listObjects(constellation='Boo')
+        objectList = ongc.listObjects(constellation=['and', 'Boo', ])
 
-        self.assertEqual(len(objectList), 532)
+        self.assertEqual(len(objectList), 738)
 
     def test_list_objects_filter_size(self):
         """Test the listObjects() method with size filters applied."""
