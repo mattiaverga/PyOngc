@@ -463,7 +463,7 @@ class TestDsoMethods(unittest.TestCase):
         """
         objectList = ongc.listObjects()
 
-        self.assertEqual(len(objectList), 13974)
+        self.assertEqual(len(objectList), 13978)
         self.assertIsInstance(objectList[0], ongc.Dso)
 
     def test_list_objects_filter_catalog_NGC(self):
@@ -476,7 +476,7 @@ class TestDsoMethods(unittest.TestCase):
         """Test the listObjects() method with catalog filter applied."""
         objectList = ongc.listObjects(catalog='IC')
 
-        self.assertEqual(len(objectList), 5611)
+        self.assertEqual(len(objectList), 5615)
 
     def test_list_objects_filter_catalog_M(self):
         """Test the listObjects() method with catalog filter applied."""
@@ -490,7 +490,7 @@ class TestDsoMethods(unittest.TestCase):
         """
         objectList = ongc.listObjects(type=['Dup', ])
 
-        self.assertEqual(len(objectList), 634)
+        self.assertEqual(len(objectList), 636)
         self.assertEqual(str(objectList[0]), 'IC0011, Duplicated record in Cas')
 
     def test_list_objects_filter_multiple_types(self):
@@ -515,7 +515,7 @@ class TestDsoMethods(unittest.TestCase):
         """Test the listObjects() method to list objects without size."""
         objectList = ongc.listObjects(maxsize=0)
 
-        self.assertEqual(len(objectList), 2017)
+        self.assertEqual(len(objectList), 2020)
 
     def test_list_objects_filter_mag(self):
         """Test the listObjects() method with magnitudes filters applied."""
@@ -533,19 +533,19 @@ class TestDsoMethods(unittest.TestCase):
         """List objects with RA lower than maxra."""
         objectList = ongc.listObjects(maxra=2)
 
-        self.assertEqual(len(objectList), 64)
+        self.assertEqual(len(objectList), 68)
 
     def test_list_objects_filter_ra_between(self):
         """List objects with RA between minra and maxra."""
         objectList = ongc.listObjects(minra=1, maxra=2)
 
-        self.assertEqual(len(objectList), 30)
+        self.assertEqual(len(objectList), 33)
 
     def test_list_objects_filter_ra_between_crossing_zero(self):
         """List objects with RA between minra and maxra crossing 0h."""
         objectList = ongc.listObjects(minra=359, maxra=1)
 
-        self.assertEqual(len(objectList), 68)
+        self.assertEqual(len(objectList), 69)
 
     def test_list_objects_filter_mindec(self):
         """List objects with Dec above mindec."""
@@ -563,7 +563,7 @@ class TestDsoMethods(unittest.TestCase):
         """List objects with Dec between mindec and maxdec."""
         objectList = ongc.listObjects(mindec=-1, maxdec=1)
 
-        self.assertEqual(len(objectList), 263)
+        self.assertEqual(len(objectList), 264)
 
     def test_list_objects_by_name(self):
         """Test the listObjects() method to list objects with the provided common name."""
@@ -582,7 +582,7 @@ class TestDsoMethods(unittest.TestCase):
         """Test the listObjects() method to list objects without common name."""
         objectList = ongc.listObjects(withname=False)
 
-        self.assertEqual(len(objectList), 13842)
+        self.assertEqual(len(objectList), 13846)
 
     def test_list_objects_wrong_filter(self):
         """Test the listObjects() method when an unsupported filter is used."""
@@ -637,7 +637,7 @@ class TestDsoMethods(unittest.TestCase):
         obj_details = ongc.printDetails('NGC1')
         expected = (
             "+-----------------------------------------------------------------------------+\n"
-            "| Id: 5612      Name: NGC0001           Type: Galaxy                          |\n"
+            "| Id: 5616      Name: NGC0001           Type: Galaxy                          |\n"
             "| R.A.: 00:07:15.84      Dec.: +27:42:29.1      Constellation: Peg            |\n"
             "+-----------------------------------------------------------------------------+\n"
             "| Major axis: 1.57'      Minor axis: 1.07'      Position angle: 112°          |\n"
@@ -658,7 +658,7 @@ class TestDsoMethods(unittest.TestCase):
         obj_details = ongc.printDetails('NGC40')
         expected = (
             "+-----------------------------------------------------------------------------+\n"
-            "| Id: 5651      Name: NGC0040           Type: Planetary Nebula                |\n"
+            "| Id: 5655      Name: NGC0040           Type: Planetary Nebula                |\n"
             "| R.A.: 00:13:01.03      Dec.: +72:31:19.0      Constellation: Cep            |\n"
             "| Common names:                                                               |\n"
             "|    Bow-Tie nebula                                                           |\n"
@@ -684,7 +684,7 @@ class TestDsoMethods(unittest.TestCase):
         obj_details = ongc.printDetails('NGC6523')
         expected = (
             "+-----------------------------------------------------------------------------+\n"
-            "| Id: 12540     Name: NGC6523           Type: Nebula                          |\n"
+            "| Id: 12544     Name: NGC6523           Type: Nebula                          |\n"
             "| R.A.: 18:03:41.27      Dec.: -24:22:48.6      Constellation: Sgr            |\n"
             "| Also known as:                                                              |\n"
             "|    M008, NGC6533                                                            |\n"

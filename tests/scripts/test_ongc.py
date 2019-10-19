@@ -44,7 +44,7 @@ def test_view_details():
     assert result.exit_code == 0
     assert result.output == (
         "+-----------------------------------------------------------------------------+\n"
-        "| Id: 5612      Name: NGC0001           Type: Galaxy                          |\n"
+        "| Id: 5616      Name: NGC0001           Type: Galaxy                          |\n"
         "| R.A.: 00:07:15.84      Dec.: +27:42:29.1      Constellation: Peg            |\n"
         "+-----------------------------------------------------------------------------+\n"
         "| Major axis: 1.57'      Minor axis: 1.07'      Position angle: 112°          |\n"
