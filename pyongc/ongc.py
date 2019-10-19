@@ -554,20 +554,20 @@ def _distance(coords1, coords2):
             (8.852139937970884, 7.499999776570824, -4.999999851047216)
 
     Args:
-        coords1 (numpy.ndarray): R.A. and Dec expressed in radians of the first point as 
+        coords1 (numpy.ndarray): R.A. and Dec expressed in radians of the first point as
             numpy array with shape(2,)
-        coords2 (numpy.ndarray): R.A. and Dec expressed in radians of the second point as 
+        coords2 (numpy.ndarray): R.A. and Dec expressed in radians of the second point as
             numpy array with shape(2,)
 
     Returns:
         tuple: `(angular separation, difference in A.R, difference in Dec)`
 
-        This function will return three float values, which are the apparent total 
-        angular separation between the two objects, the difference in Right Ascension and the 
+        This function will return three float values, which are the apparent total
+        angular separation between the two objects, the difference in Right Ascension and the
         difference in Declination.
 
         All values are expressed in degrees.
-        
+
     """
     a1 = coords1[0]
     a2 = coords2[0]
@@ -847,8 +847,8 @@ def getNeighbors(obj, separation, catalog="all"):
     Returns:
         list: [(Dso, separation),]
 
-        A list of tuples with the Dso object found and its distance from the starting point, 
-        ordered by distance. 
+        A list of tuples with the Dso object found and its distance from the starting point,
+        ordered by distance.
 
     Raises:
         ValueError: If the search radius exceeds 10 degrees.
@@ -922,7 +922,7 @@ def getSeparation(obj1, obj2, style="raw"):
 
         (angular separation, difference in A.R, difference in Dec)
 
-        With the `style` parameter set to `text` we get a more readable output in the form 
+        With the `style` parameter set to `text` we get a more readable output in the form
         `'DD° MMm SS.SSs'`
 
     """
@@ -983,10 +983,10 @@ def listObjects(**kwargs):
     Args:
         catalog (string, optional): filter for catalog. [NGC|IC|M]
         type (list, optional): filter for object type. See OpenNGC types list.
-        constellation (list, optional): filter for constellation 
+        constellation (list, optional): filter for constellation
             (three letter latin form - e.g. "And")
         minsize (float, optional): filter for objects with MajAx >= minSize(arcmin)
-        maxsize (float, optional): filter for objects with MajAx < maxSize(arcmin) 
+        maxsize (float, optional): filter for objects with MajAx < maxSize(arcmin)
             OR MajAx not available
         uptobmag (float, optional): filter for objects with B-Mag brighter than value
         uptovmag (float, optional): filter for objects with V-Mag brighter than value
@@ -1127,8 +1127,8 @@ def nearby(coords_string, separation=60, catalog="all"):
     Returns:
         list: [(Dso, separation),]
 
-        A list of tuples with the Dso object found and its distance from the starting point, 
-        ordered by distance. 
+        A list of tuples with the Dso object found and its distance from the starting point,
+        ordered by distance.
 
     Raises:
         ValueError: If the search radius exceeds 10 degrees.
