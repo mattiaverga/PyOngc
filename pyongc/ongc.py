@@ -310,7 +310,7 @@ class Dso(object):
 
                 >>> s = Dso("ngc1")
                 >>> s.getId()
-                5612
+                5616
 
         """
         return self._id
@@ -960,17 +960,17 @@ def listObjects(**kwargs):
 
             >>> objectList = listObjects()
             >>> len(objectList)
-            13974
+            13978
 
     Filters are combined with "AND" in the query; only one value for filter is allowed:
 
-            >>> objectList = listObjects(catalog="NGC", constellation="Boo")
+            >>> objectList = listObjects(catalog="NGC", constellation=["Boo", ])
             >>> len(objectList)
             281
 
     Duplicated objects are not resolved to main objects:
 
-            >>> objectList = listObjects(type="Dup")
+            >>> objectList = listObjects(type=["Dup", ])
             >>> print(objectList[0])
             IC0011, Duplicated record in Cas
 
@@ -978,7 +978,7 @@ def listObjects(**kwargs):
 
             >>> objectList = listObjects(maxsize=0)
             >>> len(objectList)
-            2017
+            2020
 
     Args:
         catalog (string, optional): filter for catalog. [NGC|IC|M]
@@ -1166,7 +1166,7 @@ def printDetails(dso):
 
             >>> print(printDetails("ngc1"))
             +-----------------------------------------------------------------------------+
-            | Id: 5612      Name: NGC0001           Type: Galaxy                          |
+            | Id: 5616      Name: NGC0001           Type: Galaxy                          |
             | R.A.: 00:07:15.84      Dec.: +27:42:29.1      Constellation: Peg            |
             +-----------------------------------------------------------------------------+
             | Major axis: 1.57'      Minor axis: 1.07'      Position angle: 112°          |
