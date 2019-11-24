@@ -6,23 +6,19 @@ matrix:
   include:
     - python: 3.6
     - python: 3.7
-      dist: xenial
-      sudo: true
-    - python: 3.8-dev
-      dist: xenial
-      sudo: true
-  allow_failures:
-    - python: 3.8-dev
+    - python: 3.8
+#  allow_failures:
+#    - python: 3.8-dev
 
 install:
   - pip -q install -e .[tests]
-  - if [[ $TRAVIS_PYTHON_VERSION == 3.6* ]]; then
+  - if [[ $TRAVIS_PYTHON_VERSION == 3.8* ]]; then
     pip install flake8;
     pip install pytest-cov;
     fi
 
 script:
-  - if [[ $TRAVIS_PYTHON_VERSION == 3.6* ]]; then
+  - if [[ $TRAVIS_PYTHON_VERSION == 3.8* ]]; then
     flake8 .;
     pytest -v --cov=pyongc tests/;
     else
@@ -30,7 +26,7 @@ script:
     fi
 
 after_success:
-  - if [[ $TRAVIS_PYTHON_VERSION == 3.6* ]]; then
+  - if [[ $TRAVIS_PYTHON_VERSION == 3.8* ]]; then
     coveralls;
     fi
 
