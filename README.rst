@@ -68,6 +68,8 @@ Object data is easily available from command line also:
         |    B-Mag taken from LEDA                                                    |
         +-----------------------------------------------------------------------------+
 
+The full documentation is available at https://pyongc.readthedocs.io/en/latest/.
+
 License
 -------
 
