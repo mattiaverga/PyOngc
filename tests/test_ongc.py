@@ -297,22 +297,22 @@ class TestDsoMethods(unittest.TestCase):
     def test_distance(self):
         """Test distance calculation."""
         np.testing.assert_allclose(distance(np.array([0., 0.]),
-                                                  np.array([np.radians(15), 0.])),
+                                   np.array([np.radians(15), 0.])),
                                    (15, 15, 0),
                                    1e-12
                                    )
         np.testing.assert_allclose(distance(np.array([0., 0.]),
-                                                  np.array([np.radians(23*15), 0.])),
+                                   np.array([np.radians(23*15), 0.])),
                                    (15, 345, 0),
                                    1e-12
                                    )
         np.testing.assert_allclose(distance(np.array([0., 0.]),
-                                                  np.array([0., np.radians(15)])),
+                                   np.array([0., np.radians(15)])),
                                    (15, 0, 15),
                                    1e-12
                                    )
         np.testing.assert_allclose(distance(np.array([0., 0.]),
-                                                  np.array([0., np.radians(-15)])),
+                                   np.array([0., np.radians(-15)])),
                                    (15, 0, -15),
                                    1e-12
                                    )

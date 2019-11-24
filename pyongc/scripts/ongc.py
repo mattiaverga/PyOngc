@@ -183,8 +183,8 @@ def search(out_file, **kwargs):
             if kwargs[v] is not None:
                 kwargs[v] = [x.strip() for x in kwargs[v].split(',')]
 
-        object_list = pyongc.listObjects(**{k: v for k, v in kwargs.items() if (v is not None
-                                                                              and v is not False)})
+        object_list = pyongc.listObjects(
+            **{k: v for k, v in kwargs.items() if (v is not None and v is not False)})
         if len(object_list) == 0:
             click.secho('\nNo objects found with such parameters!', bold=True)
             return
