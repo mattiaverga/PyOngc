@@ -4,4 +4,4 @@
 """
 __all__ = ['ongc', ]
 
-from pyongc.ongc import *
+from .ongc import *

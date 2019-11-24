@@ -31,11 +31,12 @@
     Usage: ongc [OPTIONS] COMMAND [ARGS]...
 """
 
-from pyongc import ongc
+from os import environ
 import click
 import re
 
-from os import environ
+import pyongc
+from pyongc.ongc import __version__ as version
 
 # Make sure Less pager will properly display utf-8 characters
 environ["LESSCHARSET"] = 'utf-8'
@@ -55,9 +56,9 @@ def view(name, details):
     """Print out object information."""
     try:
         if details:
-            click.echo(ongc.printDetails(ongc.Dso(name)))
+            click.echo(pyongc.printDetails(pyongc.Dso(name)))
         else:
-            click.secho(f'{ongc.Dso(name)}', bold=True)
+            click.secho(f'{pyongc.Dso(name)}', bold=True)
     except Exception as e:
         click.echo(f'{click.style("ERROR:", fg="red", bold=True)} {e}')
 
@@ -66,8 +67,8 @@ def view(name, details):
 def stats():
     """Show database statistics."""
     try:
-        informations = ongc.stats()
-        click.echo(f'\n{click.style("PyONGC version:", bold=True)} {ongc.__version__}')
+        informations = pyongc.stats()
+        click.echo(f'\n{click.style("PyONGC version:", bold=True)} {version}')
         click.echo(f'{click.style("Database version:", bold=True)} {informations[1]}')
         click.echo(f'{click.style("Total number of objects in database:", bold=True)} '
                    f'{informations[2]}')
@@ -88,8 +89,8 @@ def stats():
 def neighbors(name, radius, catalog):
     """List objects in proximity of another DSO."""
     try:
-        start_obj = ongc.Dso(name)
-        object_list = ongc.getNeighbors(start_obj, radius, catalog)
+        start_obj = pyongc.Dso(name)
+        object_list = pyongc.getNeighbors(start_obj, radius, catalog)
         if len(object_list) == 0:
             click.secho('\nNo objects found within search radius!', bold=True)
             return
@@ -118,14 +119,14 @@ def neighbors(name, radius, catalog):
 def separation(obj1, obj2):
     """Return the apparent angular separation between two objects."""
     try:
-        first = ongc.Dso(obj1)
-        second = ongc.Dso(obj2)
+        first = pyongc.Dso(obj1)
+        second = pyongc.Dso(obj2)
         click.echo('Apparent angular separation between '
                    + click.style(first.getName(), fg='cyan')
                    + ' and '
                    + click.style(second.getName(), fg='cyan')
                    + ' is:')
-        click.secho(ongc.getSeparation(obj1, obj2, style="text"), bold=True)
+        click.secho(pyongc.getSeparation(obj1, obj2, style="text"), bold=True)
     except Exception as e:
         click.echo(f'{click.style("ERROR:", fg="red", bold=True)} {e}')
 
@@ -182,8 +183,8 @@ def search(out_file, **kwargs):
             if kwargs[v] is not None:
                 kwargs[v] = [x.strip() for x in kwargs[v].split(',')]
 
-        object_list = ongc.listObjects(**{k: v for k, v in kwargs.items() if (v is not None
-                                                                              and v is not False)})
+        object_list = pyongc.listObjects(
+            **{k: v for k, v in kwargs.items() if (v is not None and v is not False)})
         if len(object_list) == 0:
             click.secho('\nNo objects found with such parameters!', bold=True)
             return
@@ -217,7 +218,7 @@ def nearby(ra, dec, radius, catalog):
     """
     try:
         coords = '{} {}'.format(ra, dec)
-        object_list = ongc.nearby(coords, radius, catalog)
+        object_list = pyongc.nearby(coords, radius, catalog)
         if len(object_list) == 0:
             click.secho('\nNo objects found within search radius!', bold=True)
             return

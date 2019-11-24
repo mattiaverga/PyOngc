@@ -40,8 +40,8 @@ Usage
 
 ::
 
-        >>> from pyongc import ongc
-        >>> DSOobject = ongc.Dso("NGC7000")
+        >>> import pyongc
+        >>> DSOobject = pyongc.Dso("NGC7000")
         >>> DSOobject.getCoords()
         array([[20.  , 59.  , 17.14],
                [44.  , 31.  , 43.6 ]])
