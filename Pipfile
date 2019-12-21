@@ -8,6 +8,8 @@ pytest = "*"
 mock = "*"
 nose = "*"
 coveralls = "*"
+sphinx = "*"
+sphinx-rtd-theme = "*"
 
 [packages]
 click = "*"

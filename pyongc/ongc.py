@@ -37,6 +37,7 @@ Methods provided:
 """
 
 from pkg_resources import resource_filename
+from typing import Generator, List, Tuple, Optional, Union
 import numpy as np
 import re
 import sqlite3
@@ -63,38 +64,41 @@ PATTERNS = {'NGC|IC': r'^((?:NGC|IC)\s?)(\d{1,4})\s?((NED)(\d{1,2})|[A-Z]{1,2})?
 class Dso(object):
     """Describes a Deep Sky Object from ONGC database.
 
-    The class provides the following methods to access object data:
+    Each object of this class has the following read only properties:
+
+    * cstar_data: The data about central star of planetary nebulaes.
+    * constellation: The constellation where the object is located.
+    * coords: Object coordinates in HMS and DMS as numpy array or None.
+    * dec: Object Declination in a easy to read format as string.
+    * dimensions: Object axes dimensions and position angle.
+    * hubble: The Hubble classification of a galaxy.
+    * id: The internal database Id of the object.
+    * identifiers: All the alternative identifiers of the object.
+    * magnitudes: Object magnitudes.
+    * name: The main identifier of the object.
+    * notes: Notes from NED and from ONGC.
+    * ra: Object Right Ascension in a easy to read format as string.
+    * rad_coords: Object coordinates in radians as numpy array or None.
+    * surface_brightness: The surface brightness value of a galaxy or None.
+    * type: Object type.
+
+    The class also provides the following methods:
 
     * __init__: Object constructor.
     * __str__: Returns a basic description of the object.
-    * getConstellation: Returns the constellation where the object is located.
-    * getCoords: Returns object coordinates in HMS and DMS as numpy array.
-    * getCoordsRad: Returns object coordinates in radians as numpy array.
-    * getCStarData: Returns data about central star of planetary nebulaes.
-    * getDec: Returns object Declination in a easy to read format as string.
-    * getDimensions: Returns object axes dimensions and position angle.
-    * getHubble: Returns the Hubble classification of a galaxy.
-    * getId: Returns the database Id of the object.
-    * getIdentifiers: Returns all alternative identifiers of the object.
-    * getMagnitudes: Returns object magnitudes.
-    * getName: Returns the main identifier of the object.
-    * getNotes: Returns notes from NED and from ONGC.
-    * getSurfaceBrightness: Returns the surface brightness value of a galaxy.
-    * getType: Returns object typet.
-    * getRA: Returns object Right Ascension in a easy to read format as string.
     * xephemFormat: Returns object data in Xephem format.
 
     """
 
-    def __init__(self, name, returndup=False):
+    def __init__(self, name: str, returndup: bool = False):
         """Object constructor.
 
         Args:
-            name (str): Object identifier (ex.: 'NGC1', 'M15').
-            returndup (bool, optional): If set to True, don't resolve Dup objects.
-                Default is False.
+            name: Object identifier (ex.: 'NGC1', 'M15').
+            returndup: If set to True, don't resolve Dup objects. Default is False.
 
         Raises:
+            TypeError: If the object identifier is not a string.
             ValueError: If the object identifier is not found in the database.
         """
         # Make sure user passed a string as parameter
@@ -158,7 +162,7 @@ class Dso(object):
         self._nednotes = objectData[26]
         self._ongcnotes = objectData[27]
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Returns a basic description of the object.
 
                 >>> s = Dso("ngc1")
@@ -168,34 +172,68 @@ class Dso(object):
         """
         return f'{self._name}, {self._type} in {self._const}'
 
-    def getConstellation(self):
-        """Returns the constellation where the object is located.
+    @property
+    def cstar_data(self) -> Optional[Tuple[Optional[List[str]], Optional[float],
+                                           Optional[float], Optional[float]]]:
+        """Data about central star of planetary nebulaes.
 
-        Returns:
-            str: Name of the constellation in IAU 3-letter form.
+        If the DSO object is a Planetary Nebulae, this method will return a tuple with
+        the central star identifiers and its magnitudes in U-B-V bands:
+
+                >>> s = Dso("ngc1535")
+                >>> s.cstar_data
+                (['BD -13 842', 'HD 26847'], None, 12.19, 12.18)
+
+        If the object is not a PN it returns None:
 
                 >>> s = Dso("ngc1")
-                >>> s.getConstellation()
+                >>> s.cstar_data
+                None
+
+        Returns:
+            `(['cstar identifiers'], cstar UMag, cstar BMag, cstar VMag)`
+
+        """
+        if self._type != 'Planetary Nebula':
+            return None
+
+        if self._cstarnames != "":
+            identifiers = list(map(str.strip, self._cstarnames.split(",")))
+        else:
+            identifiers = None
+
+        return identifiers, self._cstarumag, self._cstarbmag, self._cstarvmag
+
+    @property
+    def constellation(self) -> str:
+        """The constellation where the object is located.
+
+        Returns:
+            Name of the constellation in IAU 3-letter form.
+
+                >>> s = Dso("ngc1")
+                >>> s.constellation
                 'Peg'
 
         """
         return self._const
 
-    def getCoords(self):
-        """Returns object coordinates in HMS and DMS as numpy array.
+    @property
+    def coords(self) -> Optional[np.ndarray]:
+        """Returns object coordinates in HMS and DMS as numpy array or None.
 
         Returns:
-            numpy.ndarray: A numpy array of shape (2, 3) with R.A. and Declination
+            A numpy array of shape (2, 3) with R.A. and Declination
             values expressed in HMS and DMS.
 
                 >>> s = Dso("ngc1")
-                >>> s.getCoords()
+                >>> s.coords
                 array([[ 0.  ,  7.  , 15.84],
                        [27.  , 42.  , 29.1 ]])
 
         """
         if self._ra is None or self._dec is None:
-            raise ValueError(f'Object named {self._name} has no coordinates in database.')
+            return None
 
         ra = np.empty(3)
         ra[0] = np.trunc(np.rad2deg(self._ra) / 15)
@@ -211,112 +249,77 @@ class Dso(object):
         dec[0] = dec[0] * -1 if np.signbit(self._dec) else dec[0]
         return np.array([ra, dec, ])
 
-    def getCoordsRad(self):
-        """Returns object coordinates in radians as numpy array.
+    @property
+    def dec(self) -> str:
+        """Object Declination in a easy to read format as string.
+
+        If you need the raw data to use in calculations use `coords` or `rad_coords` properties.
 
         Returns:
-            numpy.ndarray: A numpy array of shape (2,) with R.A. and Declination
-            values expressed in radians.
+            `'+/-DD:MM:SS.s'` or `'N/A'` if the object has no coordinates.
 
                 >>> s = Dso("ngc1")
-                >>> s.getCoordsRad()
-                array([0.03169518, 0.48359728])
-
-        """
-        return np.array([self._ra, self._dec, ])
-
-    def getCStarData(self):
-        """Returns data about central star of planetary nebulaes.
-
-        If the DSO object is a Planetary Nebulae, this method will return a tuple with
-        the central star identifiers and its magnitudes in U-B-V bands:
-
-                >>> s = Dso("ngc1535")
-                >>> s.getCStarData()
-                (['BD -13 842', 'HD 26847'], None, 12.19, 12.18)
-
-        If the object is not a PN it returns all None values:
-
-                >>> s = Dso("ngc1")
-                >>> s.getCStarData()
-                (None, None, None, None)
-
-        Returns:
-            tuple: ([cstar identifiers], cstar UMag, cstar BMag, cstar VMag)
-
-        """
-        if self._cstarnames != "":
-            identifiers = list(map(str.strip, self._cstarnames.split(",")))
-        else:
-            identifiers = None
-
-        return identifiers, self._cstarumag, self._cstarbmag, self._cstarvmag
-
-    def getDec(self):
-        """Returns object Declination in a easy to read format as string.
-
-        If you need the raw data to use in calculations use getCoords() method instead.
-
-        Returns:
-            string: `+/-DD:MM:SS.s` or `N/A` if the object has no coordinates.
-
-                >>> s = Dso("ngc1")
-                >>> s.getDec()
+                >>> s.dec
                 '+27:42:29.1'
 
                 >>> s = Dso("ngc6991")
-                >>> s.getDec()
+                >>> s.dec
                 'N/A'
 
         """
-        if self._dec is not None:
-            return '{:+03.0f}:{:02.0f}:{:04.1f}'.format(*self.getCoords()[1])
+        if self.coords is not None:
+            return '{:+03.0f}:{:02.0f}:{:04.1f}'.format(*self.coords[1])
         else:
             return 'N/A'
 
-    def getDimensions(self):
-        """Returns object axes dimensions and position angle.
+    @property
+    def dimensions(self) -> Tuple[Optional[float], Optional[float], Optional[int]]:
+        """Object axes dimensions and position angle.
 
         Where a value is not available a None type is returned.
 
         Returns:
-            tuple: (MajAx, MinAx, P.A.)
+            (MajAx, MinAx, P.A.)
 
                 >>> s = Dso("ngc1")
-                >>> s.getDimensions()
+                >>> s.dimensions
                 (1.57, 1.07, 112)
 
         """
         return self._majax, self._minax, self._pa
 
-    def getHubble(self):
-        """Returns the Hubble classification of a galaxy.
+    @property
+    def hubble(self) -> str:
+        """The Hubble classification of a galaxy.
 
         Returns:
-            string: The Hubble classifgication code of a galaxy or empty string.
+            string: The Hubble classification code of a galaxy or empty string.
 
                 >>> s = Dso("ngc1")
-                >>> s.getHubble()
+                >>> s.hubble
                 'Sb'
 
         """
         return self._hubble
 
-    def getId(self):
-        """Returns the database Id of the object.
+    @property
+    def id(self) -> int:
+        """The internal database Id of the object.
 
         Returns:
-            int: The internal database id of the object.
+            The internal database id of the object.
 
                 >>> s = Dso("ngc1")
-                >>> s.getId()
+                >>> s.id
                 5616
 
         """
         return self._id
 
-    def getIdentifiers(self):
-        """Returns all alternative identifiers of the object.
+    @property
+    def identifiers(self) -> Tuple[Optional[str], Optional[List[str]], Optional[List[str]],
+                                   Optional[List[str]], Optional[List[str]]]:
+        """All the alternative identifiers of the object.
 
         The tuple returned by this method will list all the alternative identifiers
         associated to the object.
@@ -324,15 +327,15 @@ class Dso(object):
         The other fields will be lists of cross identifiers or None.
 
         Returns:
-            tuple: ('Messier', [NGC], [IC], [common names], [other])
+            `('Messier', ['NGC'], ['IC'], ['common names'], ['other'])`
 
                 >>> s = Dso("ngc1976")
-                >>> s.getIdentifiers()
+                >>> s.identifiers
                 ('M042', None, None, ['Great Orion Nebula', 'Orion Nebula'], \
 ['LBN 974', 'MWSC 0582'])
 
                 >>> s = Dso("mel22")
-                >>> s.getIdentifiers()
+                >>> s.identifiers
                 ('M045', None, None, ['Pleiades'], ['MWSC 0305'])
 
         """
@@ -365,98 +368,123 @@ class Dso(object):
 
         return messier, ngc, ic, commonNames, other
 
-    def getMagnitudes(self):
+    @property
+    def magnitudes(self) -> Tuple[Optional[float], Optional[float], Optional[float],
+                                  Optional[float], Optional[float]]:
         """Returns object magnitudes.
 
         Where a value is not available a None type is returned
 
         Returns:
-            tuple: (Bmag, Vmag, Jmag, Hmag, Kmag)
+            `(Bmag, Vmag, Jmag, Hmag, Kmag)`
 
                 >>> s = Dso("ngc1")
-                >>> s.getMagnitudes()
+                >>> magnitudes
                 (13.4, None, 10.78, 10.02, 9.76)
 
         """
         return self._bmag, self._vmag, self._jmag, self._hmag, self._kmag
 
-    def getName(self):
-        """Returns the main identifier of the object.
+    @property
+    def name(self) -> str:
+        """The main identifier of the object.
 
         Returns:
-            string: The main identifier of the object, as listed in ONGC database
+            The main identifier of the object, as listed in ONGC database
             or its addendum.
 
                 >>> s = Dso("m45")
-                >>> s.getName()
+                >>> s.name
                 'Mel022'
 
         """
         return self._name
 
-    def getNotes(self):
+    @property
+    def notes(self) -> Tuple[str, str]:
         """Returns notes from NED and from ONGC.
 
         Returns:
-            tuple: ('nednotes', 'ongcnotes')
+            `('nednotes', 'ongcnotes')`
 
                 >>> s = Dso("ngc6543")
-                >>> s.getNotes()
+                >>> s.notes
                 ('Additional radio sources may contribute to the WMAP flux.', \
 'Dimensions taken from LEDA')
 
         """
         return self._nednotes, self._ongcnotes
 
-    def getSurfaceBrightness(self):
-        """Returns the surface brightness value of a galaxy.
+    @property
+    def ra(self) -> str:
+        """Object Right Ascension in a easy to read format as string.
+
+        If you need the raw data to use in calculations use `coords` or `rad_coords` properties.
 
         Returns:
-            float or None: Object surface brightness
+            `'HH:MM:SS.ss'` or `'N/A'` if the object has no coordinates.
 
                 >>> s = Dso("ngc1")
-                >>> s.getSurfaceBrightness()
+                >>> s.ra
+                '00:07:15.84'
+
+                >>> s = Dso("ngc6991")
+                >>> s.ra
+                'N/A'
+
+        """
+        if self.coords is not None:
+            return '{:02.0f}:{:02.0f}:{:05.2f}'.format(*self.coords[0])
+        else:
+            return 'N/A'
+
+    @property
+    def rad_coords(self) -> Optional[np.ndarray]:
+        """Returns object coordinates in radians as numpy array or None.
+
+        Returns:
+            A numpy array of shape (2,) with R.A. and Declination
+            values expressed in radians.
+
+                >>> s = Dso("ngc1")
+                >>> s.rad_coords
+                array([0.03169518, 0.48359728])
+
+        """
+        if self._ra is None or self._dec is None:
+            return None
+
+        return np.array([self._ra, self._dec, ])
+
+    @property
+    def surface_brightness(self) -> Optional[float]:
+        """The surface brightness value of a galaxy.
+
+        Returns:
+            Object's surface brightness
+
+                >>> s = Dso("ngc1")
+                >>> s.surface_brightness
                 23.13
 
         """
         return self._sbrightn
 
-    def getType(self):
-        """Returns object type.
+    @property
+    def type(self) -> str:
+        """Object type.
 
         Returns:
-            string: Object type
+            Object type
 
                 >>> s = Dso("ngc1")
-                >>> s.getType()
+                >>> s.type
                 'Galaxy'
 
         """
         return self._type
 
-    def getRA(self):
-        """Returns object Right Ascension in a easy to read format as string.
-
-        If you need the raw data to use in calculations use getCoords() method instead.
-
-        Returns:
-            string: `HH:MM:SS.ss` or `N/A` if the object has no coordinates.
-
-                >>> s = Dso("ngc1")
-                >>> s.getRA()
-                '00:07:15.84'
-
-                >>> s = Dso("ngc6991")
-                >>> s.getRA()
-                'N/A'
-
-        """
-        if self._ra is not None:
-            return '{:02.0f}:{:02.0f}:{:05.2f}'.format(*self.getCoords()[0])
-        else:
-            return 'N/A'
-
-    def xephemFormat(self):
+    def xephemFormat(self) -> str:
         """Returns object data in Xephem format.
 
         This function will produce a string containing information about the object
@@ -473,8 +501,8 @@ class Dso(object):
         """
         line = []
         # Field 1: names
-        names = [self.getName()]
-        identifiers = self.getIdentifiers()
+        names = [self.name]
+        identifiers = self.identifiers
         if identifiers[0] is not None:
             names.append(identifiers[0])
         for i in range(1, 4):
@@ -483,7 +511,7 @@ class Dso(object):
         line.append("|".join(names))
 
         # Field 2: type designation
-        objType = self.getType()
+        objType = self.type
         if objType in ("Galaxy Pair", "Galaxy Triplet", "Group of galaxies"):
             line.append("f|A")
         elif objType == "Globular Cluster":
@@ -493,7 +521,7 @@ class Dso(object):
         elif objType in ("HII Ionized region", "Nebula"):
             line.append("f|F")
         elif objType == "Galaxy":
-            if self.getHubble().startswith("S"):
+            if self.hubble.startswith("S"):
                 line.append("f|G")
             else:
                 line.append("f|H")
@@ -515,14 +543,14 @@ class Dso(object):
             line.append("f")
 
         # Field 3: Right Ascension
-        line.append(self.getRA())
+        line.append(self.ra)
 
         # Field 4: Declination
-        line.append(self.getDec())
+        line.append(self.dec)
 
         # Field 5: Magnitude
         # We use the first available magnitude in the sequence b,v,j,h,k
-        for mag in self.getMagnitudes():
+        for mag in self.magnitudes:
             if mag is not None:
                 line.append(str(mag))
                 break
@@ -533,16 +561,16 @@ class Dso(object):
         # Field 7: Dimensions
         dimensions = []
         # Xephem format wants axes espressed in arcsec, we have arcmin
-        for value in (self.getDimensions()[0], self.getDimensions()[1]):
+        for value in (self._majax, self._minax):
             dimensions.append(f'{value*60:.2f}') if value is not None else dimensions.append("")
-        for value in (self.getDimensions()[2], ):
+        for value in (self._pa, ):
             dimensions.append(str(value)) if value is not None else dimensions.append("")
         line.append("|".join(dimensions))
 
         return ",".join(line)
 
 
-def _distance(coords1, coords2):
+def _distance(coords1: np.ndarray, coords2: np.ndarray) -> Tuple[float, float, float]:
     """Calculate distance between two points in the sky.
 
     With p1 = '01:00:00 +15:30:00' and p2 = '01:30:00 +10:30:00':
@@ -554,13 +582,13 @@ def _distance(coords1, coords2):
             (8.852139937970884, 7.499999776570824, -4.999999851047216)
 
     Args:
-        coords1 (numpy.ndarray): R.A. and Dec expressed in radians of the first point as
+        coords1: R.A. and Dec expressed in radians of the first point as
             numpy array with shape(2,)
-        coords2 (numpy.ndarray): R.A. and Dec expressed in radians of the second point as
+        coords2: R.A. and Dec expressed in radians of the second point as
             numpy array with shape(2,)
 
     Returns:
-        tuple: `(angular separation, difference in A.R, difference in Dec)`
+        `(angular separation, difference in A.R, difference in Dec)`
 
         This function will return three float values, which are the apparent total
         angular separation between the two objects, the difference in Right Ascension and the
@@ -583,19 +611,19 @@ def _distance(coords1, coords2):
     return np.degrees(separation), np.degrees(a2-a1), np.degrees(d2-d1)
 
 
-def _limiting_coords(coords, radius):
+def _limiting_coords(coords: np.ndarray, radius: int) -> str:
     """Write query filters for limiting search to specific area of the sky.
 
     This is a quick method to exclude objects farther than a specified distance
     from the starting point, but it's not meant to be precise.
 
-            >>> start = Dso('ngc1').getCoords()
+            >>> start = Dso('ngc1').coords
             >>> _limiting_coords(start, 2)
             ' AND (ra <= 0.06660176425610362 OR ra >= 6.279973901355917) AND \
 (dec BETWEEN 0.44869069854374555 AND 0.5185038686235187)'
 
     Args:
-        coords (numpy.ndarray): R.A. and Dec of the starting point in the sky.
+        coords: R.A. and Dec of the starting point in the sky.
 
             It can be expressed as a numpy array of H:M:S/D:M:S
 
@@ -604,10 +632,10 @@ def _limiting_coords(coords, radius):
             or as numpy array of radians
 
             `array([RA, Dec])`
-        radius (int): radius of the search in degrees
+        radius: radius of the search in degrees
 
     Returns:
-        string: parameters to be added to query
+        Parameters to be added to query
 
     """
     if coords.shape == (2, 3):
@@ -643,7 +671,7 @@ def _limiting_coords(coords, radius):
     return params
 
 
-def _queryFetchOne(cols, tables, params):
+def _queryFetchOne(cols: str, tables: str, params: str) -> tuple:
     """Search one row in database.
 
     Be sure to use a WHERE clause which is very specific, otherwise the query
@@ -656,12 +684,12 @@ def _queryFetchOne(cols, tables, params):
             ('G',)
 
     Args:
-        cols (string): the `SELECT` field of the query
-        tables (string): the `FROM` field of the query
-        params (string): the `WHERE` field of the query
+        cols: the `SELECT` field of the query
+        tables: the `FROM` field of the query
+        params: the `WHERE` field of the query
 
     Returns:
-        tuple: selected row data from database
+        Selected row data from database
 
     """
     try:
@@ -684,7 +712,8 @@ def _queryFetchOne(cols, tables, params):
     return objectData
 
 
-def _queryFetchMany(cols, tables, params, order=''):
+def _queryFetchMany(cols: str, tables: str, params: str,
+                    order: str = '') -> Generator[tuple, None, None]:
     """Search many rows in database.
 
             >>> cols = 'name'
@@ -694,13 +723,13 @@ def _queryFetchMany(cols, tables, params, order=''):
             <generator object _queryFetchMany at 0x...>
 
     Args:
-        cols (string): the `SELECT` field of the query
-        tables (string): the `FROM` field of the query
-        params (string): the `WHERE` field of the query
-        order (string, optional): the `ORDER` clause of the query
+        cols: the `SELECT` field of the query
+        tables: the `FROM` field of the query
+        params: the `WHERE` field of the query
+        order: the `ORDER` clause of the query
 
     Yields:
-        tuple: selected row data from database
+        Selected row data from database
 
     """
     try:
@@ -727,17 +756,17 @@ def _queryFetchMany(cols, tables, params, order=''):
         db.close()
 
 
-def _recognize_name(text):
+def _recognize_name(text: str) -> Tuple[str, str]:
     """Recognize catalog and object id.
 
             >>> _recognize_name('NGC1')
             ('NGC|IC', 'NGC0001')
 
     Args:
-        text (string): the object name in input. Must be uppercase.
+        text: the object name in input. Must be uppercase.
 
     Returns:
-        tuple: (catalog name, object name)
+        `('catalog name', 'object name')`
 
     Raises:
         ValueError: If the text cannot be recognized as a valid object name.
@@ -782,14 +811,14 @@ def _recognize_name(text):
     raise ValueError(f'The name "{text}" is not recognized.')
 
 
-def _str_to_coords(text):
+def _str_to_coords(text: str) -> np.ndarray:
     """Recognize coordinates as string and return them as radians.
 
     Args:
         text (string): a string expressing coordinates in the form `HH:MM:SS.ss +/-DD:MM:SS.s`
 
     Returns:
-        numpy.ndarray: array([RA, Dec])
+        `array([RA, Dec])`
 
         A numpy array of shape (2,) with coordinates expressed in radians.
 
@@ -815,7 +844,8 @@ def _str_to_coords(text):
         raise ValueError(f'This text cannot be recognized as coordinates: {text}')
 
 
-def getNeighbors(obj, separation, catalog="all"):
+def getNeighbors(obj: Union[Dso, str], separation: Union[int, float],
+                 catalog: str = "all") -> List[Tuple[Dso, float]]:
     """Find all neighbors of an object within a user selected range.
 
     It requires an object as the starting point of the search (either a string containing
@@ -840,38 +870,33 @@ def getNeighbors(obj, separation, catalog="all"):
             [(<__main__.Dso object at 0x...>, 0.24140243942744602)]
 
     Args:
-        object (ongc.Dso or string): a Dso object or a string which identifies the object
-        separation (float): maximum distance from the object expressed in arcmin
-        catalog (string, optional): filter for "NGC" or "IC" objects - default is all
+        object: a Dso object or a string which identifies the object
+        separation: maximum distance from the object expressed in arcmin
+        catalog: filter for "NGC" or "IC" objects - default is all
 
     Returns:
-        list: [(Dso, separation),]
-
-        A list of tuples with the Dso object found and its distance from the starting point,
-        ordered by distance.
+        A list of tuples with each element composed by the Dso object found and
+        its distance from the starting point, ordered by distance.
 
     Raises:
         ValueError: If the search radius exceeds 10 degrees.
+        ValueError: If the starting object hasn't got registered cordinates.
 
     """
     if not isinstance(obj, Dso):
-        if isinstance(obj, str):
-            obj = Dso(obj)
-        else:
-            raise TypeError('Wrong type obj. Either a Dso or string type was expected.')
-    if not (isinstance(separation, int) or isinstance(separation, float)):
-        raise TypeError('Wrong type separation. Either a int or float type was expected.')
+        obj = Dso(obj)
     if separation > 600:
         raise ValueError('The maximum search radius allowed is 10 degrees.')
+    if obj.rad_coords is None:
+        raise ValueError('Starting object hasn\'t got registered coordinates.')
 
     cols = 'objects.name'
     tables = 'objects'
-    params = f'type != "Dup" AND name !="{obj.getName()}"'
+    params = f'type != "Dup" AND name !="{obj.name}"'
     if catalog.upper() in ["NGC", "IC"]:
         params += f' AND name LIKE "{catalog.upper()}%"'
 
-    objCoords = obj.getCoordsRad()
-    params += _limiting_coords(objCoords, np.ceil(separation / 60))
+    params += _limiting_coords(obj.rad_coords, np.ceil(separation / 60))
 
     neighbors = []
     for item in _queryFetchMany(cols, tables, params):
@@ -883,7 +908,8 @@ def getNeighbors(obj, separation, catalog="all"):
     return sorted(neighbors, key=lambda neighbor: neighbor[1])
 
 
-def getSeparation(obj1, obj2, style="raw"):
+def getSeparation(obj1: Union[Dso, str], obj2: Union[Dso, str],
+                  style: str = "raw") -> Union[Tuple[float, float, float], str]:
     """Finds the apparent angular separation between two objects.
 
     This function will compute the apparent angular separation between two objects,
@@ -913,12 +939,12 @@ def getSeparation(obj1, obj2, style="raw"):
             ValueError: Object named NGC0001A not found in the database.
 
     Args:
-        obj1 (ongc.Dso or string): first Dso object or string identifier
-        obj2 (ongc.Dso or string): second Dso object or string identifier
-        style (string, optional): use "text" to return a string with degrees, minutes and seconds
+        obj1: first Dso object or string identifier
+        obj2: second Dso object or string identifier
+        style: use "text" to return a string with degrees, minutes and seconds
 
     Returns:
-        tuple or string: By default the return value is a tuple with values expressed in degrees
+        By default the return value is a tuple with values expressed in degrees
 
         (angular separation, difference in A.R, difference in Dec)
 
@@ -927,20 +953,13 @@ def getSeparation(obj1, obj2, style="raw"):
 
     """
     if not isinstance(obj1, Dso):
-        if isinstance(obj1, str):
-            obj1 = Dso(obj1)
-        else:
-            raise TypeError('Wrong type obj1. Either a Dso or string type was expected.')
+        obj1 = Dso(obj1)
     if not isinstance(obj2, Dso):
-        if isinstance(obj2, str):
-            obj2 = Dso(obj2)
-        else:
-            raise TypeError('Wrong type obj2. Either a Dso or string type was expected.')
+        obj2 = Dso(obj2)
+    if obj1.rad_coords is None or obj2.rad_coords is None:
+        raise ValueError('One object hasn\'t got registered coordinates.')
 
-    coordsObj1 = obj1.getCoordsRad()
-    coordsObj2 = obj2.getCoordsRad()
-
-    separation = _distance(coordsObj1, coordsObj2)
+    separation = _distance(obj1.rad_coords, obj2.rad_coords)
 
     if style == "text":
         d = int(separation[0])
@@ -952,7 +971,7 @@ def getSeparation(obj1, obj2, style="raw"):
         return separation
 
 
-def listObjects(**kwargs):
+def listObjects(**kwargs) -> List[Dso]:
     """Query the database for DSObjects with specific parameters.
 
     This function returns a list of all DSObjects that match user defined parameters.
@@ -998,7 +1017,7 @@ def listObjects(**kwargs):
         withname (bool, optional): filter for objects with common names
 
     Returns:
-        list: A list of ongc.Dso objects.
+        A list of ongc.Dso objects.
 
     Raises:
         ValueError: If a filter name other than those expected is inserted.
@@ -1096,7 +1115,8 @@ def listObjects(**kwargs):
     return [Dso(item[0], True) for item in _queryFetchMany(cols, tables, params, order)]
 
 
-def nearby(coords_string, separation=60, catalog="all"):
+def nearby(coords_string: str, separation: float = 60,
+           catalog: str = "all") -> List[Tuple[Dso, float]]:
     """Search for objects around given coordinates.
 
     Returns all objects around a point expressed by the coords parameter and within a search
@@ -1120,12 +1140,12 @@ def nearby(coords_string, separation=60, catalog="all"):
             [(<__main__.Dso object at 0x...>, 0.7398295985600021)]
 
     Args:
-        coords (string): R.A. and Dec of search center
-        separation (float): search radius expressed in arcmin - default 60
-        catalog (string, optional): filter for "NGC" or "IC" objects - default is all
+        coords: R.A. and Dec of search center
+        separation: search radius expressed in arcmin - default 60
+        catalog: filter for "NGC" or "IC" objects - default is all
 
     Returns:
-        list: [(Dso, separation),]
+        `[(Dso, separation),]`
 
         A list of tuples with the Dso object found and its distance from the starting point,
         ordered by distance.
@@ -1150,14 +1170,14 @@ def nearby(coords_string, separation=60, catalog="all"):
     neighbors = []
     for item in _queryFetchMany(cols, tables, params):
         possibleNeighbor = Dso(item[0])
-        distance = _distance(coords, possibleNeighbor.getCoordsRad())[0]
+        distance = _distance(coords, possibleNeighbor.rad_coords)[0]
         if distance <= (separation / 60):
             neighbors.append((possibleNeighbor, distance))
 
     return sorted(neighbors, key=lambda neighbor: neighbor[1])
 
 
-def printDetails(dso):
+def printDetails(dso: Union[Dso, str]) -> str:
     """Prints a detailed description of the object in a formatted output.
 
     This function returns a string with all the available details of the object,
@@ -1188,17 +1208,17 @@ def printDetails(dso):
             ValueError: Object named NGC0001A not found in the database.
 
     Args:
-        dso (ongc.Dso or string): a Dso object or a string identifier
+        dso: a Dso object or a string identifier
 
     Returns:
-        string: All the object data ready to be printed on a 80cols terminal output.
+        All the object data ready to be printed on a 80cols terminal output.
 
     """
-    def _justifyText(text):
+    def _justifyText(text: str) -> str:
         """Prints the text on multiple lines if length is more than 73 chars.
 
         Args:
-            text (text): text to be sliced
+            text: text to be sliced
 
         """
         text_returned = ''
@@ -1218,76 +1238,69 @@ def printDetails(dso):
         text_returned += f'|    {" ".join(line):73}|\n'
         return text_returned
 
-    if not isinstance(dso, Dso):
-        if isinstance(dso, str):
-            dso = Dso(dso)
-        else:
-            raise TypeError('Wrong type as parameter. Either a Dso or string type was expected.')
+    def _add_units(value: Union[int, float, None], unit: str = '') -> str:
+        """Returns a string with value + unit or N/A.
 
-    objType = dso.getType()
+        Args:
+            value: a int, float or None
+            unit: the unit to append
+
+        """
+        if value is None:
+            return 'N/A'
+        else:
+            return f'{value}{unit}'
+
+    if not isinstance(dso, Dso):
+        dso = Dso(dso)
+
+    objType = dso.type
     separator = (f'+{"-" * 77}+\n')
     obj_string = separator
     obj_string += ('| '
-                   f'Id: {str(dso.getId()):10}'
-                   f'Name: {dso.getName():18}'
+                   f'Id: {str(dso.id):10}'
+                   f'Name: {dso.name:18}'
                    f'Type: {objType:32}'
                    '|\n'
                    )
     obj_string += ('| '
-                   f'R.A.: {dso.getRA():17}'
-                   f'Dec.: {dso.getDec():17}'
-                   f'Constellation: {dso.getConstellation():15}'
+                   f'R.A.: {dso.ra:17}'
+                   f'Dec.: {dso.dec:17}'
+                   f'Constellation: {dso.constellation:15}'
                    '|\n'
                    )
 
-    identifiers = dso.getIdentifiers()
-    if (identifiers[0] is not None or
-            identifiers[1] is not None or
-            identifiers[2] is not None):
+    if (dso.identifiers[0] is not None or
+            dso.identifiers[1] is not None or
+            dso.identifiers[2] is not None):
         obj_string += f'| {"Also known as:":76}|\n'
         knownAs = []
-        if identifiers[0] is not None:
-            knownAs.append(identifiers[0])
-        if identifiers[1] is not None:
-            knownAs.extend(identifiers[1])
-        if identifiers[2] is not None:
-            knownAs.extend(identifiers[2])
+        if dso.identifiers[0] is not None:
+            knownAs.append(dso.identifiers[0])
+        if dso.identifiers[1] is not None:
+            knownAs.extend(dso.identifiers[1])
+        if dso.identifiers[2] is not None:
+            knownAs.extend(dso.identifiers[2])
         obj_string += _justifyText(", ".join(knownAs))
 
-    if identifiers[3] is not None:
+    if dso.identifiers[3] is not None:
         obj_string += f'| {"Common names:":76}|\n'
-        obj_string += _justifyText(", ".join(identifiers[3]))
+        obj_string += _justifyText(", ".join(dso.identifiers[3]))
     obj_string += separator
 
-    dimensions = []
-    for i in range(0, 2):
-        if dso.getDimensions()[i] is None:
-            dimensions.append("N/A")
-        else:
-            dimensions.append(str(dso.getDimensions()[i]) + "'")
-    if dso.getDimensions()[2] is None:
-        dimensions.append("N/A")
-    else:
-        dimensions.append(str(dso.getDimensions()[2]) + "°")
     obj_string += ('| '
-                   f'Major axis: {dimensions[0]:11}'
-                   f'Minor axis: {dimensions[1]:11}'
-                   f'Position angle: {dimensions[2]:14}'
+                   f'''Major axis: {_add_units(dso.dimensions[0], "'"):11}'''
+                   f'''Minor axis: {_add_units(dso.dimensions[1], "'"):11}'''
+                   f'''Position angle: {_add_units(dso.dimensions[2], "°"):14}'''
                    '|\n'
                    )
 
-    magnitudes = []
-    for bandValue in dso.getMagnitudes():
-        if bandValue is None:
-            magnitudes.append("N/A")
-        else:
-            magnitudes.append(str(bandValue))
     obj_string += ('| '
-                   f'B-mag: {magnitudes[0]:8}'
-                   f'V-mag: {magnitudes[1]:8}'
-                   f'J-mag: {magnitudes[2]:8}'
-                   f'H-mag: {magnitudes[3]:8}'
-                   f'K-mag: {magnitudes[4]:9}'
+                   f'B-mag: {_add_units(dso.magnitudes[0]):8}'
+                   f'V-mag: {_add_units(dso.magnitudes[1]):8}'
+                   f'J-mag: {_add_units(dso.magnitudes[2]):8}'
+                   f'H-mag: {_add_units(dso.magnitudes[3]):8}'
+                   f'K-mag: {_add_units(dso.magnitudes[4]):9}'
                    '|\n'
                    )
 
@@ -1295,52 +1308,44 @@ def printDetails(dso):
 
     if objType == "Galaxy":
         obj_string += ('| '
-                       f'Surface brightness: {str(dso.getSurfaceBrightness()):10}'
-                       f'Hubble classification: {dso.getHubble():23}'
+                       f'Surface brightness: {str(dso.surface_brightness):10}'
+                       f'Hubble classification: {dso.hubble:23}'
                        '|\n'
                        )
 
-    if objType == "Planetary Nebula":
-        centralStar = dso.getCStarData()
-        if centralStar[0] is not None:
+    if dso.cstar_data is not None:
+        if dso.cstar_data[0] is not None:
             obj_string += f'| {"Central star identifiers:":76}|\n'
-            obj_string += f'|    {", ".join(centralStar[0]):73}|\n'
+            obj_string += f'|    {", ".join(dso.cstar_data[0]):73}|\n'
             obj_string += f'|{" " * 77}|\n'
-        cStarMagnitudes = []
-        for i in range(1, 4):
-            if centralStar[i] is None:
-                cStarMagnitudes.append("N/A")
-            else:
-                cStarMagnitudes.append(str(centralStar[i]))
         obj_string += f'| {"Central star magnitudes:":76}|\n'
         obj_string += ('|    '
-                       f'U-mag: {cStarMagnitudes[0]:17}'
-                       f'B-mag: {cStarMagnitudes[1]:17}'
-                       f'V-mag: {cStarMagnitudes[2]:18}'
+                       f'U-mag: {_add_units(dso.cstar_data[1]):17}'
+                       f'B-mag: {_add_units(dso.cstar_data[2]):17}'
+                       f'V-mag: {_add_units(dso.cstar_data[3]):18}'
                        '|\n'
                        )
 
     obj_string += separator
 
-    if identifiers[4] is not None:
+    if dso.identifiers[4] is not None:
         obj_string += f'| {"Other identifiers:":76}|\n'
-        obj_string += _justifyText(", ".join(identifiers[4]))
+        obj_string += _justifyText(", ".join(dso.identifiers[4]))
         obj_string += separator
 
-    notes = dso.getNotes()
-    if notes[0] != "":
+    if dso.notes[0] != "":
         obj_string += f'| {"NED notes:":76}|\n'
-        obj_string += _justifyText(notes[0])
+        obj_string += _justifyText(dso.notes[0])
         obj_string += separator
 
-    if notes[1] != "":
+    if dso.notes[1] != "":
         obj_string += f'| {"OpenNGC notes:":76}|\n'
-        obj_string += _justifyText(notes[1])
+        obj_string += _justifyText(dso.notes[1])
         obj_string += separator
     return obj_string
 
 
-def stats():
+def stats() -> Tuple[str, str, int, tuple]:
     try:
         db = sqlite3.connect(f'file:{DBPATH}?mode=ro', uri=True)
     except sqlite3.Error:
