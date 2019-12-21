@@ -44,4 +44,10 @@ setup(
     tests_require=TESTS_REQUIRE,
     extras_require={'tests': TESTS_REQUIRE},
     python_requires=">=3.6",
+    command_options={
+        'build_sphinx': {
+            'project': ('setup.py', 'PyOngc'),
+            'version': ('setup.py', '0.5'),
+            'release': ('setup.py', ongc.__version__),
+            'source_dir': ('setup.py', 'docs')}},
 )

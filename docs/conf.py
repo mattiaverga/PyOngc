@@ -13,16 +13,13 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('.'))
-sys.path.append('../pyongc/')
+sys.path.append('./pyongc/')
 
 
 # -- Project information -----------------------------------------------------
 
-project = 'PyONGC'
 copyright = '2019, Mattia Verga'
 author = 'Mattia Verga'
-version = '0.3'
-release = '0.3.90'
 
 
 # -- General configuration ---------------------------------------------------
