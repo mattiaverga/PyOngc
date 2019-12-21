@@ -101,7 +101,7 @@ def neighbors(name, radius, catalog):
                                                for dso in object_list))
                 return
 
-        click.secho(f'\n{start_obj.getName()} neighbors from nearest to farthest:', bold=True)
+        click.secho(f'\n{start_obj.name} neighbors from nearest to farthest:', bold=True)
         for dso in object_list:
             click.echo(f'{dso[1]:.2f}° --> {dso[0]}')
         if catalog != 'all':
@@ -122,9 +122,9 @@ def separation(obj1, obj2):
         first = pyongc.Dso(obj1)
         second = pyongc.Dso(obj2)
         click.echo('Apparent angular separation between '
-                   + click.style(first.getName(), fg='cyan')
+                   + click.style(first.name, fg='cyan')
                    + ' and '
-                   + click.style(second.getName(), fg='cyan')
+                   + click.style(second.name, fg='cyan')
                    + ' is:')
         click.secho(pyongc.getSeparation(obj1, obj2, style="text"), bold=True)
     except Exception as e:

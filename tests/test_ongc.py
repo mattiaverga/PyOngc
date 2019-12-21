@@ -53,10 +53,10 @@ class TestDsoClass():
 
     def test_name_recognition_NGC(self):
         """Test the recognition of a NGC/IC identifier."""
-        assert pyongc.Dso('ngc1')._name == 'NGC0001'
-        assert pyongc.Dso('ic 1')._name == 'IC0001'
-        assert pyongc.Dso('ic80 ned1')._name == 'IC0080 NED01'
-        assert pyongc.Dso('ngc61a')._name == 'NGC0061A'
+        assert pyongc.Dso('ngc1').name == 'NGC0001'
+        assert pyongc.Dso('ic 1').name == 'IC0001'
+        assert pyongc.Dso('ic80 ned1').name == 'IC0080 NED01'
+        assert pyongc.Dso('ngc61a').name == 'NGC0061A'
         with pytest.raises(ValueError) as excinfo:
             pyongc.Dso('NGC77777')
         assert 'not recognized' in str(excinfo.value)
@@ -69,61 +69,61 @@ class TestDsoClass():
 
     def test_name_recognition_Barnard(self):
         """Test the recognition of a Barnard identifier."""
-        assert pyongc.Dso('b33')._name == 'B033'
+        assert pyongc.Dso('b33').name == 'B033'
 
     def test_name_recognition_Caldwell(self):
         """Test the recognition of a Caldwell identifier."""
-        assert pyongc.Dso('c9')._name == 'C009'
+        assert pyongc.Dso('c9').name == 'C009'
 
     def test_name_recognition_ESO(self):
         """Test the recognition of a ESO identifier."""
-        assert pyongc.Dso('eso56-115')._name == 'ESO056-115'
+        assert pyongc.Dso('eso56-115').name == 'ESO056-115'
 
     def test_name_recognition_Harvard(self):
         """Test the recognition of a Harvard identifier."""
-        assert pyongc.Dso('H5')._name == 'H05'
+        assert pyongc.Dso('H5').name == 'H05'
 
     def test_name_recognition_Hickson(self):
         """Test the recognition of a HCG identifier."""
-        assert pyongc.Dso('hcg79')._name == 'HCG079'
+        assert pyongc.Dso('hcg79').name == 'HCG079'
 
     def test_name_recognition_LBN(self):
         """Test the recognition of a LBN identifier."""
-        assert pyongc.Dso('LBN741')._name == 'NGC1333'
+        assert pyongc.Dso('LBN741').name == 'NGC1333'
 
     def test_name_recognition_Melotte(self):
         """Test the recognition of a Mel identifier."""
-        assert pyongc.Dso('mel111')._name == 'Mel111'
+        assert pyongc.Dso('mel111').name == 'Mel111'
 
     def test_name_recognition_Messier(self):
         """Test the recognition of a Messier identifier."""
-        assert pyongc.Dso('M1')._name == 'NGC1952'
+        assert pyongc.Dso('M1').name == 'NGC1952'
         with pytest.raises(ValueError) as excinfo:
             pyongc.Dso('M15A')
         assert 'not recognized' in str(excinfo.value)
 
     def test_name_recognition_M102(self):
         """Test M102 == M101."""
-        assert pyongc.Dso('M102')._name == pyongc.Dso('M101')._name
+        assert pyongc.Dso('M102').name == pyongc.Dso('M101').name
 
     def test_name_recognition_MWSC(self):
         """Test the recognition of a MWSC identifier."""
-        assert pyongc.Dso('MWSC146')._name == 'IC0166'
+        assert pyongc.Dso('MWSC146').name == 'IC0166'
 
     def test_name_recognition_PGC(self):
         """Test the recognition of a PGC identifier."""
-        assert pyongc.Dso('PGC10540')._name == 'IC0255'
-        assert pyongc.Dso('leda 10540')._name == 'IC0255'
+        assert pyongc.Dso('PGC10540').name == 'IC0255'
+        assert pyongc.Dso('leda 10540').name == 'IC0255'
 
     def test_name_recognition_UGC(self):
         """Test the recognition of a UGC identifier."""
-        assert pyongc.Dso('UGC9965')._name == 'IC1132'
+        assert pyongc.Dso('UGC9965').name == 'IC1132'
 
     def test_duplicate_resolving(self):
         """Test that a duplicated object is returned as himself when asked to do so."""
-        assert pyongc.Dso('ngc20')._name == 'NGC0006'
-        assert pyongc.Dso('ngc20', returndup=True)._name == 'NGC0020'
-        assert pyongc.Dso('ic555')._name == 'IC0554'
+        assert pyongc.Dso('ngc20').name == 'NGC0006'
+        assert pyongc.Dso('ngc20', returndup=True).name == 'NGC0020'
+        assert pyongc.Dso('ic555').name == 'IC0554'
 
     def test_object_print(self):
         """Test basic object data representation."""
@@ -133,65 +133,66 @@ class TestDsoClass():
         actual = str(obj)
         assert actual == expected
 
-    def test_getDec(self):
+    def test_dec(self):
         """Test Declination as string is returned correctly."""
         obj = pyongc.Dso('IC15')
         expected = '-00:03:40.6'
-        assert obj.getDec() == expected
+        assert obj.dec == expected
         # Nonexistent object
         obj = pyongc.Dso('NGC6991')
         expected = 'N/A'
-        assert obj.getDec() == expected
+        assert obj.dec == expected
 
-    def test_getRA(self):
-        """Test Declination as string is returned correctly."""
+    def test_ra(self):
+        """Test Right Ascension as string is returned correctly."""
         obj = pyongc.Dso('NGC475')
         expected = '01:20:02.00'
-        assert obj.getRA() == expected
+        assert obj.ra == expected
         # Nonexistent object
         obj = pyongc.Dso('NGC6991')
         expected = 'N/A'
-        assert obj.getRA() == expected
+        assert obj.ra == expected
 
-    def test_get_coordinates_successful(self):
-        """Test succesful getCoords() method."""
+    def test_coords(self):
+        """Test coords property."""
         obj = pyongc.Dso('NGC1')
+        np.testing.assert_allclose(obj.coords, ([[0., 7., 15.84], [27., 42., 29.1]]), 1e-12)
 
-        np.testing.assert_allclose(obj.getCoords(), ([[0., 7., 15.84], [27., 42., 29.1]]), 1e-12)
-
-    def test_get_coordinates_nonexistent(self):
-        """Test getCoords() on a Nonexistent object which doesn't have coords."""
+    def test_coords_nonexistent(self):
+        """Test coords property on a Nonexistent object which doesn't have coords."""
         obj = pyongc.Dso('IC1064')
+        assert obj.coords is None
 
-        with pytest.raises(ValueError) as excinfo:
-            obj.getCoords()
-        assert 'Object named IC1064 has no coordinates in database.' in str(excinfo.value)
-
-    def test_get_coordinates_radians_successful(self):
-        """Test succesful getCoords() method."""
+    def test_rad_coords(self):
+        """Test rad_coords."""
         obj = pyongc.Dso('NGC1')
-        np.testing.assert_allclose(obj.getCoordsRad(),
+        np.testing.assert_allclose(obj.rad_coords,
                                    ([0.03169517921621703, 0.48359728358363213]),
                                    1e-12)
 
-    def test_get_PN_central_star_data(self):
-        """Test retrieving Planetary Nebulaes central star data."""
+    def test_rad_coords_nonexistent(self):
+        """Test rad_coords property on a Nonexistent object which doesn't have coords."""
+        obj = pyongc.Dso('IC1064')
+        assert obj.rad_coords is None
+
+    def test_cstar_data(self):
+        """Test retrieving Planetary Nebulae central star data."""
         # With central star identifiers
         obj = pyongc.Dso('NGC1535')
         expected = (['BD -13 842', 'HD 26847'], None, 12.19, 12.18)
-        assert obj.getCStarData() == expected
+        assert obj.cstar_data == expected
         # Without central star identifiers
         obj = pyongc.Dso('IC289')
         expected = (None, None, 15.1, 15.9)
-        assert obj.getCStarData() == expected
+        assert obj.cstar_data == expected
 
-    def test_get_object_identifiers(self):
-        """Test getIdentifiers() method."""
+    def test_identifiers(self):
+        """Test identifiers property."""
         obj = pyongc.Dso('NGC650')
         expected = ('M076', ['NGC0651'], None, ['Barbell Nebula', 'Cork Nebula',
                     'Little Dumbbell Nebula'], ['2MASX J01421808+5134243', 'IRAS 01391+5119',
                     'PN G130.9-10.5'])
-        assert obj.getIdentifiers() == expected
+        assert obj.identifiers == expected
 
         obj = pyongc.Dso('IC5003')
         expected = (None,
@@ -200,29 +201,22 @@ class TestDsoClass():
                     None,
                     ['2MASX J20431434-2951122', 'ESO 463-020', 'ESO-LV 463-0200',
                      'IRAS 20401-3002', 'MCG -05-49-001', 'PGC 065249'])
-        assert obj.getIdentifiers() == expected
+        assert obj.identifiers == expected
 
-    def test_get_magnitudes(self):
-        """Test getMagnitudes() method."""
+    def test_magnitudes(self):
+        """Test magnitudes property."""
         obj = pyongc.Dso('NGC1')
 
         expected = (13.4, None, 10.78, 10.02, 9.76)
-        assert obj.getMagnitudes() == expected
+        assert obj.magnitudes == expected
 
-    def test_get_main_identifier(self):
-        """Test getName() method."""
-        obj = pyongc.Dso('NGC1')
-
-        expected = 'NGC0001'
-        assert obj.getName() == expected
-
-    def test_get_object_notes(self):
-        """Test getNotes() method."""
+    def test_notes(self):
+        """Test notes property."""
         obj = pyongc.Dso('NGC6543')
 
         expected = ('Additional radio sources may contribute to the WMAP flux.',
                     'Dimensions taken from LEDA')
-        assert obj.getNotes() == expected
+        assert obj.notes == expected
 
     def test_xephem_format(self):
         """Test object representation in XEphem format."""
@@ -377,7 +371,7 @@ class TestDsoMethods():
             str_to_coords(bad_coords)
         assert f'This text cannot be recognized as coordinates: {bad_coords}' == str(excinfo.value)
 
-    def test_calculate_separation_raw(self):
+    def test_get_separation_raw(self):
         """Test that the calculated apparent angular separation between two objects
         is correct and reports the raw data to user.
         """
@@ -387,12 +381,20 @@ class TestDsoMethods():
         expected = (4.207483963913541, 2.9580416666666864, -2.9927499999999996)
         assert pyongc.getSeparation(obj1, obj2) == expected
 
-    def test_calculate_separation_friendly(self):
+    def test_get_separation_friendly(self):
         """Test that the calculated apparent angular separation between two objects
         is correct and returns a user friendly output.
         """
         expected = '4° 12m 26.94s'
         assert pyongc.getSeparation('NGC6118', 'NGC6070', style='text') == expected
+
+    def test_get_separation_bad_object(self):
+        """Raise exception if one object hasn't got registered coords."""
+        obj1 = pyongc.Dso('NGC6070')
+        obj2 = pyongc.Dso('IC1064')
+        with pytest.raises(ValueError) as excinfo:
+            pyongc.getSeparation(obj1, obj2)
+        assert 'One object hasn\'t got registered coordinates.' == str(excinfo.value)
 
     def test_get_neighbors(self):
         """Test that neighbors are correctly found and returned."""
@@ -463,10 +465,16 @@ class TestDsoMethods():
         assert neighbors[0][1] == expectedNearestSeparation
 
     def test_get_neighbors_bad_value(self):
-        """Return the right message if search radius value is out of range."""
+        """Raise exception if search radius value is out of range."""
         with pytest.raises(ValueError) as excinfo:
             pyongc.getNeighbors('IC1', 601)
         assert 'The maximum search radius allowed is 10 degrees.' == str(excinfo.value)
+
+    def test_get_neighbors_bad_object(self):
+        """Raise exception if starting object hasn't got registered coords."""
+        with pytest.raises(ValueError) as excinfo:
+            pyongc.getNeighbors('IC1064', 15)
+        assert 'Starting object hasn\'t got registered coordinates.' == str(excinfo.value)
 
     def test_list_all_objects(self):
         """Test the listObjects() method without filters.
@@ -610,7 +618,7 @@ class TestDsoMethods():
     def test_nearby(self):
         """Test that searching neighbors by coords works properly."""
         obj = pyongc.Dso('NGC521')
-        objCoords = ' '.join([obj.getRA(), obj.getDec()])
+        objCoords = ' '.join([obj.ra, obj.dec])
 
         neighbors = pyongc.getNeighbors(obj, 15)
         nearby_objects = pyongc.nearby(objCoords, separation=15)
@@ -625,7 +633,7 @@ class TestDsoMethods():
     def test_nearby_with_filter(self):
         """Test that neighbors are correctly filtered."""
         obj = pyongc.Dso('NGC521')
-        objCoords = ' '.join([obj.getRA(), obj.getDec()])
+        objCoords = ' '.join([obj.ra, obj.dec])
 
         neighbors = pyongc.getNeighbors('NGC521', 15, catalog='IC')
         nearby_objects = pyongc.nearby(objCoords, separation=15, catalog='IC')
@@ -723,14 +731,16 @@ class TestDatabaseIntegrity():
     def test_data_integrity(self):
         allObjects = pyongc.listObjects()
         for item in allObjects:
-            assert type(item.getId()) is int
-            assert item.getType() != ''
-            if item.getType() != 'Nonexistent object':
-                coords = item.getCoords()
-                assert type(coords) is np.ndarray
-                assert coords.shape == (2, 3)
-                assert item.getDec() != ''
-                assert item.getRA() != ''
-                assert item.getConstellation() != ''
-                assert type(item.getDimensions()) is tuple
-                assert type(item.getMagnitudes()) is tuple
+            assert type(item.id) is int
+            assert item.type != ''
+            if item.type != 'Nonexistent object':
+                # Be sure all objects have registered coordinates
+                assert item.coords is not None
+                assert item.coords.shape == (2, 3)
+                assert item.rad_coords is not None
+                assert item.dec != ''
+                assert item.ra != ''
+                assert item.constellation != ''
+            # These are always tuple even if all values are None
+            assert type(item.dimensions) is tuple
+            assert type(item.magnitudes) is tuple
