@@ -42,6 +42,8 @@ import numpy as np
 import re
 import sqlite3
 
+from pyongc import InvalidCoordinates, ObjectNotFound, UnknownIdentifier
+
 __version__ = '0.5.1'
 DBDATE = 20191019  # Version of database data
 DBPATH = resource_filename(__name__, 'ongc.db')
@@ -99,7 +101,7 @@ class Dso(object):
 
         Raises:
             TypeError: If the object identifier is not a string.
-            ValueError: If the object identifier is not found in the database.
+            pyongc.ObjectNotFound: If the object identifier is not found in the database.
         """
         # Make sure user passed a string as parameter
         if not isinstance(name, str):
@@ -120,7 +122,7 @@ class Dso(object):
         objectData = _queryFetchOne(cols, tables, params)
 
         if objectData is None:
-            raise ValueError(f'Object named {objectname} not found in the database.')
+            raise ObjectNotFound(objectname)
 
         # If object is a duplicate then return the main object
         if objectData[2] == "Dup" and not returndup:
@@ -769,7 +771,7 @@ def _recognize_name(text: str) -> Tuple[str, str]:
         `('catalog name', 'object name')`
 
     Raises:
-        ValueError: If the text cannot be recognized as a valid object name.
+        UnknownIdentifier: If the text cannot be recognized as a valid object name.
 
     """
     for cat, pat in PATTERNS.items():
@@ -808,7 +810,7 @@ def _recognize_name(text: str) -> Tuple[str, str]:
             else:
                 objectname = f'{name_parts.group(1).strip()}{name_parts.group(2):0>3}'
             return cat, objectname
-    raise ValueError(f'The name "{text}" is not recognized.')
+    raise UnknownIdentifier(text)
 
 
 def _str_to_coords(text: str) -> np.ndarray:
@@ -823,7 +825,7 @@ def _str_to_coords(text: str) -> np.ndarray:
         A numpy array of shape (2,) with coordinates expressed in radians.
 
     Raises:
-        ValueError: If the text cannot be recognized as valid coordinates.
+        InvalidCoordinates: If the text cannot be recognized as valid coordinates.
 
     """
     pattern = re.compile(r'^(?:(\d{1,2}):(\d{1,2}):(\d{1,2}(?:\.\d{1,2})?))\s'
@@ -841,7 +843,7 @@ def _str_to_coords(text: str) -> np.ndarray:
 
         return np.array([ra, dec])
     else:
-        raise ValueError(f'This text cannot be recognized as coordinates: {text}')
+        raise InvalidCoordinates(f'This text cannot be recognized as coordinates: {text}')
 
 
 def getNeighbors(obj: Union[Dso, str], separation: Union[int, float],
@@ -880,7 +882,7 @@ def getNeighbors(obj: Union[Dso, str], separation: Union[int, float],
 
     Raises:
         ValueError: If the search radius exceeds 10 degrees.
-        ValueError: If the starting object hasn't got registered cordinates.
+        InvalidCoordinates: If the starting object hasn't got registered cordinates.
 
     """
     if not isinstance(obj, Dso):
@@ -888,7 +890,7 @@ def getNeighbors(obj: Union[Dso, str], separation: Union[int, float],
     if separation > 600:
         raise ValueError('The maximum search radius allowed is 10 degrees.')
     if obj.rad_coords is None:
-        raise ValueError('Starting object hasn\'t got registered coordinates.')
+        raise InvalidCoordinates('Starting object hasn\'t got registered coordinates.')
 
     cols = 'objects.name'
     tables = 'objects'
@@ -957,7 +959,7 @@ def getSeparation(obj1: Union[Dso, str], obj2: Union[Dso, str],
     if not isinstance(obj2, Dso):
         obj2 = Dso(obj2)
     if obj1.rad_coords is None or obj2.rad_coords is None:
-        raise ValueError('One object hasn\'t got registered coordinates.')
+        raise InvalidCoordinates('One object hasn\'t got registered coordinates.')
 
     separation = _distance(obj1.rad_coords, obj2.rad_coords)
 

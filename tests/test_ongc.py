@@ -57,13 +57,13 @@ class TestDsoClass():
         assert pyongc.Dso('ic 1').name == 'IC0001'
         assert pyongc.Dso('ic80 ned1').name == 'IC0080 NED01'
         assert pyongc.Dso('ngc61a').name == 'NGC0061A'
-        with pytest.raises(ValueError) as excinfo:
+        with pytest.raises(pyongc.UnknownIdentifier) as excinfo:
             pyongc.Dso('NGC77777')
         assert 'not recognized' in str(excinfo.value)
-        with pytest.raises(ValueError) as excinfo:
+        with pytest.raises(pyongc.UnknownIdentifier) as excinfo:
             pyongc.Dso('NGC0001ABC')
         assert 'not recognized' in str(excinfo.value)
-        with pytest.raises(ValueError) as excinfo:
+        with pytest.raises(pyongc.ObjectNotFound) as excinfo:
             pyongc.Dso('NGC0001A')
         assert 'not found in the database' in str(excinfo.value)
 
@@ -98,7 +98,7 @@ class TestDsoClass():
     def test_name_recognition_Messier(self):
         """Test the recognition of a Messier identifier."""
         assert pyongc.Dso('M1').name == 'NGC1952'
-        with pytest.raises(ValueError) as excinfo:
+        with pytest.raises(pyongc.UnknownIdentifier) as excinfo:
             pyongc.Dso('M15A')
         assert 'not recognized' in str(excinfo.value)
 
@@ -367,7 +367,7 @@ class TestDsoMethods():
     def test_str_to_coords_not_recognized(self):
         """Test failed conversion from string to coordinates."""
         bad_coords = '11:11:11 1:2:3'
-        with pytest.raises(ValueError) as excinfo:
+        with pytest.raises(pyongc.InvalidCoordinates) as excinfo:
             str_to_coords(bad_coords)
         assert f'This text cannot be recognized as coordinates: {bad_coords}' == str(excinfo.value)
 
@@ -392,7 +392,7 @@ class TestDsoMethods():
         """Raise exception if one object hasn't got registered coords."""
         obj1 = pyongc.Dso('NGC6070')
         obj2 = pyongc.Dso('IC1064')
-        with pytest.raises(ValueError) as excinfo:
+        with pytest.raises(pyongc.InvalidCoordinates) as excinfo:
             pyongc.getSeparation(obj1, obj2)
         assert 'One object hasn\'t got registered coordinates.' == str(excinfo.value)
 
@@ -472,7 +472,7 @@ class TestDsoMethods():
 
     def test_get_neighbors_bad_object(self):
         """Raise exception if starting object hasn't got registered coords."""
-        with pytest.raises(ValueError) as excinfo:
+        with pytest.raises(pyongc.InvalidCoordinates) as excinfo:
             pyongc.getNeighbors('IC1064', 15)
         assert 'Starting object hasn\'t got registered coordinates.' == str(excinfo.value)
 
