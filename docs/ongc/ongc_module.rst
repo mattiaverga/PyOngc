@@ -7,3 +7,4 @@ The ongc python module
 
    Classes <classes>
    Functions <functions>
+   Exceptions <exceptions>
