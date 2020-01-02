@@ -189,8 +189,8 @@ class Dso(object):
         If the object is not a PN it returns None:
 
                 >>> s = Dso("ngc1")
-                >>> s.cstar_data
-                None
+                >>> s.cstar_data is None
+                True
 
         Returns:
             `(['cstar identifiers'], cstar UMag, cstar BMag, cstar VMag)`
@@ -381,7 +381,7 @@ class Dso(object):
             `(Bmag, Vmag, Jmag, Hmag, Kmag)`
 
                 >>> s = Dso("ngc1")
-                >>> magnitudes
+                >>> s.magnitudes
                 (13.4, None, 10.78, 10.02, 9.76)
 
         """
@@ -860,8 +860,8 @@ def getNeighbors(obj: Union[Dso, str], separation: Union[int, float],
 
             >>> s1 = Dso("ngc521")
             >>> getNeighbors(s1, 15) #doctest: +ELLIPSIS
-            [(<__main__.Dso object at 0x...>, 0.13726168561780452), \
-(<__main__.Dso object at 0x...>, 0.24140243942744602)]
+            [(<pyongc.ongc.Dso object at 0x...>, 0.13726168561780452), \
+(<pyongc.ongc.Dso object at 0x...>, 0.24140243942744602)]
 
             >>> getNeighbors("ngc521", 1)
             []
@@ -869,7 +869,7 @@ def getNeighbors(obj: Union[Dso, str], separation: Union[int, float],
     The optional "catalog" parameter can be used to filter the search to only NGC or IC objects:
 
             >>> getNeighbors("ngc521", 15, catalog="NGC") #doctest: +ELLIPSIS
-            [(<__main__.Dso object at 0x...>, 0.24140243942744602)]
+            [(<pyongc.ongc.Dso object at 0x...>, 0.24140243942744602)]
 
     Args:
         object: a Dso object or a string which identifies the object
@@ -933,12 +933,12 @@ def getSeparation(obj1: Union[Dso, str], obj2: Union[Dso, str],
             >>> getSeparation("ngc1", "ngc2", style="text")
             '0° 1m 48.32s'
 
-    If one of the objects is not found in the database it returns a ValueError:
+    If one of the objects is not found in the database it returns an ObjectNotFound exception:
 
             >>> getSeparation("ngc1a", "ngc2")
             Traceback (most recent call last):
             ...
-            ValueError: Object named NGC0001A not found in the database.
+            pyongc.exceptions.ObjectNotFound: Object named NGC0001A not found in the database.
 
     Args:
         obj1: first Dso object or string identifier
@@ -1132,14 +1132,14 @@ def nearby(coords_string: str, separation: float = 60,
     or an empty list if no object is found:
 
             >>> nearby('11:08:44 -00:09:01.3') #doctest: +ELLIPSIS
-            [(<__main__.Dso object at 0x...>, 0.1799936868460791), \
-(<__main__.Dso object at 0x...>, 0.7398295985600021), \
-(<__main__.Dso object at 0x...>, 0.9810037613087355)]
+            [(<pyongc.ongc.Dso object at 0x...>, 0.1799936868460791), \
+(<pyongc.ongc.Dso object at 0x...>, 0.7398295985600021), \
+(<pyongc.ongc.Dso object at 0x...>, 0.9810037613087355)]
 
     The optional "catalog" parameter can be used to filter the search to only NGC or IC objects:
 
             >>> nearby('11:08:44 -00:09:01.3', separation=60, catalog='NGC') #doctest: +ELLIPSIS
-            [(<__main__.Dso object at 0x...>, 0.7398295985600021)]
+            [(<pyongc.ongc.Dso object at 0x...>, 0.7398295985600021)]
 
     Args:
         coords: R.A. and Dec of search center
@@ -1202,12 +1202,12 @@ def printDetails(dso: Union[Dso, str]) -> str:
             +-----------------------------------------------------------------------------+
             <BLANKLINE>
 
-    If the object is not found in the database it returns a ValueError:
+    If the object is not found in the database it returns an ObjectNotFound exception:
 
             >>> printDetails("ngc1a")
             Traceback (most recent call last):
             ...
-            ValueError: Object named NGC0001A not found in the database.
+            pyongc.exceptions.ObjectNotFound: Object named NGC0001A not found in the database.
 
     Args:
         dso: a Dso object or a string identifier
@@ -1368,8 +1368,3 @@ def stats() -> Tuple[str, str, int, tuple]:
     totalObjects = sum(objType[1] for objType in typesStats)
 
     return __version__, DBDATE, totalObjects, typesStats
-
-
-if __name__ == "__main__":
-    import doctest
-    doctest.testmod()

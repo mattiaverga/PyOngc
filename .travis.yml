@@ -20,6 +20,7 @@ install:
 script:
   - if [[ $TRAVIS_PYTHON_VERSION == 3.8* ]]; then
     flake8 .;
+    pytest -v --doctest-modules pyongc/;
     pytest -v --cov=pyongc tests/;
     else
     pytest -v;
