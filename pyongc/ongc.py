@@ -27,6 +27,7 @@
 
 Classes provided:
     * Dso: the main class which describe a single row (object) from OpenNGC database.
+    * DsoEncoder: a custom json.dumps serializer for Dso class.
 
 Methods provided:
     * getNeighbors: Find all neighbors of an object within a user selected range.
