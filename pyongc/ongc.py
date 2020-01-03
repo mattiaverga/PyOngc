@@ -27,6 +27,7 @@
 
 Classes provided:
     * Dso: the main class which describe a single row (object) from OpenNGC database.
+    * DsoEncoder: a custom json.dumps serializer for Dso class.
 
 Methods provided:
     * getNeighbors: Find all neighbors of an object within a user selected range.
@@ -38,6 +39,7 @@ Methods provided:
 
 from pkg_resources import resource_filename
 from typing import Generator, List, Tuple, Optional, Union
+import json
 import numpy as np
 import re
 import sqlite3
@@ -486,6 +488,10 @@ class Dso(object):
         """
         return self._type
 
+    def to_json(self) -> str:
+        """Returns object data in JSON format."""
+        return json.dumps(self, cls=DsoEncoder)
+
     def xephemFormat(self) -> str:
         """Returns object data in Xephem format.
 
@@ -498,7 +504,7 @@ class Dso(object):
                 'NGC0001,f|G,00:07:15.84,+27:42:29.1,13.4,,94.20|64.20|112'
 
         Returns:
-            string: Xephem format object description
+            Xephem format object description
 
         """
         line = []
@@ -570,6 +576,65 @@ class Dso(object):
         line.append("|".join(dimensions))
 
         return ",".join(line)
+
+
+class DsoEncoder(json.JSONEncoder):
+    """A custom json.dumps serializer for Dso class."""
+    def default(self, obj: Dso) -> dict:
+        """A custom json.dumps serializer for Dso class.
+
+        Args:
+            obj: the Dso object to encode.
+        """
+        if isinstance(obj, Dso):
+            obj_description = {'id': obj.id,
+                               'name': obj.name,
+                               'type': obj.type,
+                               'coordinates': {'right ascension': obj.ra,
+                                               'declination': obj.dec,
+                                               },
+                               'constellation': obj.constellation,
+                               'dimensions': {'major axis': obj.dimensions[0],
+                                              'minor axis': obj.dimensions[1],
+                                              'position angle': obj.dimensions[2],
+                                              },
+                               'magnitudes': {'B-band': obj.magnitudes[0],
+                                              'V-band': obj.magnitudes[1],
+                                              'J-band': obj.magnitudes[2],
+                                              'H-band': obj.magnitudes[3],
+                                              'K-band': obj.magnitudes[4],
+                                              },
+                               'other identifiers': {'messier': obj.identifiers[0],
+                                                     'NGC': obj.identifiers[1],
+                                                     'IC': obj.identifiers[2],
+                                                     'common names': obj.identifiers[3],
+                                                     'other catalogs': obj.identifiers[4],
+                                                     },
+                               'notes': {'NED notes': obj.notes[0],
+                                         'OpenNGC notes': obj.notes[1]},
+                               }
+
+            if obj.rad_coords is not None:
+                obj_description['coordinates']['radians coords'] = (obj.rad_coords[0],
+                                                                    obj.rad_coords[1]
+                                                                    )
+            else:
+                obj_description['coordinates']['radians coords'] = None
+
+            if obj.type == 'Galaxy':
+                obj_description['surface brightness'] = obj.surface_brightness
+                obj_description['hubble classification'] = obj.hubble
+            elif obj.type == 'Planetary Nebula':
+                obj_description['central star data'] = {
+                    'identifiers': obj.cstar_data[0],
+                    'magnitudes': {'U-band': obj.cstar_data[1],
+                                   'B-band': obj.cstar_data[1],
+                                   'V-band': obj.cstar_data[1],
+                                   },
+                    }
+            return obj_description
+        else:
+            return super().default(obj)
 
 
 def _distance(coords1: np.ndarray, coords2: np.ndarray) -> Tuple[float, float, float]:

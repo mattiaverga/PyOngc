@@ -25,6 +25,7 @@
 
 import pytest
 
+import json
 import mock
 import numpy as np
 
@@ -217,6 +218,42 @@ class TestDsoClass():
         expected = ('Additional radio sources may contribute to the WMAP flux.',
                     'Dimensions taken from LEDA')
         assert obj.notes == expected
+
+    def test_to_json_galaxy(self):
+        """Test galaxy data exported to JSON."""
+        obj = pyongc.Dso('NGC1')
+        json_str = obj.to_json()
+        assert json_str is not None
+
+        obj_dict = json.loads(json_str)
+        assert 'name' in obj_dict
+        assert obj_dict['name'] == 'NGC0001'
+        assert 'surface brightness' in obj_dict
+        assert 'hubble classification' in obj_dict
+        assert obj_dict['coordinates']['radians coords'] is not None
+
+    def test_to_json_PN(self):
+        """Test PN data exported to JSON."""
+        obj = pyongc.Dso('NGC650')
+        json_str = obj.to_json()
+        assert json_str is not None
+
+        obj_dict = json.loads(json_str)
+        assert 'name' in obj_dict
+        assert obj_dict['name'] == 'NGC0650'
+        assert 'central star data' in obj_dict
+        assert obj_dict['coordinates']['radians coords'] is not None
+
+    def test_to_json_no_coords(self):
+        """Test object with no coords exported to JSON."""
+        obj = pyongc.Dso('NGC6991')
+        json_str = obj.to_json()
+        assert json_str is not None
+
+        obj_dict = json.loads(json_str)
+        assert 'name' in obj_dict
+        assert obj_dict['name'] == 'NGC6991'
+        assert obj_dict['coordinates']['radians coords'] is None
 
     def test_xephem_format(self):
         """Test object representation in XEphem format."""
