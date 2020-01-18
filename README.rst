@@ -75,4 +75,7 @@ License
 
 PyOngc is licensed under MIT.
 
-
+.. image:: https://www.ko-fi.com/img/githubbutton_sm.svg
+   :target: https://ko-fi.com/E1E41AH8L
+.. image:: https://liberapay.com/assets/widgets/donate.svg
+   :target: https://liberapay.com/mattia/donate
