@@ -571,7 +571,7 @@ class TestDsoMethods():
         """Test the listObjects() method to list objects without size."""
         objectList = pyongc.listObjects(maxsize=0)
 
-        assert len(objectList) == 2020
+        assert len(objectList) == 2021
 
     def test_list_objects_filter_mag(self):
         """Test the listObjects() method with magnitudes filters applied."""

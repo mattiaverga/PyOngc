@@ -46,8 +46,8 @@ import sqlite3
 
 from pyongc import InvalidCoordinates, ObjectNotFound, UnknownIdentifier
 
-__version__ = '0.5.1'
-DBDATE = 20191019  # Version of database data
+__version__ = '0.5.2'
+DBDATE = 20200329  # Version of database data
 DBPATH = resource_filename(__name__, 'ongc.db')
 PATTERNS = {'NGC|IC': r'^((?:NGC|IC)\s?)(\d{1,4})\s?((NED)(\d{1,2})|[A-Z]{1,2})?$',
             'Messier': r'^(M\s?)(\d{1,3})$',
