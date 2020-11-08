@@ -15,6 +15,7 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
     'Topic :: Database',
     'Topic :: Scientific/Engineering :: Astronomy'
 ]
@@ -47,7 +48,7 @@ setup(
     command_options={
         'build_sphinx': {
             'project': ('setup.py', 'PyOngc'),
-            'version': ('setup.py', '0.5'),
+            'version': ('setup.py', '0.6'),
             'release': ('setup.py', ongc.__version__),
             'source_dir': ('setup.py', 'docs')}},
 )
