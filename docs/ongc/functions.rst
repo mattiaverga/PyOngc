@@ -3,6 +3,8 @@ Functions provided by ongc module
 
 Public Functions
 ----------------
+.. autofunction:: ongc.get
+
 .. autofunction:: ongc.getNeighbors
 
 .. autofunction:: ongc.getSeparation

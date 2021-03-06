@@ -41,7 +41,7 @@ Usage
 ::
 
         >>> import pyongc
-        >>> DSOobject = pyongc.Dso("NGC7000")
+        >>> DSOobject = pyongc.get("NGC7000")
         >>> DSOobject.coords
         array([[20.  , 59.  , 17.14],
                [44.  , 31.  , 43.6 ]])

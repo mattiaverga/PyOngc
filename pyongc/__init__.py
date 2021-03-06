@@ -5,4 +5,4 @@
 __all__ = ['ongc', 'exceptions']
 
 from .exceptions import InvalidCoordinates, ObjectNotFound, UnknownIdentifier
-from .ongc import Dso, getNeighbors, getSeparation, listObjects, nearby, printDetails, stats
+from .ongc import Dso, get, getNeighbors, getSeparation, listObjects, nearby, printDetails, stats
