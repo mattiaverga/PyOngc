@@ -408,6 +408,24 @@ class TestDsoMethods():
             str_to_coords(bad_coords)
         assert f'This text cannot be recognized as coordinates: {bad_coords}' == str(excinfo.value)
 
+    def test_get_return_obj(self):
+        """The method should return the required object."""
+        obj = pyongc.get('NGC1')
+        
+        assert obj.name == 'NGC0001'
+
+    def test_get_invalid_identifier(self):
+        """An invalid identifier should return None."""
+        obj = pyongc.get('NGC100000')
+        
+        assert obj == None
+
+    def test_get_not_found(self):
+        """If the object is not found should return None."""
+        obj = pyongc.get('NGC1a')
+        
+        assert obj == None
+
     def test_get_separation_raw(self):
         """Test that the calculated apparent angular separation between two objects
         is correct and reports the raw data to user.

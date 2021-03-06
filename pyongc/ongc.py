@@ -46,7 +46,7 @@ import sqlite3
 
 from pyongc import InvalidCoordinates, ObjectNotFound, UnknownIdentifier
 
-__version__ = '0.6.0'
+__version__ = '0.6.1'
 DBDATE = 20210306  # Version of database data
 DBPATH = resource_filename(__name__, 'ongc.db')
 PATTERNS = {'NGC|IC': r'^((?:NGC|IC)\s?)(\d{1,4})\s?((NED)(\d{1,2})|[A-Z]{1,2})?$',
@@ -909,6 +909,25 @@ def _str_to_coords(text: str) -> np.ndarray:
         return np.array([ra, dec])
     else:
         raise InvalidCoordinates(f'This text cannot be recognized as coordinates: {text}')
+
+
+def get(name: str) -> Optional[Dso]:
+    """Search and return an object from the database.
+
+    If an object name isn't recognized, it will return None.
+
+    Args:
+        name: the name of the object
+
+    Returns:
+        Dso or None.
+
+    """
+    try:
+        obj = Dso(name)
+    except (ObjectNotFound, UnknownIdentifier):
+        return None
+    return obj
 
 
 def getNeighbors(obj: Union[Dso, str], separation: Union[int, float],
