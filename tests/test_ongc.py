@@ -310,7 +310,7 @@ class TestDsoClass():
 
         # SNR
         obj = pyongc.Dso('NGC1952')
-        expected = 'NGC1952|M001,f|R,05:34:31.97,+22:00:52.1,8.4,,480.00|240.00|'
+        expected = 'NGC1952|M001|Crab Nebula,f|R,05:34:31.97,+22:00:52.1,8.4,,480.00|240.00|'
         assert obj.xephemFormat() == expected
 
         # Star
@@ -577,7 +577,7 @@ class TestDsoMethods():
         """Test the listObjects() method with constellation filter applied."""
         objectList = pyongc.listObjects(constellation=['and', 'Boo', ])
 
-        assert len(objectList) == 738
+        assert len(objectList) == 736
 
     def test_list_objects_filter_size(self):
         """Test the listObjects() method with size filters applied."""
@@ -650,13 +650,13 @@ class TestDsoMethods():
         """Test the listObjects() method to list objects with common name."""
         objectList = pyongc.listObjects(withname=True)
 
-        assert len(objectList) == 132
+        assert len(objectList) == 142
 
     def test_list_objects_without_name(self):
         """Test the listObjects() method to list objects without common name."""
         objectList = pyongc.listObjects(withname=False)
 
-        assert len(objectList) == 13846
+        assert len(objectList) == 13836
 
     def test_list_objects_wrong_filter(self):
         """Test the listObjects() method when an unsupported filter is used."""
