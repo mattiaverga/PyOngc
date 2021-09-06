@@ -537,7 +537,7 @@ class TestDsoMethods():
         """
         objectList = pyongc.listObjects()
 
-        assert len(objectList) == 13978
+        assert len(objectList) == 13981
         assert type(objectList[0]) is pyongc.Dso
 
     def test_list_objects_filter_catalog_NGC(self):
@@ -583,7 +583,7 @@ class TestDsoMethods():
         """Test the listObjects() method with size filters applied."""
         objectList = pyongc.listObjects(minsize=15, maxsize=20)
 
-        assert len(objectList) == 40
+        assert len(objectList) == 41
 
     def test_list_objects_with_no_size(self):
         """Test the listObjects() method to list objects without size."""
@@ -650,7 +650,7 @@ class TestDsoMethods():
         """Test the listObjects() method to list objects with common name."""
         objectList = pyongc.listObjects(withname=True)
 
-        assert len(objectList) == 142
+        assert len(objectList) == 145
 
     def test_list_objects_without_name(self):
         """Test the listObjects() method to list objects without common name."""

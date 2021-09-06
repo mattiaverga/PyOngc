@@ -166,7 +166,7 @@ def test_search():
     result = runner.invoke(ongc.search)
     assert result.exit_code == 0
     assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
-    assert result.output.endswith('NGC7840, Galaxy in Psc\n')
+    assert result.output.endswith('UGC05470, Galaxy in Leo\n')
 
 
 def test_search_with_catalog_filter():
@@ -214,7 +214,7 @@ def test_search_with_minsize_filter():
     result = runner.invoke(ongc.search, ['--minsize=5'])
     assert result.exit_code == 0
     assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
-    assert result.output.endswith('Mel111, Open Cluster in Com\n')
+    assert result.output.endswith('UGC05470, Galaxy in Leo\n')
 
 
 def test_search_with_maxsize_filter():
