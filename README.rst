@@ -10,10 +10,6 @@ A python interface for accessing OpenNGC database data
 .. image:: https://img.shields.io/pypi/pyversions/PyOngc.svg
 
 
-.. image:: https://travis-ci.com/mattiaverga/PyOngc.svg?branch=master
-   :target: https://travis-ci.com/mattiaverga/PyOngc
-.. image:: https://ci.appveyor.com/api/projects/status/ee72q5vkbi7quri6/branch/master?svg=true
-   :target: https://ci.appveyor.com/project/mattiaverga/pyongc
 .. image:: https://coveralls.io/repos/github/mattiaverga/PyOngc/badge.svg?branch=master
    :target: https://coveralls.io/github/mattiaverga/PyOngc?branch=master
 
@@ -74,8 +70,3 @@ License
 -------
 
 PyOngc is licensed under MIT.
-
-.. image:: https://www.ko-fi.com/img/githubbutton_sm.svg
-   :target: https://ko-fi.com/E1E41AH8L
-.. image:: https://liberapay.com/assets/widgets/donate.svg
-   :target: https://liberapay.com/mattia/donate
