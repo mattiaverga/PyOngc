@@ -10,6 +10,8 @@ A python interface for accessing OpenNGC database data
 .. image:: https://img.shields.io/pypi/pyversions/PyOngc.svg
 
 
+.. image:: https://github.com/mattiaverga/PyOngc/actions/workflows/python-package.yml/badge.svg?branch=master
+   :target: https://github.com/mattiaverga/PyOngc/actions/workflows/python-package.yml
 .. image:: https://coveralls.io/repos/github/mattiaverga/PyOngc/badge.svg?branch=master
    :target: https://coveralls.io/github/mattiaverga/PyOngc?branch=master
 
