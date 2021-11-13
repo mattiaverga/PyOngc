@@ -140,7 +140,7 @@ class TestDsoClass():
         expected = '-00:03:40.6'
         assert obj.dec == expected
         # Nonexistent object
-        obj = pyongc.Dso('NGC6991')
+        obj = pyongc.Dso('IC1064')
         expected = 'N/A'
         assert obj.dec == expected
 
@@ -150,7 +150,7 @@ class TestDsoClass():
         expected = '01:20:02.00'
         assert obj.ra == expected
         # Nonexistent object
-        obj = pyongc.Dso('NGC6991')
+        obj = pyongc.Dso('IC1064')
         expected = 'N/A'
         assert obj.ra == expected
 
@@ -216,7 +216,8 @@ class TestDsoClass():
         obj = pyongc.Dso('NGC6543')
 
         expected = ('Additional radio sources may contribute to the WMAP flux.',
-                    'Dimensions taken from LEDA')
+                    'Diameter measured by the author from DSS2 images. The fainter '
+                    'outer shell has a diameter of 5.5 arcmin ca.')
         assert obj.notes == expected
 
     def test_to_json_galaxy(self):
@@ -246,13 +247,13 @@ class TestDsoClass():
 
     def test_to_json_no_coords(self):
         """Test object with no coords exported to JSON."""
-        obj = pyongc.Dso('NGC6991')
+        obj = pyongc.Dso('IC1064')
         json_str = obj.to_json()
         assert json_str is not None
 
         obj_dict = json.loads(json_str)
         assert 'name' in obj_dict
-        assert obj_dict['name'] == 'NGC6991'
+        assert obj_dict['name'] == 'IC1064'
         assert obj_dict['coordinates']['radians coords'] is None
 
     def test_xephem_format(self):
@@ -314,8 +315,8 @@ class TestDsoClass():
         assert obj.xephemFormat() == expected
 
         # Star
-        obj = pyongc.Dso('IC117')
-        expected = 'IC0117,f|S,01:27:25.41,-01:51:36.7,11.22,,||'
+        obj = pyongc.Dso('IC124')
+        expected = 'IC0124,f|S,01:29:09.08,-01:56:13.3,14.4,,||'
         assert obj.xephemFormat() == expected
 
         # Star cluster + nebula
@@ -537,14 +538,14 @@ class TestDsoMethods():
         """
         objectList = pyongc.listObjects()
 
-        assert len(objectList) == 13981
+        assert len(objectList) == 14011
         assert type(objectList[0]) is pyongc.Dso
 
     def test_list_objects_filter_catalog_NGC(self):
         """Test the listObjects() method with catalog filter applied."""
         objectList = pyongc.listObjects(catalog='NGC')
 
-        assert len(objectList) == 8343
+        assert len(objectList) == 8373
 
     def test_list_objects_filter_catalog_IC(self):
         """Test the listObjects() method with catalog filter applied."""
@@ -564,20 +565,20 @@ class TestDsoMethods():
         """
         objectList = pyongc.listObjects(type=['Dup', ])
 
-        assert len(objectList) == 636
+        assert len(objectList) == 651
         assert str(objectList[0]) == 'IC0011, Duplicated record in Cas'
 
     def test_list_objects_filter_multiple_types(self):
         """Test the listObjects() method with multiple types filter."""
         objectList = pyongc.listObjects(type=['*', '**', ])
 
-        assert len(objectList) == 792
+        assert len(objectList) == 786
 
     def test_list_objects_filter_constellation(self):
         """Test the listObjects() method with constellation filter applied."""
         objectList = pyongc.listObjects(constellation=['and', 'Boo', ])
 
-        assert len(objectList) == 736
+        assert len(objectList) == 738
 
     def test_list_objects_filter_size(self):
         """Test the listObjects() method with size filters applied."""
@@ -589,7 +590,7 @@ class TestDsoMethods():
         """Test the listObjects() method to list objects without size."""
         objectList = pyongc.listObjects(maxsize=0)
 
-        assert len(objectList) == 2021
+        assert len(objectList) == 2008
 
     def test_list_objects_filter_mag(self):
         """Test the listObjects() method with magnitudes filters applied."""
@@ -656,7 +657,7 @@ class TestDsoMethods():
         """Test the listObjects() method to list objects without common name."""
         objectList = pyongc.listObjects(withname=False)
 
-        assert len(objectList) == 13836
+        assert len(objectList) == 13866
 
     def test_list_objects_wrong_filter(self):
         """Test the listObjects() method when an unsupported filter is used."""
@@ -756,7 +757,7 @@ class TestDsoMethods():
         obj_details = pyongc.printDetails('NGC6523')
         expected = (
             "+-----------------------------------------------------------------------------+\n"
-            "| Id: 12544     Name: NGC6523           Type: Nebula                          |\n"
+            "| Id: 12572     Name: NGC6523           Type: Nebula                          |\n"
             "| R.A.: 18:03:41.27      Dec.: -24:22:48.6      Constellation: Sgr            |\n"
             "| Also known as:                                                              |\n"
             "|    M008, NGC6533                                                            |\n"
