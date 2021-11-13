@@ -266,7 +266,7 @@ class Dso(object):
                 >>> s.dec
                 '+27:42:29.1'
 
-                >>> s = Dso("ngc6991")
+                >>> s = Dso("ic1064")
                 >>> s.dec
                 'N/A'
 
@@ -414,7 +414,8 @@ class Dso(object):
                 >>> s = Dso("ngc6543")
                 >>> s.notes
                 ('Additional radio sources may contribute to the WMAP flux.', \
-'Dimensions taken from LEDA')
+'Diameter measured by the author from DSS2 images. The fainter outer shell has a \
+diameter of 5.5 arcmin ca.')
 
         """
         return self._nednotes, self._ongcnotes
@@ -432,7 +433,7 @@ class Dso(object):
                 >>> s.ra
                 '00:07:15.84'
 
-                >>> s = Dso("ngc6991")
+                >>> s = Dso("ic1064")
                 >>> s.ra
                 'N/A'
 
@@ -1065,13 +1066,13 @@ def listObjects(**kwargs) -> List[Dso]:
 
             >>> objectList = listObjects()
             >>> len(objectList)
-            13978
+            14011
 
     Filters are combined with "AND" in the query; only one value for filter is allowed:
 
             >>> objectList = listObjects(catalog="NGC", constellation=["Boo", ])
             >>> len(objectList)
-            281
+            280
 
     Duplicated objects are not resolved to main objects:
 
@@ -1083,7 +1084,7 @@ def listObjects(**kwargs) -> List[Dso]:
 
             >>> objectList = listObjects(maxsize=0)
             >>> len(objectList)
-            2020
+            2008
 
     Args:
         catalog (string, optional): filter for catalog. [NGC|IC|M]
