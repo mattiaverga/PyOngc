@@ -864,7 +864,7 @@ def _recognize_name(text: str) -> Tuple[str, str]:
                 objectname = f'{name_parts.group(1).strip()}{name_parts.group(2):0>2}'
             elif cat == 'Messier':
                 # We need to return only the numeric part of the name
-                objectname = (f'101' if name_parts.group(2) == '102'
+                objectname = ('101' if name_parts.group(2) == '102'
                               else f'{name_parts.group(2):0>3}'
                               )
             elif cat == 'UGC':

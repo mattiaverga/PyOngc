@@ -84,7 +84,7 @@ def test_stats_database_error():
     runner = CliRunner()
     result = runner.invoke(ongc.stats)
     assert result.exit_code == 0
-    assert 'ERROR: There was a problem accessing database file at badpath\n'in result.output
+    assert 'ERROR: There was a problem accessing database file at badpath\n' in result.output
 
 
 def test_neighbors():
@@ -329,7 +329,7 @@ def test_search_database_error():
     runner = CliRunner()
     result = runner.invoke(ongc.search)
     assert result.exit_code == 0
-    assert 'ERROR: There was a problem accessing database file at badpath\n'in result.output
+    assert 'ERROR: There was a problem accessing database file at badpath\n' in result.output
 
 
 def test_nearby():

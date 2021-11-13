@@ -40,7 +40,7 @@ class InvalidCoordinates(Exception):
         if text is not None:
             super().__init__(text)
         else:
-            super().__init__(f'Coordinates not recognized.')
+            super().__init__('Coordinates not recognized.')
 
 
 class ObjectNotFound(Exception):
@@ -56,7 +56,7 @@ class ObjectNotFound(Exception):
         if name is not None:
             super().__init__(f'Object named {name} not found in the database.')
         else:
-            super().__init__(f'Object not found in the database.')
+            super().__init__('Object not found in the database.')
 
 
 class UnknownIdentifier(Exception):
@@ -70,4 +70,4 @@ class UnknownIdentifier(Exception):
         if text is not None:
             super().__init__(f'The name "{text}" is not recognized.')
         else:
-            super().__init__(f'Unrecognized object name.')
+            super().__init__('Unrecognized object name.')
