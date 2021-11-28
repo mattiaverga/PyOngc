@@ -1,7 +1,10 @@
 .directory
+*.egg-info
 *.pyc
 */__pycache__/
 .pytest_cache/
+build/
+dist/
 docs/_*/
 venv/
 Pipfile.lock
