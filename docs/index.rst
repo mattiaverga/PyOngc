@@ -8,9 +8,7 @@ Welcome to PyONGC's documentation!
 
 .. toctree::
    :maxdepth: 3
-   :caption: Contents:
-   :includehidden:
 
    readme
-   The Python module <ongc/ongc_module>
+   Python modules <modules/index>
    The CLI interface <cli/ongc>
