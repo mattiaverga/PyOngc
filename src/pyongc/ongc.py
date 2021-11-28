@@ -211,12 +211,12 @@ class Dso(object):
     def constellation(self) -> str:
         """The constellation where the object is located.
 
-        Returns:
-            Name of the constellation in IAU 3-letter form.
-
                 >>> s = Dso("ngc1")
                 >>> s.constellation
                 'Peg'
+
+        Returns:
+            Name of the constellation in IAU 3-letter form.
 
         """
         return self._const
@@ -225,14 +225,14 @@ class Dso(object):
     def coords(self) -> Optional[np.ndarray]:
         """Returns object coordinates in HMS and DMS as numpy array or None.
 
-        Returns:
-            A numpy array of shape (2, 3) with R.A. and Declination
-            values expressed in HMS and DMS.
-
                 >>> s = Dso("ngc1")
                 >>> s.coords
                 array([[ 0.  ,  7.  , 15.84],
                        [27.  , 42.  , 29.1 ]])
+
+        Returns:
+            A numpy array of shape (2, 3) with R.A. and Declination
+            values expressed in HMS and DMS.
 
         """
         if self._ra is None or self._dec is None:
@@ -258,16 +258,16 @@ class Dso(object):
 
         If you need the raw data to use in calculations use `coords` or `rad_coords` properties.
 
+            >>> s = Dso("ngc1")
+            >>> s.dec
+            '+27:42:29.1'
+
+            >>> s = Dso("ic1064")
+            >>> s.dec
+            'N/A'
+
         Returns:
-            `'+/-DD:MM:SS.s'` or `'N/A'` if the object has no coordinates.
-
-                >>> s = Dso("ngc1")
-                >>> s.dec
-                '+27:42:29.1'
-
-                >>> s = Dso("ic1064")
-                >>> s.dec
-                'N/A'
+            string: `'+/-DD:MM:SS.s'` or `'N/A'` if the object has no coordinates.
 
         """
         if self.coords is not None:
@@ -281,12 +281,12 @@ class Dso(object):
 
         Where a value is not available a None type is returned.
 
-        Returns:
-            (MajAx, MinAx, P.A.)
-
                 >>> s = Dso("ngc1")
                 >>> s.dimensions
                 (1.57, 1.07, 112)
+
+        Returns:
+            (MajAx, MinAx, P.A.)
 
         """
         return self._majax, self._minax, self._pa
@@ -295,12 +295,12 @@ class Dso(object):
     def hubble(self) -> str:
         """The Hubble classification of a galaxy.
 
-        Returns:
-            string: The Hubble classification code of a galaxy or empty string.
-
                 >>> s = Dso("ngc1")
                 >>> s.hubble
                 'Sb'
+
+        Returns:
+            string: The Hubble classification code of a galaxy or empty string.
 
         """
         return self._hubble
@@ -329,9 +329,6 @@ class Dso(object):
         The first element of the tuple will be a string with the Messier name or None.
         The other fields will be lists of cross identifiers or None.
 
-        Returns:
-            `('Messier', ['NGC'], ['IC'], ['common names'], ['other'])`
-
                 >>> s = Dso("ngc1976")
                 >>> s.identifiers
                 ('M042', None, None, ['Great Orion Nebula', 'Orion Nebula'], \
@@ -340,6 +337,9 @@ class Dso(object):
                 >>> s = Dso("mel22")
                 >>> s.identifiers
                 ('M045', None, None, ['Pleiades'], ['MWSC 0305'])
+
+        Returns:
+            `('Messier', ['NGC'], ['IC'], ['common names'], ['other'])`
 
         """
         if self._messier == "":
@@ -378,12 +378,12 @@ class Dso(object):
 
         Where a value is not available a None type is returned
 
-        Returns:
-            `(Bmag, Vmag, Jmag, Hmag, Kmag)`
-
                 >>> s = Dso("ngc1")
                 >>> s.magnitudes
                 (13.4, None, 10.78, 10.02, 9.76)
+
+        Returns:
+            `(Bmag, Vmag, Jmag, Hmag, Kmag)`
 
         """
         return self._bmag, self._vmag, self._jmag, self._hmag, self._kmag
@@ -392,13 +392,13 @@ class Dso(object):
     def name(self) -> str:
         """The main identifier of the object.
 
-        Returns:
-            The main identifier of the object, as listed in ONGC database
-            or its addendum.
-
                 >>> s = Dso("m45")
                 >>> s.name
                 'Mel022'
+
+        Returns:
+            The main identifier of the object, as listed in ONGC database
+            or its addendum.
 
         """
         return self._name
@@ -407,14 +407,14 @@ class Dso(object):
     def notes(self) -> Tuple[str, str]:
         """Returns notes from NED and from ONGC.
 
-        Returns:
-            `('nednotes', 'ongcnotes')`
-
                 >>> s = Dso("ngc6543")
                 >>> s.notes
                 ('Additional radio sources may contribute to the WMAP flux.', \
 'Diameter measured by the author from DSS2 images. The fainter outer shell has a \
 diameter of 5.5 arcmin ca.')
+
+        Returns:
+            `('nednotes', 'ongcnotes')`
 
         """
         return self._nednotes, self._ongcnotes
@@ -425,16 +425,16 @@ diameter of 5.5 arcmin ca.')
 
         If you need the raw data to use in calculations use `coords` or `rad_coords` properties.
 
+            >>> s = Dso("ngc1")
+            >>> s.ra
+            '00:07:15.84'
+
+            >>> s = Dso("ic1064")
+            >>> s.ra
+            'N/A'
+
         Returns:
-            `'HH:MM:SS.ss'` or `'N/A'` if the object has no coordinates.
-
-                >>> s = Dso("ngc1")
-                >>> s.ra
-                '00:07:15.84'
-
-                >>> s = Dso("ic1064")
-                >>> s.ra
-                'N/A'
+            string: `'HH:MM:SS.ss'` or `'N/A'` if the object has no coordinates.
 
         """
         if self.coords is not None:
@@ -446,13 +446,13 @@ diameter of 5.5 arcmin ca.')
     def rad_coords(self) -> Optional[np.ndarray]:
         """Returns object coordinates in radians as numpy array or None.
 
-        Returns:
-            A numpy array of shape (2,) with R.A. and Declination
-            values expressed in radians.
-
                 >>> s = Dso("ngc1")
                 >>> s.rad_coords
                 array([0.03169518, 0.48359728])
+
+        Returns:
+            A numpy array of shape (2,) with R.A. and Declination
+            values expressed in radians.
 
         """
         if self._ra is None or self._dec is None:
@@ -464,12 +464,12 @@ diameter of 5.5 arcmin ca.')
     def surface_brightness(self) -> Optional[float]:
         """The surface brightness value of a galaxy.
 
-        Returns:
-            Object's surface brightness
-
                 >>> s = Dso("ngc1")
                 >>> s.surface_brightness
                 23.13
+
+        Returns:
+            float: Object's surface brightness
 
         """
         return self._sbrightn
@@ -478,12 +478,12 @@ diameter of 5.5 arcmin ca.')
     def type(self) -> str:
         """Object type.
 
-        Returns:
-            Object type
-
                 >>> s = Dso("ngc1")
                 >>> s.type
                 'Galaxy'
+
+        Returns:
+            string: Object type
 
         """
         return self._type
