@@ -27,8 +27,8 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install .[data]
-        python -m pip install .[development]
+        python -m pip install -e .[data]
+        python -m pip install -e .[development]
     - name: Lint with flake8
       run: |
         flake8 .
@@ -38,10 +38,14 @@ jobs:
     - name: Test with pytest
       run: |
         pytest -v --cov=pyongc tests/
-    - name: Upload coverage data to coveralls.io
+    - name: Convert coverage data for uploading to coveralls.io
       if: ${{ matrix.python-version == 3.10}}
       run: |
-        python -m pip install coveralls
-        coveralls --service=github
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        python -m pip install coveragepy-lcov
+        coveragepy-lcov --data_file_path .coverage --output_file_path lcov.info
+    - name: Upload coverage results
+      if: ${{ matrix.python-version == 3.10}}
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        path-to-lcov: lcov.info
