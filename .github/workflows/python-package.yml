@@ -27,6 +27,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
+        python -m pip install .[data]
         python -m pip install .[development]
     - name: Lint with flake8
       run: |
@@ -36,7 +37,7 @@ jobs:
         pytest -v --doctest-modules src/pyongc/
     - name: Test with pytest
       run: |
-        pytest -v --cov=pyongc test/
+        pytest -v --cov=pyongc tests/
     - name: Upload coverage data to coveralls.io
       if: ${{ matrix.python-version == 3.10}}
       run: |

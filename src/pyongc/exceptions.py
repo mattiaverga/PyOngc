@@ -39,7 +39,7 @@ class InvalidCoordinates(Exception):
     def __init__(self, text: Optional[str] = None):
         if text is not None:
             super().__init__(text)
-        else:
+        else:  # pragma: no cover
             super().__init__('Coordinates not recognized.')
 
 
@@ -55,7 +55,7 @@ class ObjectNotFound(Exception):
     def __init__(self, name: Optional[str] = None):
         if name is not None:
             super().__init__(f'Object named {name} not found in the database.')
-        else:
+        else:  # pragma: no cover
             super().__init__('Object not found in the database.')
 
 
@@ -69,5 +69,5 @@ class UnknownIdentifier(Exception):
     def __init__(self, text: Optional[str] = None):
         if text is not None:
             super().__init__(f'The name "{text}" is not recognized.')
-        else:
+        else:  # pragma: no cover
             super().__init__('Unrecognized object name.')
