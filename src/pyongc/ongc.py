@@ -37,17 +37,15 @@ Methods provided:
     * printDetails: Prints a detailed description of the object in a formatted output.
 """
 
-from pkg_resources import resource_filename
 from typing import Generator, List, Tuple, Optional, Union
 import json
 import numpy as np
 import re
 import sqlite3
 
-from pyongc import __version__ as version, DBDATE
+from pyongc import __version__ as version, DBDATE, DBPATH
 from pyongc.exceptions import InvalidCoordinates, ObjectNotFound, UnknownIdentifier
 
-DBPATH = resource_filename(__name__, 'ongc.db')
 PATTERNS = {'NGC|IC': r'^((?:NGC|IC)\s?)(\d{1,4})\s?((NED)(\d{1,2})|[A-Z]{1,2})?$',
             'Messier': r'^(M\s?)(\d{1,3})$',
             'Barnard': r'^(B\s?)(\d{1,3})$',
@@ -771,7 +769,7 @@ def _queryFetchOne(cols: str, tables: str, params: str) -> tuple:
                        f'WHERE {params}'
                        )
         objectData = cursor.fetchone()
-    except Exception as err:
+    except Exception as err:  # pragma: no cover
         raise err
     finally:
         db.close()
@@ -817,7 +815,7 @@ def _queryFetchMany(cols: str, tables: str, params: str,
             if objectList == []:
                 break
             yield objectList[0]
-    except Exception as err:
+    except Exception as err:  # pragma: no cover
         raise err
     finally:
         db.close()
@@ -1444,7 +1442,7 @@ def stats() -> Tuple[str, str, int, tuple]:
                        'FROM objects JOIN objTypes ON objects.type = objTypes.type '
                        'GROUP BY objects.type')
         typesStats = cursor.fetchall()
-    except Exception as err:
+    except Exception as err:  # pragma: no cover
         raise err
     finally:
         db.close()
