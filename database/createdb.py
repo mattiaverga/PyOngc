@@ -118,7 +118,8 @@ try:
                    'identifiers TEXT, '
                    'commonnames TEXT, '
                    'nednotes TEXT, '
-                   'ongcnotes TEXT)')
+                   'ongcnotes TEXT, '
+                   'notngc BOOL DEFAULT FALSE)')
 
     # Create object identifiers table
     cursor.execute('DROP TABLE IF EXISTS objIdentifiers')
@@ -128,6 +129,7 @@ try:
                    'identifier TEXT NOT NULL UNIQUE)')
 
     for filename in ('NGC.csv', 'addendum.csv'):
+        notngc = True if filename != 'NGC.csv' else False
         with open(filename, 'r') as csvFile:
             reader = csv.reader(csvFile, delimiter=';')
             # List of columns that are not text and should be transformed in NULL if empty
@@ -155,12 +157,12 @@ try:
                 cursor.execute('INSERT INTO objects(name,type,ra,dec,const,majax,minax,pa,bmag,'
                                'vmag,jmag,hmag,kmag,sbrightn,hubble,cstarumag,cstarbmag,'
                                'cstarvmag,messier,ngc,ic,cstarnames,identifiers,commonnames,'
-                               'nednotes,ongcnotes) '
-                               'VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+                               'nednotes,ongcnotes,notngc) '
+                               'VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
                                (line[0], line[1], ra_rad, dec_rad, line[4], line[5], line[6],
                                 line[7], line[8], line[9], line[10], line[11], line[12], line[13],
                                 line[14], line[15], line[16], line[17], line[18], line[19],
-                                line[20], line[21], line[22], line[23], line[24], line[25])
+                                line[20], line[21], line[22], line[23], line[24], line[25], notngc)
                                )
                 cursor.execute('INSERT INTO objIdentifiers(name,identifier) VALUES(?,?)',
                                (line[0], line[0].upper())

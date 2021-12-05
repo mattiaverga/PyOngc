@@ -45,7 +45,7 @@ class TestDataFrames():
         """Test all() method."""
         objs = data.all()
         assert type(objs) == pd.core.frame.DataFrame
-        assert objs[objs['type'] == 'Dup'].shape == (651, 27)
+        assert objs[objs['type'] == 'Dup'].shape == (651, 28)
 
     def test_clusters_none(self):
         """Calling clusters with all parameters set to False should return None."""
