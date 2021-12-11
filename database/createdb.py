@@ -131,22 +131,23 @@ try:
     for filename in ('NGC.csv', 'addendum.csv'):
         notngc = True if filename != 'NGC.csv' else False
         with open(filename, 'r') as csvFile:
-            reader = csv.reader(csvFile, delimiter=';')
+            reader = csv.DictReader(csvFile, delimiter=';')
             # List of columns that are not text and should be transformed in NULL if empty
-            columns_maybe_null = [5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 16, 17]
+            columns_maybe_null = ['MajAx', 'MinAx', 'PosAng', 'B-Mag', 'V-Mag', 'J-Mag', 'H-Mag',
+                                  'K-Mag', 'SurfBr', 'Cstar U-Mag', 'Cstar B-Mag', 'Cstar V-Mag']
             for line in reader:
                 for column in columns_maybe_null:
                     if line[column] == '':
                         line[column] = None
 
                 # Convert RA and Dec in radians
-                if line[2] != '':
-                    ra_array = np.array([float(x) for x in line[2].split(':')])
+                if line['RA'] != '':
+                    ra_array = np.array([float(x) for x in line['RA'].split(':')])
                     ra_rad = np.radians(np.sum(ra_array * [15, 1/4, 1/240]))
                 else:
                     ra_rad = None
-                if line[3] != '':
-                    dec_array = np.array([float(x) for x in line[3].split(':')])
+                if line['Dec'] != '':
+                    dec_array = np.array([float(x) for x in line['Dec'].split(':')])
                     if np.signbit(dec_array[0]):
                         dec_rad = np.radians(np.sum(dec_array * [1, -1/60, -1/3600]))
                     else:
@@ -159,15 +160,17 @@ try:
                                'cstarvmag,messier,ngc,ic,cstarnames,identifiers,commonnames,'
                                'nednotes,ongcnotes,notngc) '
                                'VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
-                               (line[0], line[1], ra_rad, dec_rad, line[4], line[5], line[6],
-                                line[7], line[8], line[9], line[10], line[11], line[12], line[13],
-                                line[14], line[15], line[16], line[17], line[18], line[19],
-                                line[20], line[21], line[22], line[23], line[24], line[25], notngc)
+                               (line['Name'], line['Type'], ra_rad, dec_rad, line['Const'], line['MajAx'],
+                                line['MinAx'], line['PosAng'], line['B-Mag'], line['V-Mag'], line['J-Mag'],
+                                line['H-Mag'], line['K-Mag'], line['SurfBr'], line['Hubble'],
+                                line['Cstar U-Mag'], line['Cstar B-Mag'], line['Cstar V-Mag'],
+                                line['M'], line['NGC'], line['IC'], line['Cstar Names'], line['Identifiers'],
+                                line['Common names'], line['NED notes'], line['OpenNGC notes'], notngc)
                                )
                 cursor.execute('INSERT INTO objIdentifiers(name,identifier) VALUES(?,?)',
-                               (line[0], line[0].upper())
+                               (line['Name'], line['Name'].upper())
                                )
-                for identifier in line[22].split(','):
+                for identifier in line['Identifiers'].split(','):
                     for cat, pat in PATTERNS.items():
                         name_parts = re.match(pat, identifier)
                         if name_parts is not None:
@@ -202,7 +205,7 @@ try:
                                              f'{name_parts.group(2):0>3}'
                             cursor.execute('INSERT INTO objIdentifiers(name,identifier) '
                                            'VALUES(?,?)',
-                                           (line[0], objectname)
+                                           (line['Name'], objectname)
                                            )
 
     cursor.execute('CREATE UNIQUE INDEX "idx_identifiers" ON "objIdentifiers" ("identifier");')
