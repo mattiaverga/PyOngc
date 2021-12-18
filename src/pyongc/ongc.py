@@ -79,8 +79,6 @@ class Dso(object):
     * name: The main identifier of the object.
     * notes: Notes from NED and from ONGC.
     * notngc: A flag which marks objects not being in the NGC or IC catalog
-        (maybe it's from the addendum or it has a possible identification
-        on a NGC/IC id).
     * parallax: Parallax, expressed in milliarcseconds.
     * pm_dec: Proper apparent motion in Dec, expressed in milliarcseconds/year.
     * pm_ra: Proper apparent motion in RA, expressed in milliarcseconds/year.
