@@ -78,8 +78,16 @@ class Dso(object):
     * magnitudes: Object magnitudes.
     * name: The main identifier of the object.
     * notes: Notes from NED and from ONGC.
+    * notngc: A flag which marks objects not being in the NGC or IC catalog
+        (maybe it's from the addendum or it has a possible identification
+        on a NGC/IC id).
+    * parallax: Parallax, expressed in milliarcseconds.
+    * pm_dec: Proper apparent motion in Dec, expressed in milliarcseconds/year.
+    * pm_ra: Proper apparent motion in RA, expressed in milliarcseconds/year.
     * ra: Object Right Ascension in a easy to read format as string.
     * rad_coords: Object coordinates in radians as numpy array or None.
+    * radvel: Radial velocity (heliocentric), expressed in km/s.
+    * redshift: Redshift value (heliocentric).
     * surface_brightness: The surface brightness value of a galaxy or None.
     * type: Object type.
 
@@ -109,9 +117,9 @@ class Dso(object):
         catalog, objectname = _recognize_name(name.upper())
 
         cols = ('objects.id, objects.name, objects.type, objTypes.typedesc, ra, dec, const, '
-                'majax, minax, pa, bmag, vmag, jmag,hmag, kmag, sbrightn, hubble, cstarumag, '
-                'cstarbmag, cstarvmag, messier, ngc, ic, cstarnames,identifiers, commonnames, '
-                'nednotes, ongcnotes')
+                'majax, minax, pa, bmag, vmag, jmag, hmag, kmag, sbrightn, hubble, parallax, '
+                'pmra, pmdec, radvel, redshift, cstarumag, cstarbmag, cstarvmag, messier, '
+                'ngc, ic, cstarnames, identifiers, commonnames, nednotes, ongcnotes, notngc')
         tables = ('objects JOIN objTypes ON objects.type = objTypes.type '
                   'JOIN objIdentifiers ON objects.name = objIdentifiers.name')
         if catalog == 'Messier':
@@ -125,10 +133,10 @@ class Dso(object):
 
         # If object is a duplicate then return the main object
         if objectData[2] == "Dup" and not returndup:
-            if objectData[21] != "":
-                objectname = f'NGC{objectData[21]}'
+            if objectData[26] != "":
+                objectname = f'NGC{objectData[26]}'
             else:
-                objectname = f'IC{objectData[22]}'
+                objectname = f'IC{objectData[27]}'
             params = f'objIdentifiers.identifier="{objectname}"'
             objectData = _queryFetchOne(cols, tables, params)
 
@@ -139,6 +147,7 @@ class Dso(object):
         self._ra = objectData[4]
         self._dec = objectData[5]
         self._const = objectData[6]
+        self._notngc = objectData[33]
 
         # These properties may be empty
         self._majax = objectData[7]
@@ -151,17 +160,22 @@ class Dso(object):
         self._kmag = objectData[14]
         self._sbrightn = objectData[15]
         self._hubble = objectData[16]
-        self._cstarumag = objectData[17]
-        self._cstarbmag = objectData[18]
-        self._cstarvmag = objectData[19]
-        self._messier = objectData[20]
-        self._ngc = objectData[21]
-        self._ic = objectData[22]
-        self._cstarnames = objectData[23]
-        self._identifiers = objectData[24]
-        self._commonnames = objectData[25]
-        self._nednotes = objectData[26]
-        self._ongcnotes = objectData[27]
+        self._parallax = objectData[17]
+        self._pmra = objectData[18]
+        self._pmdec = objectData[19]
+        self._radvel = objectData[20]
+        self._redshift = objectData[21]
+        self._cstarumag = objectData[22]
+        self._cstarbmag = objectData[23]
+        self._cstarvmag = objectData[24]
+        self._messier = objectData[25]
+        self._ngc = objectData[26]
+        self._ic = objectData[27]
+        self._cstarnames = objectData[28]
+        self._identifiers = objectData[29]
+        self._commonnames = objectData[30]
+        self._nednotes = objectData[31]
+        self._ongcnotes = objectData[32]
 
     def __str__(self) -> str:
         """Returns a basic description of the object.
@@ -418,6 +432,64 @@ diameter of 5.5 arcmin ca.')
         return self._nednotes, self._ongcnotes
 
     @property
+    def notngc(self) -> bool:
+        """A flag which marks objects not being in the NGC or IC catalog.
+
+        The OpenNGC database also includes objects which aren't part of the NGC or IC catalog.
+        For example, objects from the 'addendum' are objects which can interest amateur
+        astronomers, thus we're including in our listings.
+        The `notngc` property is a convenient flag to mark these extra objects.
+
+                >>> s = Dso("m45")
+                >>> s.notngc
+                True
+
+        """
+        return bool(self._notngc)
+
+    @property
+    def parallax(self) -> Optional[float]:
+        """Object's parallax.
+
+                >>> s = Dso("m13")
+                >>> s.parallax
+                0.0813
+
+        Returns:
+            Object's parallax expressed in milliarcseconds or None.
+
+        """
+        return self._parallax
+
+    @property
+    def pm_dec(self) -> Optional[float]:
+        """Proper apparent motion in Dec, expressed in milliarcseconds/year.
+
+                >>> s = Dso("m13")
+                >>> s.pm_dec
+                -2.56
+
+        Returns:
+            Object's apparent motion in Dec or None.
+
+        """
+        return self._pmdec
+
+    @property
+    def pm_ra(self) -> Optional[float]:
+        """Proper apparent motion in RA, expressed in milliarcseconds/year.
+
+                >>> s = Dso("m13")
+                >>> s.pm_ra
+                -3.18
+
+        Returns:
+            Object's apparent motion in RA or None.
+
+        """
+        return self._pmra
+
+    @property
     def ra(self) -> str:
         """Object Right Ascension in a easy to read format as string.
 
@@ -457,6 +529,34 @@ diameter of 5.5 arcmin ca.')
             return None
 
         return np.array([self._ra, self._dec, ])
+
+    @property
+    def radvel(self) -> Optional[float]:
+        """Object's radial velocity.
+
+                >>> s = Dso("m13")
+                >>> s.radvel
+                -244
+
+        Returns:
+            Object's radial velocity (heliocentric) expressed in km/s or None.
+
+        """
+        return self._radvel
+
+    @property
+    def redshift(self) -> Optional[float]:
+        """Object's redshift value.
+
+                >>> s = Dso("m13")
+                >>> s.redshift
+                -0.000815
+
+        Returns:
+            Object's redshift value or None.
+
+        """
+        return self._redshift
 
     @property
     def surface_brightness(self) -> Optional[float]:
@@ -1069,7 +1169,7 @@ def listObjects(**kwargs) -> List[Dso]:
 
             >>> objectList = listObjects(catalog="NGC", constellation=["Boo", ])
             >>> len(objectList)
-            280
+            281
 
     Duplicated objects are not resolved to main objects:
 
@@ -1276,6 +1376,11 @@ def printDetails(dso: Union[Dso, str]) -> str:
             | Major axis: 1.57'      Minor axis: 1.07'      Position angle: 112°          |
             | B-mag: 13.4    V-mag: N/A     J-mag: 10.78   H-mag: 10.02   K-mag: 9.76     |
             |                                                                             |
+            | Parallax: N/A          Radial velocity: 4536km/s      Redshift: 0.015245    |
+            |                                                                             |
+            | Proper apparent motion in RA: N/A                                           |
+            | Proper apparent motion in Dec: N/A                                          |
+            |                                                                             |
             | Surface brightness: 23.13     Hubble classification: Sb                     |
             +-----------------------------------------------------------------------------+
             | Other identifiers:                                                          |
@@ -1385,6 +1490,28 @@ def printDetails(dso: Union[Dso, str]) -> str:
                    f'J-mag: {_add_units(dso.magnitudes[2]):8}'
                    f'H-mag: {_add_units(dso.magnitudes[3]):8}'
                    f'K-mag: {_add_units(dso.magnitudes[4]):9}'
+                   '|\n'
+                   )
+
+    obj_string += (f'|{" " * 77}|\n')
+
+    redshift = f'{dso.redshift:.6f}'
+    obj_string += ('| '
+                   f'Parallax: {_add_units(dso.parallax, "mas"):13}'
+                   f'Radial velocity: {_add_units(dso.radvel, "km/s"):14}'
+                   f'Redshift: {_add_units(redshift):12}'
+                   '|\n'
+                   )
+
+    obj_string += (f'|{" " * 77}|\n')
+
+    obj_string += ('| '
+                   f'Proper apparent motion in RA: {_add_units(dso.pm_ra, "mas/yr"):46}'
+                   '|\n'
+                   )
+
+    obj_string += ('| '
+                   f'Proper apparent motion in Dec: {_add_units(dso.pm_dec, "mas/yr"):45}'
                    '|\n'
                    )
 

@@ -220,6 +220,54 @@ class TestDsoClass():
                     'outer shell has a diameter of 5.5 arcmin ca.')
         assert obj.notes == expected
 
+    @pytest.mark.parametrize('obj,expected', [pytest.param('M45', True),
+                                              pytest.param('IC1', False)])
+    def test_notngc(self, obj, expected):
+        """Test notngc property."""
+        obj = ongc.get(obj)
+
+        assert obj.notngc is expected
+
+    @pytest.mark.parametrize('obj,expected', [pytest.param('M13', 0.0813),
+                                              pytest.param('IC1', None)])
+    def test_parallax(self, obj, expected):
+        """Test parallax property."""
+        obj = ongc.get(obj)
+
+        assert obj.parallax == expected
+
+    @pytest.mark.parametrize('obj,expected', [pytest.param('M13', -2.56),
+                                              pytest.param('IC1', None)])
+    def test_pmdec(self, obj, expected):
+        """Test pm_dec property."""
+        obj = ongc.get(obj)
+
+        assert obj.pm_dec == expected
+
+    @pytest.mark.parametrize('obj,expected', [pytest.param('M13', -3.18),
+                                              pytest.param('IC1', None)])
+    def test_pmra(self, obj, expected):
+        """Test pm_ra property."""
+        obj = ongc.get(obj)
+
+        assert obj.pm_ra == expected
+
+    @pytest.mark.parametrize('obj,expected', [pytest.param('M13', -244),
+                                              pytest.param('IC1', None)])
+    def test_radvel(self, obj, expected):
+        """Test radvel property."""
+        obj = ongc.get(obj)
+
+        assert obj.radvel == expected
+
+    @pytest.mark.parametrize('obj,expected', [pytest.param('M13', -0.000815),
+                                              pytest.param('IC1', None)])
+    def test_redshift(self, obj, expected):
+        """Test redshift property."""
+        obj = ongc.get(obj)
+
+        assert obj.redshift == expected
+
     def test_to_json_galaxy(self):
         """Test galaxy data exported to JSON."""
         obj = ongc.Dso('NGC1')
@@ -578,7 +626,7 @@ class TestDsoMethods():
         """Test the listObjects() method with constellation filter applied."""
         objectList = ongc.listObjects(constellation=['and', 'Boo', ])
 
-        assert len(objectList) == 738
+        assert len(objectList) == 739
 
     def test_list_objects_filter_size(self):
         """Test the listObjects() method with size filters applied."""
@@ -716,6 +764,11 @@ class TestDsoMethods():
             "| Major axis: 1.57'      Minor axis: 1.07'      Position angle: 112°          |\n"
             "| B-mag: 13.4    V-mag: N/A     J-mag: 10.78   H-mag: 10.02   K-mag: 9.76     |\n"
             "|                                                                             |\n"
+            "| Parallax: N/A          Radial velocity: 4536km/s      Redshift: 0.015245    |\n"
+            "|                                                                             |\n"
+            "| Proper apparent motion in RA: N/A                                           |\n"
+            "| Proper apparent motion in Dec: N/A                                          |\n"
+            "|                                                                             |\n"
             "| Surface brightness: 23.13     Hubble classification: Sb                     |\n"
             "+-----------------------------------------------------------------------------+\n"
             "| Other identifiers:                                                          |\n"
@@ -738,6 +791,11 @@ class TestDsoMethods():
             "+-----------------------------------------------------------------------------+\n"
             "| Major axis: 0.8'       Minor axis: N/A        Position angle: N/A           |\n"
             "| B-mag: 11.27   V-mag: 11.89   J-mag: 10.89   H-mag: 10.8    K-mag: 10.38    |\n"
+            "|                                                                             |\n"
+            "| Parallax: 0.5041mas    Radial velocity: -20km/s       Redshift: -0.000068   |\n"
+            "|                                                                             |\n"
+            "| Proper apparent motion in RA: -7.249mas/yr                                  |\n"
+            "| Proper apparent motion in Dec: -1.811mas/yr                                 |\n"
             "|                                                                             |\n"
             "| Central star identifiers:                                                   |\n"
             "|    HD 000826, HIP 001041, TYC 4302-01297-1                                  |\n"
@@ -766,6 +824,11 @@ class TestDsoMethods():
             "+-----------------------------------------------------------------------------+\n"
             "| Major axis: 45.0'      Minor axis: 30.0'      Position angle: N/A           |\n"
             "| B-mag: 5.0     V-mag: 5.8     J-mag: N/A     H-mag: N/A     K-mag: N/A      |\n"
+            "|                                                                             |\n"
+            "| Parallax: N/A          Radial velocity: 4km/s         Redshift: 0.000013    |\n"
+            "|                                                                             |\n"
+            "| Proper apparent motion in RA: N/A                                           |\n"
+            "| Proper apparent motion in Dec: N/A                                          |\n"
             "|                                                                             |\n"
             "+-----------------------------------------------------------------------------+\n"
             "| Other identifiers:                                                          |\n"

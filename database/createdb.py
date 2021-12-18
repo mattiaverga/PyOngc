@@ -108,6 +108,11 @@ try:
                    'kmag REAL, '
                    'sbrightn REAL, '
                    'hubble TEXT, '
+                   'parallax REAL, '
+                   'pmra REAL, '
+                   'pmdec REAL, '
+                   'radvel INTEGER, '
+                   'redshift REAL, '
                    'cstarumag REAL, '
                    'cstarbmag REAL, '
                    'cstarvmag REAL, '
@@ -134,7 +139,8 @@ try:
             reader = csv.DictReader(csvFile, delimiter=';')
             # List of columns that are not text and should be transformed in NULL if empty
             columns_maybe_null = ['MajAx', 'MinAx', 'PosAng', 'B-Mag', 'V-Mag', 'J-Mag', 'H-Mag',
-                                  'K-Mag', 'SurfBr', 'Cstar U-Mag', 'Cstar B-Mag', 'Cstar V-Mag']
+                                  'K-Mag', 'SurfBr', 'Pax', 'Pm-RA', 'Pm-Dec', 'RadVel',
+                                  'Redshift', 'Cstar U-Mag', 'Cstar B-Mag', 'Cstar V-Mag']
             for line in reader:
                 for column in columns_maybe_null:
                     if line[column] == '':
@@ -156,16 +162,20 @@ try:
                     dec_rad = None
 
                 cursor.execute('INSERT INTO objects(name,type,ra,dec,const,majax,minax,pa,bmag,'
-                               'vmag,jmag,hmag,kmag,sbrightn,hubble,cstarumag,cstarbmag,'
-                               'cstarvmag,messier,ngc,ic,cstarnames,identifiers,commonnames,'
-                               'nednotes,ongcnotes,notngc) '
-                               'VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
-                               (line['Name'], line['Type'], ra_rad, dec_rad, line['Const'], line['MajAx'],
-                                line['MinAx'], line['PosAng'], line['B-Mag'], line['V-Mag'], line['J-Mag'],
-                                line['H-Mag'], line['K-Mag'], line['SurfBr'], line['Hubble'],
+                               'vmag,jmag,hmag,kmag,sbrightn,hubble,parallax,pmra,pmdec,radvel,'
+                               'redshift,cstarumag,cstarbmag,cstarvmag,messier,ngc,ic,cstarnames,'
+                               'identifiers,commonnames,nednotes,ongcnotes,notngc) '
+                               'VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,'
+                               '?,?,?)',
+                               (line['Name'], line['Type'], ra_rad, dec_rad, line['Const'],
+                                line['MajAx'], line['MinAx'], line['PosAng'], line['B-Mag'],
+                                line['V-Mag'], line['J-Mag'], line['H-Mag'], line['K-Mag'],
+                                line['SurfBr'], line['Hubble'], line['Pax'], line['Pm-RA'],
+                                line['Pm-Dec'], line['RadVel'], line['Redshift'],
                                 line['Cstar U-Mag'], line['Cstar B-Mag'], line['Cstar V-Mag'],
-                                line['M'], line['NGC'], line['IC'], line['Cstar Names'], line['Identifiers'],
-                                line['Common names'], line['NED notes'], line['OpenNGC notes'], notngc)
+                                line['M'], line['NGC'], line['IC'], line['Cstar Names'],
+                                line['Identifiers'], line['Common names'], line['NED notes'],
+                                line['OpenNGC notes'], notngc)
                                )
                 cursor.execute('INSERT INTO objIdentifiers(name,identifier) VALUES(?,?)',
                                (line['Name'], line['Name'].upper())

@@ -32,13 +32,15 @@ Methods provided:
     * nebulae: Returns data for nebulae.
 """
 
+from typing import Optional
 import pandas as pd
 import sqlite3
 
 from pyongc import DBPATH
 
 COMMON_COLS = ['name', 'type', 'ra', 'dec', 'const', 'majax', 'minax', 'pa',
-               'messier', 'ngc', 'ic', 'bmag', 'vmag', 'jmag', 'hmag', 'kmag', 'notngc']
+               'messier', 'ngc', 'ic', 'bmag', 'vmag', 'jmag', 'hmag', 'kmag', 'notngc',
+               'parallax', 'pmra', 'pmdec', 'radvel', 'redshift']
 
 
 def _get_from_db(query: str) -> pd.core.frame.DataFrame:
@@ -68,7 +70,7 @@ def all() -> pd.core.frame.DataFrame:
 
 
 def clusters(globular: bool = True, open: bool = True, other: bool = False,
-             extra_ids: bool = False, notngc: bool = False) -> pd.core.frame.DataFrame:
+             extra_ids: bool = False, notngc: bool = False) -> Optional[pd.core.frame.DataFrame]:
     """Returns data for star clusters.
 
     Args:
