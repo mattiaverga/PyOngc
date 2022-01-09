@@ -1311,14 +1311,15 @@ def nearby(coords_string: str, separation: float = 60,
     It returns a list of of tuples with the Dso objects found in range and its distance,
     or an empty list if no object is found:
 
-            >>> nearby('11:08:44 -00:09:01.3') #doctest: +ELLIPSIS +NUMBER
-            [(<pyongc.ongc.Dso object at 0x...>, 0.17999), \
-(<pyongc.ongc.Dso object at 0x...>, 0.73982), \
-(<pyongc.ongc.Dso object at 0x...>, 0.98100)]
+            >>> nearby('11:08:44 -00:09:01.3') #doctest: +ELLIPSIS +FLOAT_CMP
+            [(<pyongc.ongc.Dso object at 0x...>, 0.1799936868460791), \
+(<pyongc.ongc.Dso object at 0x...>, 0.7398295985600021), \
+(<pyongc.ongc.Dso object at 0x...>, 0.9810037613087355)]
 
     The optional "catalog" parameter can be used to filter the search to only NGC or IC objects:
 
-            >>> nearby('11:08:44 -00:09:01.3', separation=60, catalog='NGC') #doctest: +ELLIPSIS
+            >>> nearby('11:08:44 -00:09:01.3', separation=60, catalog='NGC') #doctest: +ELLIPSIS \
++FLOAT_CMP
             [(<pyongc.ongc.Dso object at 0x...>, 0.7398295985600021)]
 
     Args:
