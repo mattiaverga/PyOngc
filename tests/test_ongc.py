@@ -206,9 +206,9 @@ class TestDsoClass():
 
     def test_magnitudes(self):
         """Test magnitudes property."""
-        obj = ongc.Dso('NGC1')
+        obj = ongc.Dso('IC2')
 
-        expected = (13.4, None, 10.78, 10.02, 9.76)
+        expected = (15.46, None, 12.26, 11.48, 11.17)
         assert obj.magnitudes == expected
 
     def test_notes(self):
@@ -328,12 +328,12 @@ class TestDsoClass():
 
         # Spiral galaxy
         obj = ongc.Dso('NGC1')
-        expected = 'NGC0001,f|G,00:07:15.84,+27:42:29.1,13.4,,94.20|64.20|112'
+        expected = 'NGC0001,f|G,00:07:15.84,+27:42:29.1,13.69,,94.20|64.20|112'
         assert obj.xephemFormat() == expected
 
         # Elliptical galaxy
         obj = ongc.Dso('IC3')
-        expected = 'IC0003,f|H,00:12:06.09,-00:24:54.8,15.1,,55.80|40.20|53'
+        expected = 'IC0003,f|H,00:12:06.09,-00:24:54.8,14.78,,55.80|40.20|53'
         assert obj.xephemFormat() == expected
 
         # Dark nebula
@@ -586,7 +586,7 @@ class TestDsoMethods():
         """
         objectList = ongc.listObjects()
 
-        assert len(objectList) == 14011
+        assert len(objectList) == 13991
         assert type(objectList[0]) is ongc.Dso
 
     def test_list_objects_filter_catalog_NGC(self):
@@ -599,7 +599,7 @@ class TestDsoMethods():
         """Test the listObjects() method with catalog filter applied."""
         objectList = ongc.listObjects(catalog='IC')
 
-        assert len(objectList) == 5615
+        assert len(objectList) == 5595
 
     def test_list_objects_filter_catalog_M(self):
         """Test the listObjects() method with catalog filter applied."""
@@ -620,13 +620,13 @@ class TestDsoMethods():
         """Test the listObjects() method with multiple types filter."""
         objectList = ongc.listObjects(type=['*', '**', ])
 
-        assert len(objectList) == 786
+        assert len(objectList) == 790
 
     def test_list_objects_filter_constellation(self):
         """Test the listObjects() method with constellation filter applied."""
         objectList = ongc.listObjects(constellation=['and', 'Boo', ])
 
-        assert len(objectList) == 739
+        assert len(objectList) == 737
 
     def test_list_objects_filter_size(self):
         """Test the listObjects() method with size filters applied."""
@@ -638,13 +638,13 @@ class TestDsoMethods():
         """Test the listObjects() method to list objects without size."""
         objectList = ongc.listObjects(maxsize=0)
 
-        assert len(objectList) == 2008
+        assert len(objectList) == 1967
 
     def test_list_objects_filter_mag(self):
         """Test the listObjects() method with magnitudes filters applied."""
         objectList = ongc.listObjects(uptobmag=8, uptovmag=10)
 
-        assert len(objectList) == 173
+        assert len(objectList) == 175
 
     def test_list_objects_filter_minra(self):
         """List objects with RA greater than minra."""
@@ -705,7 +705,7 @@ class TestDsoMethods():
         """Test the listObjects() method to list objects without common name."""
         objectList = ongc.listObjects(withname=False)
 
-        assert len(objectList) == 13866
+        assert len(objectList) == 13846
 
     def test_list_objects_wrong_filter(self):
         """Test the listObjects() method when an unsupported filter is used."""
@@ -758,11 +758,11 @@ class TestDsoMethods():
         obj_details = ongc.printDetails('NGC1')
         expected = (
             "+-----------------------------------------------------------------------------+\n"
-            "| Id: 5616      Name: NGC0001           Type: Galaxy                          |\n"
+            "| Id: 5596      Name: NGC0001           Type: Galaxy                          |\n"
             "| R.A.: 00:07:15.84      Dec.: +27:42:29.1      Constellation: Peg            |\n"
             "+-----------------------------------------------------------------------------+\n"
             "| Major axis: 1.57'      Minor axis: 1.07'      Position angle: 112°          |\n"
-            "| B-mag: 13.4    V-mag: N/A     J-mag: 10.78   H-mag: 10.02   K-mag: 9.76     |\n"
+            "| B-mag: 13.69   V-mag: 12.93   J-mag: 10.78   H-mag: 10.02   K-mag: 9.76     |\n"
             "|                                                                             |\n"
             "| Parallax: N/A          Radial velocity: 4536km/s      Redshift: 0.015245    |\n"
             "|                                                                             |\n"
@@ -784,7 +784,7 @@ class TestDsoMethods():
         obj_details = ongc.printDetails('NGC40')
         expected = (
             "+-----------------------------------------------------------------------------+\n"
-            "| Id: 5655      Name: NGC0040           Type: Planetary Nebula                |\n"
+            "| Id: 5635      Name: NGC0040           Type: Planetary Nebula                |\n"
             "| R.A.: 00:13:01.03      Dec.: +72:31:19.0      Constellation: Cep            |\n"
             "| Common names:                                                               |\n"
             "|    Bow-Tie nebula                                                           |\n"
@@ -815,7 +815,7 @@ class TestDsoMethods():
         obj_details = ongc.printDetails('NGC6523')
         expected = (
             "+-----------------------------------------------------------------------------+\n"
-            "| Id: 12572     Name: NGC6523           Type: Nebula                          |\n"
+            "| Id: 12552     Name: NGC6523           Type: Nebula                          |\n"
             "| R.A.: 18:03:41.27      Dec.: -24:22:48.6      Constellation: Sgr            |\n"
             "| Also known as:                                                              |\n"
             "|    M008, NGC6533                                                            |\n"
