@@ -34,7 +34,7 @@ jobs:
         flake8 .
     - name: Doctests
       run: |
-        pytest -v --doctest-modules src/pyongc/
+        pytest -v --doctest-plus src/pyongc/
     - name: Test with pytest
       run: |
         pytest -v --cov=pyongc tests/
