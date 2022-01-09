@@ -324,7 +324,7 @@ class Dso(object):
 
                 >>> s = Dso("ngc1")
                 >>> s.id
-                5616
+                5596
 
         """
         return self._id
@@ -390,7 +390,7 @@ class Dso(object):
 
                 >>> s = Dso("ngc1")
                 >>> s.magnitudes
-                (13.4, None, 10.78, 10.02, 9.76)
+                (13.69, 12.93, 10.78, 10.02, 9.76)
 
         Returns:
             `(Bmag, Vmag, Jmag, Hmag, Kmag)`
@@ -597,7 +597,7 @@ diameter of 5.5 arcmin ca.')
 
                 >>> s = Dso("ngc1")
                 >>> s.xephemFormat()
-                'NGC0001,f|G,00:07:15.84,+27:42:29.1,13.4,,94.20|64.20|112'
+                'NGC0001,f|G,00:07:15.84,+27:42:29.1,13.69,,94.20|64.20|112'
 
         Returns:
             Xephem format object description
@@ -1161,7 +1161,7 @@ def listObjects(**kwargs) -> List[Dso]:
 
             >>> objectList = listObjects()
             >>> len(objectList)
-            14011
+            13991
 
     Filters are combined with "AND" in the query; only one value for filter is allowed:
 
@@ -1179,7 +1179,7 @@ def listObjects(**kwargs) -> List[Dso]:
 
             >>> objectList = listObjects(maxsize=0)
             >>> len(objectList)
-            2008
+            1967
 
     Args:
         catalog (string, optional): filter for catalog. [NGC|IC|M]
@@ -1311,10 +1311,10 @@ def nearby(coords_string: str, separation: float = 60,
     It returns a list of of tuples with the Dso objects found in range and its distance,
     or an empty list if no object is found:
 
-            >>> nearby('11:08:44 -00:09:01.3') #doctest: +ELLIPSIS
-            [(<pyongc.ongc.Dso object at 0x...>, 0.1799936868460791), \
-(<pyongc.ongc.Dso object at 0x...>, 0.7398295985600021), \
-(<pyongc.ongc.Dso object at 0x...>, 0.9810037613087355)]
+            >>> nearby('11:08:44 -00:09:01.3') #doctest: +ELLIPSIS +NUMBER
+            [(<pyongc.ongc.Dso object at 0x...>, 0.17999), \
+(<pyongc.ongc.Dso object at 0x...>, 0.73982), \
+(<pyongc.ongc.Dso object at 0x...>, 0.98100)]
 
     The optional "catalog" parameter can be used to filter the search to only NGC or IC objects:
 
@@ -1368,11 +1368,11 @@ def printDetails(dso: Union[Dso, str]) -> str:
 
             >>> print(printDetails("ngc1"))
             +-----------------------------------------------------------------------------+
-            | Id: 5616      Name: NGC0001           Type: Galaxy                          |
+            | Id: 5596      Name: NGC0001           Type: Galaxy                          |
             | R.A.: 00:07:15.84      Dec.: +27:42:29.1      Constellation: Peg            |
             +-----------------------------------------------------------------------------+
             | Major axis: 1.57'      Minor axis: 1.07'      Position angle: 112°          |
-            | B-mag: 13.4    V-mag: N/A     J-mag: 10.78   H-mag: 10.02   K-mag: 9.76     |
+            | B-mag: 13.69   V-mag: 12.93   J-mag: 10.78   H-mag: 10.02   K-mag: 9.76     |
             |                                                                             |
             | Parallax: N/A          Radial velocity: 4536km/s      Redshift: 0.015245    |
             |                                                                             |
