@@ -512,7 +512,7 @@ class TestDsoMethods():
         assert type(neighbors) is list
         assert len(neighbors) == expectedListLength
         assert str(neighbors[0][0]) == expectedNearest
-        assert neighbors[0][1] == expectedNearestSeparation
+        assert np.isclose(neighbors[0][1], expectedNearestSeparation)
 
     def test_get_neighbors_negative_dec(self):
         """Test that neighbors are correctly found and returned - with negative Dec value."""
@@ -526,7 +526,7 @@ class TestDsoMethods():
         assert type(neighbors) is list
         assert len(neighbors) == expectedListLength
         assert str(neighbors[0][0]) == expectedNearest
-        assert neighbors[0][1] == expectedNearestSeparation
+        assert np.isclose(neighbors[0][1], expectedNearestSeparation)
 
     def test_get_neighbors_above0ra(self):
         """Test that neighbors are correctly found and returned - with RA just above 00h."""
@@ -540,7 +540,7 @@ class TestDsoMethods():
         assert type(neighbors) is list
         assert len(neighbors) == expectedListLength
         assert str(neighbors[0][0]) == expectedNearest
-        assert neighbors[0][1] == expectedNearestSeparation
+        assert np.isclose(neighbors[0][1], expectedNearestSeparation)
 
     def test_get_neighbors_below0ra(self):
         """Test that neighbors are correctly found and returned - with RA just below 00h."""
@@ -554,7 +554,7 @@ class TestDsoMethods():
         assert type(neighbors) is list
         assert len(neighbors) == expectedListLength
         assert str(neighbors[0][0]) == expectedNearest
-        assert neighbors[0][1] == expectedNearestSeparation
+        assert np.isclose(neighbors[0][1], expectedNearestSeparation)
 
     def test_get_neighbors_with_filter(self):
         """Test that neighbors are correctly found and returned."""
@@ -566,7 +566,7 @@ class TestDsoMethods():
         assert type(neighbors) is list
         assert len(neighbors) == expectedListLength
         assert str(neighbors[0][0]) == expectedNearest
-        assert neighbors[0][1] == expectedNearestSeparation
+        assert np.isclose(neighbors[0][1], expectedNearestSeparation)
 
     def test_get_neighbors_bad_value(self):
         """Raise exception if search radius value is out of range."""
