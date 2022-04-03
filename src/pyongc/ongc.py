@@ -178,6 +178,7 @@ class Dso(object):
     def __str__(self) -> str:
         """Returns a basic description of the object.
 
+                >>> from pyongc.ongc import Dso
                 >>> s = Dso("ngc1")
                 >>> print(s)
                 NGC0001, Galaxy in Peg
@@ -193,12 +194,14 @@ class Dso(object):
         If the DSO object is a Planetary Nebulae, this method will return a tuple with
         the central star identifiers and its magnitudes in U-B-V bands:
 
+                >>> from pyongc.ongc import Dso
                 >>> s = Dso("ngc1535")
                 >>> s.cstar_data
                 (['BD -13 842', 'HD 26847'], None, 12.19, 12.18)
 
         If the object is not a PN it returns None:
 
+                >>> from pyongc.ongc import Dso
                 >>> s = Dso("ngc1")
                 >>> s.cstar_data is None
                 True
@@ -221,6 +224,7 @@ class Dso(object):
     def constellation(self) -> str:
         """The constellation where the object is located.
 
+                >>> from pyongc.ongc import Dso
                 >>> s = Dso("ngc1")
                 >>> s.constellation
                 'Peg'
@@ -235,6 +239,7 @@ class Dso(object):
     def coords(self) -> Optional[np.ndarray]:
         """Returns object coordinates in HMS and DMS as numpy array or None.
 
+                >>> from pyongc.ongc import Dso
                 >>> s = Dso("ngc1")
                 >>> s.coords
                 array([[ 0.  ,  7.  , 15.84],
@@ -268,10 +273,12 @@ class Dso(object):
 
         If you need the raw data to use in calculations use `coords` or `rad_coords` properties.
 
+            >>> from pyongc.ongc import Dso
             >>> s = Dso("ngc1")
             >>> s.dec
             '+27:42:29.1'
 
+            >>> from pyongc.ongc import Dso
             >>> s = Dso("ic1064")
             >>> s.dec
             'N/A'
@@ -291,6 +298,7 @@ class Dso(object):
 
         Where a value is not available a None type is returned.
 
+                >>> from pyongc.ongc import Dso
                 >>> s = Dso("ngc1")
                 >>> s.dimensions
                 (1.57, 1.07, 112)
@@ -305,6 +313,7 @@ class Dso(object):
     def hubble(self) -> str:
         """The Hubble classification of a galaxy.
 
+                >>> from pyongc.ongc import Dso
                 >>> s = Dso("ngc1")
                 >>> s.hubble
                 'Sb'
@@ -322,6 +331,7 @@ class Dso(object):
         Returns:
             The internal database id of the object.
 
+                >>> from pyongc.ongc import Dso
                 >>> s = Dso("ngc1")
                 >>> s.id
                 5596
@@ -339,11 +349,13 @@ class Dso(object):
         The first element of the tuple will be a string with the Messier name or None.
         The other fields will be lists of cross identifiers or None.
 
+                >>> from pyongc.ongc import Dso
                 >>> s = Dso("ngc1976")
                 >>> s.identifiers
                 ('M042', None, None, ['Great Orion Nebula', 'Orion Nebula'], \
 ['LBN 974', 'MWSC 0582'])
 
+                >>> from pyongc.ongc import Dso
                 >>> s = Dso("mel22")
                 >>> s.identifiers
                 ('M045', None, None, ['Pleiades'], ['MWSC 0305'])
@@ -388,6 +400,7 @@ class Dso(object):
 
         Where a value is not available a None type is returned
 
+                >>> from pyongc.ongc import Dso
                 >>> s = Dso("ngc1")
                 >>> s.magnitudes
                 (13.69, 12.93, 10.78, 10.02, 9.76)
@@ -402,6 +415,7 @@ class Dso(object):
     def name(self) -> str:
         """The main identifier of the object.
 
+                >>> from pyongc.ongc import Dso
                 >>> s = Dso("m45")
                 >>> s.name
                 'Mel022'
@@ -417,6 +431,7 @@ class Dso(object):
     def notes(self) -> Tuple[str, str]:
         """Returns notes from NED and from ONGC.
 
+                >>> from pyongc.ongc import Dso
                 >>> s = Dso("ngc6543")
                 >>> s.notes
                 ('Additional radio sources may contribute to the WMAP flux.', \
@@ -438,6 +453,7 @@ diameter of 5.5 arcmin ca.')
         astronomers, thus we're including in our listings.
         The `notngc` property is a convenient flag to mark these extra objects.
 
+                >>> from pyongc.ongc import Dso
                 >>> s = Dso("m45")
                 >>> s.notngc
                 True
@@ -449,6 +465,7 @@ diameter of 5.5 arcmin ca.')
     def parallax(self) -> Optional[float]:
         """Object's parallax.
 
+                >>> from pyongc.ongc import Dso
                 >>> s = Dso("m13")
                 >>> s.parallax
                 0.0813
@@ -463,6 +480,7 @@ diameter of 5.5 arcmin ca.')
     def pm_dec(self) -> Optional[float]:
         """Proper apparent motion in Dec, expressed in milliarcseconds/year.
 
+                >>> from pyongc.ongc import Dso
                 >>> s = Dso("m13")
                 >>> s.pm_dec
                 -2.56
@@ -477,6 +495,7 @@ diameter of 5.5 arcmin ca.')
     def pm_ra(self) -> Optional[float]:
         """Proper apparent motion in RA, expressed in milliarcseconds/year.
 
+                >>> from pyongc.ongc import Dso
                 >>> s = Dso("m13")
                 >>> s.pm_ra
                 -3.18
@@ -493,10 +512,12 @@ diameter of 5.5 arcmin ca.')
 
         If you need the raw data to use in calculations use `coords` or `rad_coords` properties.
 
+            >>> from pyongc.ongc import Dso
             >>> s = Dso("ngc1")
             >>> s.ra
             '00:07:15.84'
 
+            >>> from pyongc.ongc import Dso
             >>> s = Dso("ic1064")
             >>> s.ra
             'N/A'
@@ -514,6 +535,7 @@ diameter of 5.5 arcmin ca.')
     def rad_coords(self) -> Optional[np.ndarray]:
         """Returns object coordinates in radians as numpy array or None.
 
+                >>> from pyongc.ongc import Dso
                 >>> s = Dso("ngc1")
                 >>> s.rad_coords
                 array([0.03169518, 0.48359728])
@@ -532,6 +554,7 @@ diameter of 5.5 arcmin ca.')
     def radvel(self) -> Optional[float]:
         """Object's radial velocity.
 
+                >>> from pyongc.ongc import Dso
                 >>> s = Dso("m13")
                 >>> s.radvel
                 -244
@@ -546,6 +569,7 @@ diameter of 5.5 arcmin ca.')
     def redshift(self) -> Optional[float]:
         """Object's redshift value.
 
+                >>> from pyongc.ongc import Dso
                 >>> s = Dso("m13")
                 >>> s.redshift
                 -0.000815
@@ -560,6 +584,7 @@ diameter of 5.5 arcmin ca.')
     def surface_brightness(self) -> Optional[float]:
         """The surface brightness value of a galaxy.
 
+                >>> from pyongc.ongc import Dso
                 >>> s = Dso("ngc1")
                 >>> s.surface_brightness
                 23.13
@@ -574,6 +599,7 @@ diameter of 5.5 arcmin ca.')
     def type(self) -> str:
         """Object type.
 
+                >>> from pyongc.ongc import Dso
                 >>> s = Dso("ngc1")
                 >>> s.type
                 'Galaxy'
@@ -595,6 +621,7 @@ diameter of 5.5 arcmin ca.')
         suitable to be imported in other software that accept Xephem format
         (for example: PyEphem).
 
+                >>> from pyongc.ongc import Dso
                 >>> s = Dso("ngc1")
                 >>> s.xephemFormat()
                 'NGC0001,f|G,00:07:15.84,+27:42:29.1,13.69,,94.20|64.20|112'
@@ -780,6 +807,7 @@ def _limiting_coords(coords: np.ndarray, radius: int) -> str:
     This is a quick method to exclude objects farther than a specified distance
     from the starting point, but it's not meant to be precise.
 
+            >>> from pyongc.ongc import Dso, _limiting_coords
             >>> start = Dso('ngc1').coords
             >>> _limiting_coords(start, 2)
             ' AND (ra <= 0.06660176425610362 OR ra >= 6.279973901355917) AND \
@@ -840,6 +868,7 @@ def _queryFetchOne(cols: str, tables: str, params: str) -> tuple:
     Be sure to use a WHERE clause which is very specific, otherwise the query
     will return the first row that matches.
 
+            >>> from pyongc.ongc import _queryFetchOne
             >>> cols = 'type'
             >>> tables = 'objects'
             >>> params = 'name="NGC0001"'
@@ -879,6 +908,7 @@ def _queryFetchMany(cols: str, tables: str, params: str,
                     order: str = '') -> Generator[tuple, None, None]:
     """Search many rows in database.
 
+            >>> from pyongc.ongc import _queryFetchMany
             >>> cols = 'name'
             >>> tables = 'objects'
             >>> params = 'type="G"'
@@ -922,6 +952,7 @@ def _queryFetchMany(cols: str, tables: str, params: str,
 def _recognize_name(text: str) -> Tuple[str, str]:
     """Recognize catalog and object id.
 
+            >>> from pyongc.ongc import _recognize_name
             >>> _recognize_name('NGC1')
             ('NGC|IC', 'NGC0001')
 
@@ -1038,16 +1069,19 @@ def getNeighbors(obj: Union[Dso, str], separation: Union[int, float],
     It returns a list of of tuples with the Dso objects found in range and its distance,
     or an empty list if no object is found:
 
+            >>> from pyongc.ongc import Dso, getNeighbors
             >>> s1 = Dso("ngc521")
             >>> getNeighbors(s1, 15) #doctest: +ELLIPSIS
             [(<pyongc.ongc.Dso object at 0x...>, 0.13726168561780452), \
 (<pyongc.ongc.Dso object at 0x...>, 0.24140243942744602)]
 
+            >>> from pyongc.ongc import getNeighbors
             >>> getNeighbors("ngc521", 1)
             []
 
     The optional "catalog" parameter can be used to filter the search to only NGC or IC objects:
 
+            >>> from pyongc.ongc import getNeighbors
             >>> getNeighbors("ngc521", 15, catalog="NGC") #doctest: +ELLIPSIS
             [(<pyongc.ongc.Dso object at 0x...>, 0.24140243942744602)]
 
@@ -1100,21 +1134,25 @@ def getSeparation(obj1: Union[Dso, str], obj2: Union[Dso, str],
     By default it returns a tuple containing the angular separation and the differences in A.R.
     and Declination expressed in degrees:
 
+            >>> from pyongc.ongc import Dso, getSeparation
             >>> s1 = Dso("ngc1")
             >>> s2 = Dso("ngc2")
             >>> getSeparation(s1, s2)
             (0.03008927371519897, 0.005291666666666788, -0.02972222222221896)
 
+            >>> from pyongc.ongc import getSeparation
             >>> getSeparation("ngc1", "ngc2")
             (0.03008927371519897, 0.005291666666666788, -0.02972222222221896)
 
     With the optional parameter `style` set to `text`, it returns a formatted string:
 
+            >>> from pyongc.ongc import getSeparation
             >>> getSeparation("ngc1", "ngc2", style="text")
             '0° 1m 48.32s'
 
     If one of the objects is not found in the database it returns an ObjectNotFound exception:
 
+            >>> from pyongc.ongc import getSeparation
             >>> getSeparation("ngc1a", "ngc2")
             Traceback (most recent call last):
             ...
@@ -1159,24 +1197,28 @@ def listObjects(**kwargs) -> List[Dso]:
     This function returns a list of all DSObjects that match user defined parameters.
     If no argument is passed to the function, it returns all the objects from the database:
 
+            >>> from pyongc.ongc import listObjects
             >>> objectList = listObjects()
             >>> len(objectList)
             13991
 
     Filters are combined with "AND" in the query; only one value for filter is allowed:
 
+            >>> from pyongc.ongc import listObjects
             >>> objectList = listObjects(catalog="NGC", constellation=["Boo", ])
             >>> len(objectList)
             281
 
     Duplicated objects are not resolved to main objects:
 
+            >>> from pyongc.ongc import listObjects
             >>> objectList = listObjects(type=["Dup", ])
             >>> print(objectList[0])
             IC0011, Duplicated record in Cas
 
     The maxSize filter will include objects with no size recorded in database:
 
+            >>> from pyongc.ongc import listObjects
             >>> objectList = listObjects(maxsize=0)
             >>> len(objectList)
             1967
@@ -1311,6 +1353,7 @@ def nearby(coords_string: str, separation: float = 60,
     It returns a list of of tuples with the Dso objects found in range and its distance,
     or an empty list if no object is found:
 
+            >>> from pyongc.ongc import nearby
             >>> nearby('11:08:44 -00:09:01.3') #doctest: +ELLIPSIS +FLOAT_CMP
             [(<pyongc.ongc.Dso object at 0x...>, 0.1799936868460791), \
 (<pyongc.ongc.Dso object at 0x...>, 0.7398295985600021), \
@@ -1318,6 +1361,7 @@ def nearby(coords_string: str, separation: float = 60,
 
     The optional "catalog" parameter can be used to filter the search to only NGC or IC objects:
 
+            >>> from pyongc.ongc import nearby
             >>> nearby('11:08:44 -00:09:01.3', separation=60, catalog='NGC') #doctest: +ELLIPSIS \
 +FLOAT_CMP
             [(<pyongc.ongc.Dso object at 0x...>, 0.7398295985600021)]
@@ -1367,6 +1411,7 @@ def printDetails(dso: Union[Dso, str]) -> str:
     formatted in a way to fit a 80cols display.
     The object can be identified by its name as a string or by a Dso type:
 
+            >>> from pyongc.ongc import printDetails
             >>> print(printDetails("ngc1"))
             +-----------------------------------------------------------------------------+
             | Id: 5596      Name: NGC0001           Type: Galaxy                          |
@@ -1390,6 +1435,7 @@ def printDetails(dso: Union[Dso, str]) -> str:
 
     If the object is not found in the database it returns an ObjectNotFound exception:
 
+            >>> from pyongc.ongc import printDetails
             >>> printDetails("ngc1a")
             Traceback (most recent call last):
             ...
