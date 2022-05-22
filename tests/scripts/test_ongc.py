@@ -314,6 +314,31 @@ def test_search_to_file():
         assert os.path.isfile('test.txt')
 
 
+def test_search_to_custom_file():
+    runner = CliRunner()
+    with runner.isolated_filesystem():
+        result = runner.invoke(ongc.search, [
+            '--info=name,type,cstarnames',
+            '--constellation=her',
+            '--out_custom=test.csv',
+        ])
+        assert result.exit_code == 0
+        assert os.path.isfile('test.csv')
+        assert '\nIC4593,Planetary Nebula,BD +12 2966; HD 145649\n' in open('test.csv').read()
+
+
+def test_search_to_custom_file_no_info():
+    runner = CliRunner()
+    with runner.isolated_filesystem():
+        result = runner.invoke(ongc.search, [
+            '--constellation=her',
+            '--out_custom=test.csv',
+        ])
+        assert result.exit_code == 0
+        assert result.output == 'ERROR: --out_custom requires --info argument\n'
+        assert not os.path.isfile('test.csv')
+
+
 def test_search_no_results():
     runner = CliRunner()
     result = runner.invoke(ongc.search, ['--type=*', '--minsize=5'])
