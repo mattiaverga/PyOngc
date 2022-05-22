@@ -159,7 +159,11 @@ def separation(obj1, obj2):
 @click.option('--withname', '-N', is_flag=True, help='List only objects with common name')
 @click.option('--out_file', '-O', type=click.File('w'),
               help='Output results to text file')
-def search(out_file, **kwargs):
+@click.option('--out_custom','-C',type=click.File('w'),
+              help='Output custom results to file, use with --info for parameters')
+@click.option('--info', '-I',help='Parameters for custom file output')
+
+def search(out_file, out_custom, info,**kwargs):
     """Search in the database for objects with given parameters."""
     try:
         for r in ['minra', 'maxra']:
@@ -190,6 +194,22 @@ def search(out_file, **kwargs):
         if out_file is not None:
             out_file.write('\n'.join(str(dso) for dso in object_list))
             out_file.flush()
+        elif out_custom is not None:
+            assert info is not None, "--out_custom requires --info argument"
+            custom_info = [x.strip() for x in info.split(',')]
+
+            lines = []
+            lines.append(",".join(custom_info))
+            for dso in object_list:
+                line = []
+                for param in custom_info:
+                    column = getattr(dso, f'_{param}')
+                    if "," in column:
+                        column = column.replace(',','; ')
+                    line.append(column)
+                lines.append(",".join(line))
+            out_custom.write('\n'.join(lines))
+            out_custom.flush()
         else:
             if len(object_list) > 20:
                 if click.confirm(click.style('WARNING: ', fg='yellow', bold=True)
