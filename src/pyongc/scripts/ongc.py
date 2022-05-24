@@ -159,11 +159,8 @@ def separation(obj1, obj2):
 @click.option('--withname', '-N', is_flag=True, help='List only objects with common name')
 @click.option('--out_file', '-O', type=click.File('w'),
               help='Output results to text file')
-@click.option('--out_custom','-C',type=click.File('w'),
-              help='Output custom results to file, use with --info for parameters')
-@click.option('--info', '-I',help='Parameters for custom file output')
-
-def search(out_file, out_custom, info,**kwargs):
+@click.option('--include_field', '-I', help='Parameters for custom file output')
+def search(out_file, include_field, **kwargs):
     """Search in the database for objects with given parameters."""
     try:
         for r in ['minra', 'maxra']:
@@ -192,24 +189,23 @@ def search(out_file, out_custom, info,**kwargs):
             click.secho('\nNo objects found with such parameters!', bold=True)
             return
         if out_file is not None:
-            out_file.write('\n'.join(str(dso) for dso in object_list))
-            out_file.flush()
-        elif out_custom is not None:
-            assert info is not None, "--out_custom requires --info argument"
-            custom_info = [x.strip() for x in info.split(',')]
-
-            lines = []
-            lines.append(",".join(custom_info))
-            for dso in object_list:
-                line = []
-                for param in custom_info:
-                    column = getattr(dso, f'_{param}')
-                    if "," in column:
-                        column = column.replace(',','; ')
-                    line.append(column)
-                lines.append(",".join(line))
-            out_custom.write('\n'.join(lines))
-            out_custom.flush()
+            if include_field is not None:
+                include_field = [x.strip() for x in include_field.split(',')]
+                if 'name' not in include_field:
+                    include_field.insert(0, "name")
+                lines = []
+                lines.append(";".join(include_field))
+                for dso in object_list:
+                    line = []
+                    for param in include_field:
+                        column = getattr(dso, f'_{param}')
+                        line.append(column)
+                    lines.append(";".join(line))
+                out_file.write('\n'.join(lines))
+                out_file.flush()
+            else:
+                out_file.write('\n'.join(dso._name for dso in object_list))
+                out_file.flush()
         else:
             if len(object_list) > 20:
                 if click.confirm(click.style('WARNING: ', fg='yellow', bold=True)

@@ -312,30 +312,32 @@ def test_search_to_file():
         result = runner.invoke(ongc.search, ['--constellation=aql', '--out_file=test.txt'])
         assert result.exit_code == 0
         assert os.path.isfile('test.txt')
+        assert '\nNGC6915\n' in open('test.txt').read()
 
 
 def test_search_to_custom_file():
     runner = CliRunner()
     with runner.isolated_filesystem():
         result = runner.invoke(ongc.search, [
-            '--info=name,type,cstarnames',
+            '--include_field=name,type,cstarnames',
             '--constellation=her',
-            '--out_custom=test.csv',
+            '--out_file=test.csv',
         ])
         assert result.exit_code == 0
         assert os.path.isfile('test.csv')
-        assert '\nIC4593,Planetary Nebula,BD +12 2966; HD 145649\n' in open('test.csv').read()
+        assert '\nIC4593;Planetary Nebula;BD +12 2966,HD 145649\n' in open('test.csv').read()
 
 
-def test_search_to_custom_file_no_info():
+def test_search_to_custom_file_invalid_field():
     runner = CliRunner()
     with runner.isolated_filesystem():
         result = runner.invoke(ongc.search, [
             '--constellation=her',
-            '--out_custom=test.csv',
+            '--out_file=test.csv',
+            '--include_field=test'
         ])
         assert result.exit_code == 0
-        assert result.output == 'ERROR: --out_custom requires --info argument\n'
+        assert result.output == "ERROR: 'Dso' object has no attribute '_test'\n"
         assert not os.path.isfile('test.csv')
 
 
