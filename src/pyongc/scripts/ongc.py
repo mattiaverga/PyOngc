@@ -198,7 +198,7 @@ def search(out_file, include_field, **kwargs):
                 for dso in object_list:
                     line = []
                     for param in include_field:
-                        column = getattr(dso, f'_{param}')
+                        column = str(getattr(dso, f'_{param}'))
                         line.append(column)
                     lines.append(";".join(line))
                 out_file.write('\n'.join(lines))
