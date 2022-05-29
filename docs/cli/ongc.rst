@@ -11,7 +11,7 @@ Synopsis
 Description
 ===========
 
-``ongc`` is the command line interface to used to browse ONGC database data. It can be used 
+``ongc`` is the command line interface to used to browse ONGC database data. It can be used
 to query data about an object or to build up lists based on some parameters.
 
 
@@ -38,12 +38,12 @@ The coordinates must be expressed in the form `HH:MM:SS(.SS) +/-DD:MM:SS(.S)`
 
     ``--radius INTEGER``
 
-        It's the radius ot the search, expressed in arcmin. If it's not provided, the search is 
+        It's the radius ot the search, expressed in arcmin. If it's not provided, the search is
         made with a default value of 60'.
 
     ``--catalog [all|NGC|IC]``
 
-        Allows to list only objects from NGC or IC catalog. By default the search will ouput 
+        Allows to list only objects from NGC or IC catalog. By default the search will ouput
         all objects.
 
 Neighbors
@@ -61,18 +61,18 @@ If the ouput exceed 20 objects, the user can choose to view the list in a pager.
 
     ``--radius INTEGER``
 
-        It's the radius ot the search, expressed in arcmin. If it's not provided, the search is 
+        It's the radius ot the search, expressed in arcmin. If it's not provided, the search is
         made with a default value of 30'.
 
     ``--catalog [all|NGC|IC]``
 
-        Allows to list only objects from NGC or IC catalog. By default the search will ouput 
+        Allows to list only objects from NGC or IC catalog. By default the search will ouput
         all objects.
 
 Search
 ------
 
-The ``search`` command allows to build up a list of objects with specific parameters. The 
+The ``search`` command allows to build up a list of objects with specific parameters. The
 different options can be combined to perform a very granular search.
 
 If the ouput exceed 20 objects, the user can choose to view the list in a pager.
@@ -81,28 +81,28 @@ If the ouput exceed 20 objects, the user can choose to view the list in a pager.
 
     ``--catalog [all|NGC|IC]``
 
-        Allows to list only objects from NGC or IC catalog. By default the search will ouput 
+        Allows to list only objects from NGC or IC catalog. By default the search will ouput
         all objects.
 
     ``--type TEXT``
 
-        Allows to list only objects of specific kinds. It accepts multiple comma separated values 
+        Allows to list only objects of specific kinds. It accepts multiple comma separated values
         of the object types listed in the 
         `OpenNGC guide <https://github.com/mattiaverga/OpenNGC/blob/master/NGC_guide.txt>`_.
 
     ``--constellation TEXT``
 
-        Allows to list only objects within some constellations boundaries. It accepts multiple comma 
+        Allows to list only objects within some constellations boundaries. It accepts multiple comma
         separated values. Use IAU 3-letter form.
 
     ``--minsize FLOAT``
 
-        Allows to list only objects with a major axis greater or equal than the specified value 
+        Allows to list only objects with a major axis greater or equal than the specified value
         expressed in arcmin.
 
     ``--maxsize FLOAT``
 
-        Allows to list only objects with a major axis lower than the specified value 
+        Allows to list only objects with a major axis lower than the specified value
         expressed in arcmin.
 
         It will also include all objects with an unknown major axis value.
@@ -117,22 +117,22 @@ If the ouput exceed 20 objects, the user can choose to view the list in a pager.
 
     ``--minra TEXT``
 
-        Allows to list only objects with a Right Ascension greater than the specified value. 
+        Allows to list only objects with a Right Ascension greater than the specified value.
         It accepts an input in the form `HH:MM:SS(.SS)`
 
     ``--maxra TEXT``
 
-        Allows to list only objects with a Right Ascension lower than the specified value. 
+        Allows to list only objects with a Right Ascension lower than the specified value.
         It accepts an input in the form `HH:MM:SS(.SS)`
 
     ``--mindec TEXT``
 
-        Allows to list only objects with a Declination greater than the specified value. 
+        Allows to list only objects with a Declination greater than the specified value.
         It accepts an input in the form `+/-DD:MM:SS(.S)`
 
     ``--maxdec TEXT``
 
-        Allows to list only objects with a Declination lower than the specified value. 
+        Allows to list only objects with a Declination lower than the specified value.
         It accepts an input in the form `+/-DD:MM:SS(.S)`
 
     ``-n, --named TEXT``
@@ -146,6 +146,15 @@ If the ouput exceed 20 objects, the user can choose to view the list in a pager.
     ``-O, --out_file FILENAME``
 
         Outputs the results to a file rather than to the terminal.
+
+    ``-I, --include_fields field_1,field_2,...,field_n``
+
+        Combined with `-O` it will produce a csv file with the requested fields added to
+        the results output. The `name` field is always included.
+        Other available fields are: `type | ra | dec | const | majax | minax | pa |
+        bmag | vmag | jmag | hmag | kmag | sbrightn | hubble | parallax | pmra | pmdec
+        | radvel | redshift | cstarumag | cstarbmag | cstarvmag | messier | ngc | ic |
+        cstarnames | identifiers | commonnames | nednotes | ongnotes`.
 
 Separation
 ----------

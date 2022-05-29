@@ -159,8 +159,8 @@ def separation(obj1, obj2):
 @click.option('--withname', '-N', is_flag=True, help='List only objects with common name')
 @click.option('--out_file', '-O', type=click.File('w'),
               help='Output results to text file')
-@click.option('--include_field', '-I', help='Parameters for custom file output')
-def search(out_file, include_field, **kwargs):
+@click.option('--include_fields', '-I', help='Parameters for custom file output')
+def search(out_file, include_fields, **kwargs):
     """Search in the database for objects with given parameters."""
     try:
         for r in ['minra', 'maxra']:
@@ -189,15 +189,15 @@ def search(out_file, include_field, **kwargs):
             click.secho('\nNo objects found with such parameters!', bold=True)
             return
         if out_file is not None:
-            if include_field is not None:
-                include_field = [x.strip() for x in include_field.split(',')]
-                if 'name' not in include_field:
-                    include_field.insert(0, "name")
+            if include_fields is not None:
+                include_fields = [x.strip() for x in include_fields.split(',')]
+                if 'name' not in include_fields:
+                    include_fields.insert(0, "name")
                 lines = []
-                lines.append(";".join(include_field))
+                lines.append(";".join(include_fields))
                 for dso in object_list:
                     line = []
-                    for param in include_field:
+                    for param in include_fields:
                         column = str(getattr(dso, f'_{param}'))
                         line.append(column)
                     lines.append(";".join(line))
