@@ -319,7 +319,7 @@ def test_search_to_custom_file():
     runner = CliRunner()
     with runner.isolated_filesystem():
         result = runner.invoke(ongc.search, [
-            '--include_field=name,type,cstarnames',
+            '--include_fields=name,type,cstarnames',
             '--constellation=her',
             '--out_file=test.csv',
         ])
@@ -334,7 +334,7 @@ def test_search_to_custom_file_invalid_field():
         result = runner.invoke(ongc.search, [
             '--constellation=her',
             '--out_file=test.csv',
-            '--include_field=test'
+            '--include_fields=test'
         ])
         assert result.exit_code == 0
         assert result.output == "ERROR: 'Dso' object has no attribute '_test'\n"
