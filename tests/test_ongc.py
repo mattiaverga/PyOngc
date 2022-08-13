@@ -216,8 +216,7 @@ class TestDsoClass():
         obj = ongc.Dso('NGC6543')
 
         expected = ('Additional radio sources may contribute to the WMAP flux.',
-                    'Diameter measured by the author from DSS2 images. The fainter '
-                    'outer shell has a diameter of 5.5 arcmin ca.')
+                    'The fainter outer shell has a diameter of 5.5 arcmin ca.')
         assert obj.notes == expected
 
     @pytest.mark.parametrize('obj,expected', [pytest.param('M45', True),
@@ -638,7 +637,7 @@ class TestDsoMethods():
         """Test the listObjects() method to list objects without size."""
         objectList = ongc.listObjects(maxsize=0)
 
-        assert len(objectList) == 1967
+        assert len(objectList) == 1966
 
     def test_list_objects_filter_mag(self):
         """Test the listObjects() method with magnitudes filters applied."""
@@ -836,9 +835,6 @@ class TestDsoMethods():
             "+-----------------------------------------------------------------------------+\n"
             "| NED notes:                                                                  |\n"
             "|    Nominal position for NGC 6533 is -30 arcmin in error.                    |\n"
-            "+-----------------------------------------------------------------------------+\n"
-            "| OpenNGC notes:                                                              |\n"
-            "|    B-Mag taken from LEDA, V-mag taken from HEASARC's messier table          |\n"
             "+-----------------------------------------------------------------------------+\n"
             )
 
