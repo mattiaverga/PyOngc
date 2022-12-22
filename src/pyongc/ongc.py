@@ -37,6 +37,7 @@ Methods provided:
     * printDetails: Prints a detailed description of the object in a formatted output.
 """
 
+from functools import cached_property
 from typing import Generator, List, Tuple, Optional, Union
 import json
 import numpy as np
@@ -186,7 +187,7 @@ class Dso(object):
         """
         return f'{self._name}, {self._type} in {self._const}'
 
-    @property
+    @cached_property
     def cstar_data(self) -> Optional[Tuple[Optional[List[str]], Optional[float],
                                            Optional[float], Optional[float]]]:
         """Data about central star of planetary nebulaes.
@@ -220,7 +221,7 @@ class Dso(object):
 
         return identifiers, self._cstarumag, self._cstarbmag, self._cstarvmag
 
-    @property
+    @cached_property
     def constellation(self) -> str:
         """The constellation where the object is located.
 
@@ -235,7 +236,7 @@ class Dso(object):
         """
         return self._const
 
-    @property
+    @cached_property
     def coords(self) -> Optional[np.ndarray]:
         """Returns object coordinates in HMS and DMS as numpy array or None.
 
@@ -267,7 +268,7 @@ class Dso(object):
         dec[0] = dec[0] * -1 if np.signbit(self._dec) else dec[0]
         return np.array([ra, dec, ])
 
-    @property
+    @cached_property
     def dec(self) -> str:
         """Object Declination in a easy to read format as string.
 
@@ -292,7 +293,7 @@ class Dso(object):
         else:
             return 'N/A'
 
-    @property
+    @cached_property
     def dimensions(self) -> Tuple[Optional[float], Optional[float], Optional[int]]:
         """Object axes dimensions and position angle.
 
@@ -309,7 +310,7 @@ class Dso(object):
         """
         return self._majax, self._minax, self._pa
 
-    @property
+    @cached_property
     def hubble(self) -> str:
         """The Hubble classification of a galaxy.
 
@@ -324,7 +325,7 @@ class Dso(object):
         """
         return self._hubble
 
-    @property
+    @cached_property
     def id(self) -> int:
         """The internal database Id of the object.
 
@@ -339,7 +340,7 @@ class Dso(object):
         """
         return self._id
 
-    @property
+    @cached_property
     def identifiers(self) -> Tuple[Optional[str], Optional[List[str]], Optional[List[str]],
                                    Optional[List[str]], Optional[List[str]]]:
         """All the alternative identifiers of the object.
@@ -393,7 +394,7 @@ class Dso(object):
 
         return messier, ngc, ic, commonNames, other
 
-    @property
+    @cached_property
     def magnitudes(self) -> Tuple[Optional[float], Optional[float], Optional[float],
                                   Optional[float], Optional[float]]:
         """Returns object magnitudes.
@@ -411,7 +412,7 @@ class Dso(object):
         """
         return self._bmag, self._vmag, self._jmag, self._hmag, self._kmag
 
-    @property
+    @cached_property
     def name(self) -> str:
         """The main identifier of the object.
 
@@ -427,7 +428,7 @@ class Dso(object):
         """
         return self._name
 
-    @property
+    @cached_property
     def notes(self) -> Tuple[str, str]:
         """Returns notes from NED and from ONGC.
 
@@ -443,7 +444,7 @@ class Dso(object):
         """
         return self._nednotes, self._ongcnotes
 
-    @property
+    @cached_property
     def notngc(self) -> bool:
         """A flag which marks objects not being in the NGC or IC catalog.
 
@@ -460,7 +461,7 @@ class Dso(object):
         """
         return bool(self._notngc)
 
-    @property
+    @cached_property
     def parallax(self) -> Optional[float]:
         """Object's parallax.
 
@@ -475,7 +476,7 @@ class Dso(object):
         """
         return self._parallax
 
-    @property
+    @cached_property
     def pm_dec(self) -> Optional[float]:
         """Proper apparent motion in Dec, expressed in milliarcseconds/year.
 
@@ -490,7 +491,7 @@ class Dso(object):
         """
         return self._pmdec
 
-    @property
+    @cached_property
     def pm_ra(self) -> Optional[float]:
         """Proper apparent motion in RA, expressed in milliarcseconds/year.
 
@@ -505,7 +506,7 @@ class Dso(object):
         """
         return self._pmra
 
-    @property
+    @cached_property
     def ra(self) -> str:
         """Object Right Ascension in a easy to read format as string.
 
@@ -530,7 +531,7 @@ class Dso(object):
         else:
             return 'N/A'
 
-    @property
+    @cached_property
     def rad_coords(self) -> Optional[np.ndarray]:
         """Returns object coordinates in radians as numpy array or None.
 
@@ -549,7 +550,7 @@ class Dso(object):
 
         return np.array([self._ra, self._dec, ])
 
-    @property
+    @cached_property
     def radvel(self) -> Optional[float]:
         """Object's radial velocity.
 
@@ -564,7 +565,7 @@ class Dso(object):
         """
         return self._radvel
 
-    @property
+    @cached_property
     def redshift(self) -> Optional[float]:
         """Object's redshift value.
 
@@ -579,7 +580,7 @@ class Dso(object):
         """
         return self._redshift
 
-    @property
+    @cached_property
     def surface_brightness(self) -> Optional[float]:
         """The surface brightness value of a galaxy.
 
@@ -594,7 +595,7 @@ class Dso(object):
         """
         return self._sbrightn
 
-    @property
+    @cached_property
     def type(self) -> str:
         """Object type.
 
