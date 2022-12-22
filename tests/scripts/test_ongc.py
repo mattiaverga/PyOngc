@@ -227,7 +227,7 @@ def test_search_with_maxsize_filter():
     result = runner.invoke(ongc.search, ['--maxsize=0.5'])
     assert result.exit_code == 0
     assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
-    assert result.output.endswith('M040, Double star in UMa\n')
+    assert result.output.endswith('NGC5457, Galaxy in UMa\n')
 
 
 def test_search_with_uptobmag_filter():
