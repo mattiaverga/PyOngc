@@ -585,7 +585,7 @@ class TestDsoMethods():
         """
         objectList = ongc.listObjects()
 
-        assert len(objectList) == 13991
+        assert len(objectList) == 13992
         assert type(objectList[0]) is ongc.Dso
 
     def test_list_objects_filter_catalog_NGC(self):
@@ -604,7 +604,7 @@ class TestDsoMethods():
         """Test the listObjects() method with catalog filter applied."""
         objectList = ongc.listObjects(catalog='M')
 
-        assert len(objectList) == 109
+        assert len(objectList) == 110
 
     def test_list_objects_filter_type(self):
         """Test the listObjects() method with type filter applied.
@@ -612,7 +612,7 @@ class TestDsoMethods():
         """
         objectList = ongc.listObjects(type=['Dup', ])
 
-        assert len(objectList) == 651
+        assert len(objectList) == 652
         assert str(objectList[0]) == 'IC0011, Duplicated record in Cas'
 
     def test_list_objects_filter_multiple_types(self):
@@ -637,7 +637,7 @@ class TestDsoMethods():
         """Test the listObjects() method to list objects without size."""
         objectList = ongc.listObjects(maxsize=0)
 
-        assert len(objectList) == 1966
+        assert len(objectList) == 1967
 
     def test_list_objects_filter_mag(self):
         """Test the listObjects() method with magnitudes filters applied."""
@@ -704,7 +704,7 @@ class TestDsoMethods():
         """Test the listObjects() method to list objects without common name."""
         objectList = ongc.listObjects(withname=False)
 
-        assert len(objectList) == 13846
+        assert len(objectList) == 13847
 
     def test_list_objects_wrong_filter(self):
         """Test the listObjects() method when an unsupported filter is used."""
