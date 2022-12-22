@@ -435,8 +435,7 @@ class Dso(object):
                 >>> s = Dso("ngc6543")
                 >>> s.notes
                 ('Additional radio sources may contribute to the WMAP flux.', \
-'Diameter measured by the author from DSS2 images. The fainter outer shell has a \
-diameter of 5.5 arcmin ca.')
+'The fainter outer shell has a diameter of 5.5 arcmin ca.')
 
         Returns:
             `('nednotes', 'ongcnotes')`
@@ -1200,7 +1199,7 @@ def listObjects(**kwargs) -> List[Dso]:
             >>> from pyongc.ongc import listObjects
             >>> objectList = listObjects()
             >>> len(objectList)
-            13991
+            13992
 
     Filters are combined with "AND" in the query; only one value for filter is allowed:
 
