@@ -312,7 +312,8 @@ def test_search_to_file():
         result = runner.invoke(ongc.search, ['--constellation=aql', '--out_file=test.txt'])
         assert result.exit_code == 0
         assert os.path.isfile('test.txt')
-        assert '\nNGC6915\n' in open('test.txt').read()
+        with open('test.txt') as f:
+            assert '\nNGC6915\n' in f.read()
 
 
 def test_search_to_custom_file():
@@ -325,7 +326,8 @@ def test_search_to_custom_file():
         ])
         assert result.exit_code == 0
         assert os.path.isfile('test.csv')
-        assert '\nIC4593;Planetary Nebula;BD +12 2966,HD 145649\n' in open('test.csv').read()
+        with open('test.csv') as f:
+            assert '\nIC4593;Planetary Nebula;BD +12 2966,HD 145649\n' in f.read()
 
 
 def test_search_to_custom_file_invalid_field():
