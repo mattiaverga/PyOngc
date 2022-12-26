@@ -12,3 +12,4 @@ Welcome to PyONGC's documentation!
    readme
    Python modules <modules/index>
    The CLI interface <cli/ongc>
+   Use examples <examples/examples>
