@@ -23,10 +23,10 @@
 # SOFTWARE.
 #
 
+from unittest import mock
 import pytest
 
 import json
-import mock
 import numpy as np
 
 from pyongc import ongc, exceptions
