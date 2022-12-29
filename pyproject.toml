@@ -40,7 +40,7 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 data = ["pandas"]
-development = ["pytest", "mock", "flake8", "pytest-cov", "pytest-doctestplus"]
+development = ["pytest", "flake8", "pytest-cov", "pytest-doctestplus"]
 docs = ["pandas", "sphinx", "sphinx_rtd_theme"]
 
 [project.scripts]

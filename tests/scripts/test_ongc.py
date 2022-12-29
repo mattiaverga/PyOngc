@@ -23,9 +23,10 @@
 # SOFTWARE.
 #
 
+from unittest import mock
+
 from click.testing import CliRunner
 import os.path
-import mock
 
 from pyongc.scripts import ongc
 from pyongc import __version__ as version
