@@ -840,6 +840,35 @@ class TestDsoMethods():
 
         assert obj_details == expected
 
+    def test_print_details_no_redshift(self):
+        """printDetails() should handle correctly None redshift value."""
+        obj_details = ongc.printDetails('NGC6383')
+        expected = ("""\
++-----------------------------------------------------------------------------+
+| Id: 12400     Name: NGC6374           Type: Open Cluster                    |
+| R.A.: 17:34:42.54      Dec.: -32:34:52.9      Constellation: Sco            |
+| Also known as:                                                              |
+|    NGC6383                                                                  |
++-----------------------------------------------------------------------------+
+| Major axis: 6.9'       Minor axis: N/A        Position angle: N/A           |
+| B-mag: 5.56    V-mag: 5.5     J-mag: N/A     H-mag: N/A     K-mag: N/A      |
+|                                                                             |
+| Parallax: N/A          Radial velocity: N/A           Redshift: N/A         |
+|                                                                             |
+| Proper apparent motion in RA: N/A                                           |
+| Proper apparent motion in Dec: N/A                                          |
+|                                                                             |
++-----------------------------------------------------------------------------+
+| Other identifiers:                                                          |
+|    MWSC 2631                                                                |
++-----------------------------------------------------------------------------+
+| NED notes:                                                                  |
+|    Bright star superposed.                                                  |
++-----------------------------------------------------------------------------+
+""")
+
+        assert obj_details == expected
+
 
 class TestDatabaseIntegrity():
     """Check data integrity."""

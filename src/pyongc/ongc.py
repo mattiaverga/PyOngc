@@ -1547,7 +1547,7 @@ def printDetails(dso: Union[Dso, str]) -> str:
 
     obj_string += (f'|{" " * 77}|\n')
 
-    redshift = f'{dso.redshift:.6f}'
+    redshift = f'{dso.redshift:.6f}' if dso.redshift is not None else None
     obj_string += ('| '
                    f'Parallax: {_add_units(dso.parallax, "mas"):13}'
                    f'Radial velocity: {_add_units(dso.radvel, "km/s"):14}'
