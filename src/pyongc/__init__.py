@@ -1,7 +1,8 @@
-"""Python interface to OpenNGC database data.
+# SPDX-FileCopyrightText: 2017 Mattia Verga <mattia.verga@tiscali.it>
+#
+# SPDX-License-Identifier: MIT
 
-:license: MIT, see LICENSE for more details.
-"""
+"""Python interface to OpenNGC database data."""
 
 from pkg_resources import resource_filename
 

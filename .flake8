@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2017 Mattia Verga <mattia.verga@tiscali.it>
+#
+# SPDX-License-Identifier: MIT
+
 [flake8]
 show-source = True
 max-line-length = 100
