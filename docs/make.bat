@@ -1,3 +1,7 @@
+REM SPDX-FileCopyrightText: 2017 Mattia Verga <mattia.verga@tiscali.it>
+REM
+REM SPDX-License-Identifier: MIT
+
 @ECHO OFF
 
 pushd %~dp0
