@@ -44,7 +44,7 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 data = ["pandas"]
-development = ["pytest", "flake8", "pytest-cov", "pytest-doctestplus"]
+development = ["pytest", "pytest-cov", "pytest-doctestplus", "ruff"]
 docs = ["pandas", "sphinx", "sphinx_rtd_theme"]
 
 [project.scripts]
@@ -65,3 +65,5 @@ find = {where = ["src"]}
 [tool.setuptools.package-data]
 pyongc = ["ongc.db"]
 
+[tool.ruff]
+line-length = 100

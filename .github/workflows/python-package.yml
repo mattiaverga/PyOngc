@@ -33,9 +33,9 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install -e .[data]
         python -m pip install -e .[development]
-    - name: Lint with flake8
+    - name: Lint with ruff
       run: |
-        flake8 .
+        ruff .
     - name: Doctests
       run: |
         pytest -v --doctest-plus src/pyongc/
