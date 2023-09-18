@@ -487,7 +487,7 @@ class TestDsoMethods():
         expectedNearest = 'IC1694, Galaxy in Cet'
         expectedNearestSeparation = 0.13726168561780452
 
-        assert type(neighbors) is list
+        assert isinstance(neighbors, list)
         assert len(neighbors) == expectedListLength
         assert str(neighbors[0][0]) == expectedNearest
         assert np.isclose(neighbors[0][1], expectedNearestSeparation)
@@ -501,7 +501,7 @@ class TestDsoMethods():
         expectedNearest = 'IC0058, Galaxy in Cet'
         expectedNearestSeparation = 0.4064105387726472
 
-        assert type(neighbors) is list
+        assert isinstance(neighbors, list)
         assert len(neighbors) == expectedListLength
         assert str(neighbors[0][0]) == expectedNearest
         assert np.isclose(neighbors[0][1], expectedNearestSeparation)
@@ -515,7 +515,7 @@ class TestDsoMethods():
         expectedNearest = 'NGC0016, Galaxy in Peg'
         expectedNearestSeparation = 0.1378555838270968
 
-        assert type(neighbors) is list
+        assert isinstance(neighbors, list)
         assert len(neighbors) == expectedListLength
         assert str(neighbors[0][0]) == expectedNearest
         assert np.isclose(neighbors[0][1], expectedNearestSeparation)
@@ -529,7 +529,7 @@ class TestDsoMethods():
         expectedNearest = 'NGC7802, Galaxy in Psc'
         expectedNearestSeparation = 0.7874886760327793
 
-        assert type(neighbors) is list
+        assert isinstance(neighbors, list)
         assert len(neighbors) == expectedListLength
         assert str(neighbors[0][0]) == expectedNearest
         assert np.isclose(neighbors[0][1], expectedNearestSeparation)
@@ -541,7 +541,7 @@ class TestDsoMethods():
         expectedNearest = 'NGC0533, Galaxy in Cet'
         expectedNearestSeparation = 0.24140243942744602
 
-        assert type(neighbors) is list
+        assert isinstance(neighbors, list)
         assert len(neighbors) == expectedListLength
         assert str(neighbors[0][0]) == expectedNearest
         assert np.isclose(neighbors[0][1], expectedNearestSeparation)
@@ -705,7 +705,7 @@ class TestDsoMethods():
         neighbors = ongc.getNeighbors(obj, 15)
         nearby_objects = ongc.nearby(objCoords, separation=15)
 
-        assert type(nearby_objects) is list
+        assert isinstance(nearby_objects, list)
         assert len(nearby_objects) == len(neighbors)+1
         assert str(nearby_objects[0][0]) == str(obj)
         assert nearby_objects[0][1] == 0
@@ -720,7 +720,7 @@ class TestDsoMethods():
         neighbors = ongc.getNeighbors('NGC521', 15, catalog='IC')
         nearby_objects = ongc.nearby(objCoords, separation=15, catalog='IC')
 
-        assert type(nearby_objects) is list
+        assert isinstance(nearby_objects, list)
         assert len(nearby_objects) == len(neighbors)
         assert str(nearby_objects[0][0]) == str(neighbors[0][0])
         assert nearby_objects[0][1] == neighbors[0][1]
@@ -854,7 +854,7 @@ class TestDatabaseIntegrity():
     def test_data_integrity(self):
         allObjects = ongc.listObjects()
         for item in allObjects:
-            assert type(item.id) is int
+            assert isinstance(item.id, int)
             assert item.type != ''
             if item.type != 'Nonexistent object':
                 # Be sure all objects have registered coordinates
