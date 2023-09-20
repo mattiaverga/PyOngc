@@ -12,6 +12,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "PyOngc"
+version = "1.0.2"
 description = "Python interface to OpenNGC database data"
 readme = "README.rst"
 authors = [
@@ -40,7 +41,6 @@ dependencies = [
     "Click",
     "numpy",
 ]
-dynamic = ["version"]
 
 [project.optional-dependencies]
 data = ["pandas"]
@@ -52,9 +52,6 @@ ongc = "pyongc.scripts.ongc:cli"
 
 [project.urls]
 homepage = "https://github.com/mattiaverga/PyOngc"
-
-[tool.setuptools.dynamic]
-version = {attr = "pyongc.__version__"}
 
 [tool.setuptools.packages]
 find = {where = ["src"]}
