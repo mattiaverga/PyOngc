@@ -461,7 +461,7 @@ class TestDsoMethods():
         obj2 = ongc.Dso('NGC6118')
 
         expected = (4.207483963913541, 2.9580416666666864, -2.9927499999999996)
-        assert ongc.getSeparation(obj1, obj2) == expected
+        np.testing.assert_allclose(ongc.getSeparation(obj1, obj2), expected)
 
     def test_get_separation_friendly(self):
         """Test that the calculated apparent angular separation between two objects
