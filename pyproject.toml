@@ -45,7 +45,11 @@ dependencies = [
 [project.optional-dependencies]
 data = ["pandas"]
 development = ["pytest", "pytest-cov", "pytest-doctestplus", "ruff"]
-docs = ["pandas", "sphinx", "sphinx_rtd_theme"]
+docs = [
+    "pandas",
+    "sphinx>=4.0",
+    "sphinx_rtd_theme>=1.0"
+]
 
 [project.scripts]
 ongc = "pyongc.scripts.ongc:cli"
