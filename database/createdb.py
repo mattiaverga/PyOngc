@@ -54,6 +54,7 @@ PATTERNS = {'NGC|IC': r'^((?:NGC|IC)\s?)(\d{1,4})\s?((NED)(\d{1,2})|[A-Z]{1,2})?
             'MWSC': r'^(MWSC\s?)(\d{1,4})$',
             'PGC': r'^((?:PGC|LEDA)\s?)(\d{1,6})$',
             'UGC': r'^(UGC\s?)(\d{1,5})$',
+            'UGCA': r'^(UGCA\s?)(\d{1,3})$',
             }
 
 # Create db
