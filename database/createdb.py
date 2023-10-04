@@ -50,6 +50,7 @@ PATTERNS = {'NGC|IC': r'^((?:NGC|IC)\s?)(\d{1,4})\s?((NED)(\d{1,2})|[A-Z]{1,2})?
             'Harvard': r'^(H\s?)(\d{1,2})$',
             'Hickson': r'^(HCG\s?)(\d{1,3})$',
             'LBN': r'^(LBN\s?)(\d{1,3})$',
+            'MCG': r'^(MCG\s?)([+-]\d{2}-\d{2}-\d{3,4})$',
             'Melotte': r'^(MEL\s?)(\d{1,3})$',
             'MWSC': r'^(MWSC\s?)(\d{1,4})$',
             'PGC': r'^((?:PGC|LEDA)\s?)(\d{1,6})$',
@@ -191,6 +192,9 @@ try:
                             elif cat == 'PGC':
                                 # Fixed catalog name to recognize also LEDA prefix
                                 objectname = f'{cat}{name_parts.group(2):0>6}'
+                            elif cat == 'MCG':
+                                objectname = f'{name_parts.group(1).strip()}' \
+                                             f'{name_parts.group(2).strip()}'
                             else:
                                 objectname = f'{name_parts.group(1).strip()}' \
                                              f'{name_parts.group(2):0>3}'

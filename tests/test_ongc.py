@@ -86,6 +86,11 @@ class TestDsoClass():
         """Test M102 == M101."""
         assert ongc.Dso('M102').name == ongc.Dso('M101').name
 
+    def test_name_recognition_MCG(self):
+        """Test the recognition of a MCG identifier."""
+        assert ongc.Dso('MCG-02-01-031').name == 'IC0002'
+        assert ongc.Dso('MCG+00-01-038').name == 'IC0003'
+
     def test_name_recognition_MWSC(self):
         """Test the recognition of a MWSC identifier."""
         assert ongc.Dso('MWSC146').name == 'IC0166'
@@ -98,6 +103,10 @@ class TestDsoClass():
     def test_name_recognition_UGC(self):
         """Test the recognition of a UGC identifier."""
         assert ongc.Dso('UGC9965').name == 'IC1132'
+
+    def test_name_recognition_UGCA(self):
+        """Test the recognition of a UGCA identifier."""
+        assert ongc.Dso('UGCA99').name == 'IC0402'
 
     def test_duplicate_resolving(self):
         """Test that a duplicated object is returned as himself when asked to do so."""
