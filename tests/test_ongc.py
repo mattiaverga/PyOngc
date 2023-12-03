@@ -573,7 +573,7 @@ class TestDsoMethods():
         """
         objectList = ongc.listObjects()
 
-        assert len(objectList) == 13992
+        assert len(objectList) == 14033
         assert type(objectList[0]) is ongc.Dso
 
     def test_list_objects_filter_catalog_NGC(self):
@@ -586,7 +586,7 @@ class TestDsoMethods():
         """Test the listObjects() method with catalog filter applied."""
         objectList = ongc.listObjects(catalog='IC')
 
-        assert len(objectList) == 5595
+        assert len(objectList) == 5596
 
     def test_list_objects_filter_catalog_M(self):
         """Test the listObjects() method with catalog filter applied."""
@@ -643,7 +643,7 @@ class TestDsoMethods():
         """List objects with RA lower than maxra."""
         objectList = ongc.listObjects(maxra=2)
 
-        assert len(objectList) == 68
+        assert len(objectList) == 69
 
     def test_list_objects_filter_ra_between(self):
         """List objects with RA between minra and maxra."""
@@ -655,7 +655,7 @@ class TestDsoMethods():
         """List objects with RA between minra and maxra crossing 0h."""
         objectList = ongc.listObjects(minra=359, maxra=1)
 
-        assert len(objectList) == 69
+        assert len(objectList) == 70
 
     def test_list_objects_filter_mindec(self):
         """List objects with Dec above mindec."""
@@ -686,13 +686,13 @@ class TestDsoMethods():
         """Test the listObjects() method to list objects with common name."""
         objectList = ongc.listObjects(withname=True)
 
-        assert len(objectList) == 145
+        assert len(objectList) == 151
 
     def test_list_objects_without_name(self):
         """Test the listObjects() method to list objects without common name."""
         objectList = ongc.listObjects(withname=False)
 
-        assert len(objectList) == 13847
+        assert len(objectList) == 13882
 
     def test_list_objects_wrong_filter(self):
         """Test the listObjects() method when an unsupported filter is used."""
@@ -745,7 +745,7 @@ class TestDsoMethods():
         obj_details = ongc.printDetails('NGC1')
         expected = (
             "+-----------------------------------------------------------------------------+\n"
-            "| Id: 5596      Name: NGC0001           Type: Galaxy                          |\n"
+            "| Id: 5597      Name: NGC0001           Type: Galaxy                          |\n"
             "| R.A.: 00:07:15.84      Dec.: +27:42:29.1      Constellation: Peg            |\n"
             "+-----------------------------------------------------------------------------+\n"
             "| Major axis: 1.57'      Minor axis: 1.07'      Position angle: 112°          |\n"
@@ -771,7 +771,7 @@ class TestDsoMethods():
         obj_details = ongc.printDetails('NGC40')
         expected = (
             "+-----------------------------------------------------------------------------+\n"
-            "| Id: 5635      Name: NGC0040           Type: Planetary Nebula                |\n"
+            "| Id: 5636      Name: NGC0040           Type: Planetary Nebula                |\n"
             "| R.A.: 00:13:01.03      Dec.: +72:31:19.0      Constellation: Cep            |\n"
             "| Common names:                                                               |\n"
             "|    Bow-Tie nebula                                                           |\n"
@@ -802,7 +802,7 @@ class TestDsoMethods():
         obj_details = ongc.printDetails('NGC6523')
         expected = (
             "+-----------------------------------------------------------------------------+\n"
-            "| Id: 12552     Name: NGC6523           Type: Nebula                          |\n"
+            "| Id: 12553     Name: NGC6523           Type: Nebula                          |\n"
             "| R.A.: 18:03:41.27      Dec.: -24:22:48.6      Constellation: Sgr            |\n"
             "| Also known as:                                                              |\n"
             "|    M008, NGC6533                                                            |\n"
@@ -833,7 +833,7 @@ class TestDsoMethods():
         obj_details = ongc.printDetails('NGC6383')
         expected = ("""\
 +-----------------------------------------------------------------------------+
-| Id: 12400     Name: NGC6374           Type: Open Cluster                    |
+| Id: 12401     Name: NGC6374           Type: Open Cluster                    |
 | R.A.: 17:34:42.54      Dec.: -32:34:52.9      Constellation: Sco            |
 | Also known as:                                                              |
 |    NGC6383                                                                  |

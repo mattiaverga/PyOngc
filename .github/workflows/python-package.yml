@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11"]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
 
     steps:
     - uses: actions/checkout@v2
@@ -43,7 +43,7 @@ jobs:
       run: |
         pytest -v --cov=pyongc --cov-report=lcov tests/
     - name: Upload coverage results
-      if: ${{ matrix.python-version == 3.11}}
+      if: ${{ matrix.python-version == 3.12}}
       uses: coverallsapp/github-action@master
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}

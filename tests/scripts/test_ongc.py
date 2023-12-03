@@ -24,7 +24,7 @@ def test_view_details():
     assert result.exit_code == 0
     assert result.output == (
         "+-----------------------------------------------------------------------------+\n"
-        "| Id: 5596      Name: NGC0001           Type: Galaxy                          |\n"
+        "| Id: 5597      Name: NGC0001           Type: Galaxy                          |\n"
         "| R.A.: 00:07:15.84      Dec.: +27:42:29.1      Constellation: Peg            |\n"
         "+-----------------------------------------------------------------------------+\n"
         "| Major axis: 1.57'      Minor axis: 1.07'      Position angle: 112°          |\n"
@@ -183,7 +183,7 @@ def test_search_with_constellation_filter():
     result = runner.invoke(ongc.search, ['--constellation=aql'])
     assert result.exit_code == 0
     assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
-    assert result.output.endswith('NGC6941, Galaxy in Aql\n')
+    assert result.output.endswith('MWSC3171, Globular Cluster in Aql\n')
 
 
 def test_search_with_multiple_constellations_filter():
@@ -191,7 +191,7 @@ def test_search_with_multiple_constellations_filter():
     result = runner.invoke(ongc.search, ['--constellation=aql,cyg'])
     assert result.exit_code == 0
     assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
-    assert result.output.endswith('NGC7175, Open Cluster in Cyg\n')
+    assert result.output.endswith('MWSC3171, Globular Cluster in Aql\n')
 
 
 def test_search_with_minsize_filter():
@@ -239,7 +239,7 @@ def test_search_with_maxra_filter():
     result = runner.invoke(ongc.search, ['--maxra=0:8:0'])
     assert result.exit_code == 0
     assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
-    assert result.output.endswith('NGC7840, Galaxy in Psc\n')
+    assert result.output.endswith('PGC000143, Galaxy in Cet\n')
 
 
 def test_search_with_minra_maxra_filter():
@@ -247,7 +247,7 @@ def test_search_with_minra_maxra_filter():
     result = runner.invoke(ongc.search, ['--minra=23:56:0', '--maxra=0:4:0'])
     assert result.exit_code == 0
     assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
-    assert result.output.endswith('NGC7822, HII Ionized region in Cep\n')
+    assert result.output.endswith('PGC000143, Galaxy in Cet\n')
 
 
 def test_search_with_mindec_filter():
