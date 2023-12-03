@@ -1188,7 +1188,7 @@ def listObjects(**kwargs) -> List[Dso]:
             >>> from pyongc.ongc import listObjects
             >>> objectList = listObjects()
             >>> len(objectList)
-            13992
+            14033
 
     Filters are combined with "AND" in the query; only one value for filter is allowed:
 
@@ -1402,7 +1402,7 @@ def printDetails(dso: Union[Dso, str]) -> str:
             >>> from pyongc.ongc import printDetails
             >>> print(printDetails("ngc1"))
             +-----------------------------------------------------------------------------+
-            | Id: 5596      Name: NGC0001           Type: Galaxy                          |
+            | Id: 5597      Name: NGC0001           Type: Galaxy                          |
             | R.A.: 00:07:15.84      Dec.: +27:42:29.1      Constellation: Peg            |
             +-----------------------------------------------------------------------------+
             | Major axis: 1.57'      Minor axis: 1.07'      Position angle: 112°          |
