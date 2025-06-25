@@ -22,7 +22,7 @@ class TestDataFrames():
     def test_all(self):
         """Test all() method."""
         objs = data.all()
-        assert type(objs) == pd.core.frame.DataFrame
+        assert type(objs) is pd.core.frame.DataFrame
         assert objs[objs['type'] == 'Dup'].shape == (652, 33)
 
     def test_clusters_none(self):
