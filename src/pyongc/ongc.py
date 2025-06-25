@@ -757,7 +757,8 @@ def _distance(coords1: np.ndarray, coords2: np.ndarray) -> Tuple[float, float, f
             >>> p1 = np.array([0.26179939, 0.27052603])
             >>> p2 = np.array([0.39269908, 0.18325957])
             >>> _distance(p1, p2)
-            (8.852139937970884, 7.499999776570824, -4.999999851047216)
+            (np.float64(8.852139937970884), np.float64(7.499999776570824), \
+np.float64(-4.999999851047216))
 
     Args:
         coords1: R.A. and Dec expressed in radians of the first point as
@@ -1060,8 +1061,8 @@ def getNeighbors(obj: Union[Dso, str], separation: Union[int, float],
             >>> from pyongc.ongc import Dso, getNeighbors
             >>> s1 = Dso("ngc521")
             >>> getNeighbors(s1, 15) #doctest: +ELLIPSIS
-            [(<pyongc.ongc.Dso object at 0x...>, 0.13726168561780452), \
-(<pyongc.ongc.Dso object at 0x...>, 0.24140243942744602)]
+            [(<pyongc.ongc.Dso object at 0x...>, np.float64(0.13726168561780452)), \
+(<pyongc.ongc.Dso object at 0x...>, np.float64(0.24140243942744602))]
 
             >>> from pyongc.ongc import getNeighbors
             >>> getNeighbors("ngc521", 1)
@@ -1071,7 +1072,7 @@ def getNeighbors(obj: Union[Dso, str], separation: Union[int, float],
 
             >>> from pyongc.ongc import getNeighbors
             >>> getNeighbors("ngc521", 15, catalog="NGC") #doctest: +ELLIPSIS
-            [(<pyongc.ongc.Dso object at 0x...>, 0.24140243942744602)]
+            [(<pyongc.ongc.Dso object at 0x...>, np.float64(0.24140243942744602))]
 
     Args:
         object: a Dso object or a string which identifies the object
@@ -1126,11 +1127,13 @@ def getSeparation(obj1: Union[Dso, str], obj2: Union[Dso, str],
             >>> s1 = Dso("ngc1")
             >>> s2 = Dso("ngc2")
             >>> getSeparation(s1, s2)
-            (0.03008927371519897, 0.005291666666666788, -0.02972222222221896)
+            (np.float64(0.03008927371519897), np.float64(0.005291666666666788), \
+np.float64(-0.02972222222221896))
 
             >>> from pyongc.ongc import getSeparation
             >>> getSeparation("ngc1", "ngc2")
-            (0.03008927371519897, 0.005291666666666788, -0.02972222222221896)
+            (np.float64(0.03008927371519897), np.float64(0.005291666666666788), \
+np.float64(-0.02972222222221896))
 
     With the optional parameter `style` set to `text`, it returns a formatted string:
 
@@ -1343,16 +1346,16 @@ def nearby(coords_string: str, separation: float = 60,
 
             >>> from pyongc.ongc import nearby
             >>> nearby('11:08:44 -00:09:01.3') #doctest: +ELLIPSIS +FLOAT_CMP
-            [(<pyongc.ongc.Dso object at 0x...>, 0.1799936868460791), \
-(<pyongc.ongc.Dso object at 0x...>, 0.7398295985600021), \
-(<pyongc.ongc.Dso object at 0x...>, 0.9810037613087355)]
+            [(<pyongc.ongc.Dso object at 0x...>, np.float64(0.1799936868460791)), \
+(<pyongc.ongc.Dso object at 0x...>, np.float64(0.7398295985600021)), \
+(<pyongc.ongc.Dso object at 0x...>, np.float64(0.9810037613087355))]
 
     The optional "catalog" parameter can be used to filter the search to only NGC or IC objects:
 
             >>> from pyongc.ongc import nearby
             >>> nearby('11:08:44 -00:09:01.3', separation=60, catalog='NGC') #doctest: +ELLIPSIS \
 +FLOAT_CMP
-            [(<pyongc.ongc.Dso object at 0x...>, 0.7398295985600021)]
+            [(<pyongc.ongc.Dso object at 0x...>, np.float64(0.7398295985600021))]
 
     Args:
         coords: R.A. and Dec of search center

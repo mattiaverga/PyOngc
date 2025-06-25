@@ -36,8 +36,8 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Astronomy",
 ]
 dependencies = [
-    "Click",
-    "numpy",
+    "Click>=8.0",
+    "numpy>=2.0",
 ]
 
 [project.optional-dependencies]
