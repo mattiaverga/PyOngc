@@ -3,11 +3,8 @@
 # SPDX-License-Identifier: MIT
 
 [build-system]
-requires = [
-    "setuptools>=60",
-    "wheel",
-]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling >= 1.27"]
+build-backend = "hatchling.build"
 
 [project]
 name = "PyOngc"
@@ -15,12 +12,12 @@ version = "1.1.0"
 description = "Python interface to OpenNGC database data"
 readme = "README.rst"
 authors = [
-  {email = "mattia.verga@tiscali.it"},
-  {name = "Mattia Verga"}
+  {name = "Mattia Verga", email = "mattia.verga@tiscali.it"},
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 keywords = ["astronomy", "database"]
-license = {text = "MIT AND CC-BY-SA-4.0"}
+license = "MIT AND CC-BY-SA-4.0"
+license-files = ["LICENSES/*.txt"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
@@ -29,11 +26,12 @@ classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Database",
     "Topic :: Scientific/Engineering :: Astronomy",
 ]
