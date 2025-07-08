@@ -316,7 +316,7 @@ class Dso(object):
                 >>> from pyongc.ongc import Dso
                 >>> s = Dso("ngc1")
                 >>> s.id
-                5596
+                5597
 
         """
         return self._id
