@@ -8,7 +8,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "PyOngc"
-version = "1.1.0"
+version = "1.2.0"
 description = "Python interface to OpenNGC database data"
 readme = "README.rst"
 authors = [
@@ -36,17 +36,17 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Astronomy",
 ]
 dependencies = [
-    "Click>=8.0",
-    "numpy>=2.0",
+    "Click~=8.0",
+    "numpy~=2.0",
 ]
 
 [project.optional-dependencies]
-data = ["pandas"]
+data = ["pandas~=2.0"]
 development = ["pytest", "pytest-cov", "pytest-doctestplus", "ruff"]
 docs = [
-    "pandas",
-    "sphinx>=4.0",
-    "sphinx_rtd_theme>=1.0"
+    "pandas~=2.0",
+    "sphinx~=8.0",
+    "sphinx_rtd_theme~=3.0"
 ]
 
 [project.scripts]
