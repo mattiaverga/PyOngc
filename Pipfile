@@ -18,7 +18,7 @@ sphinx-rtd-theme = "~=3.0"
 [packages]
 click = "~=8.0"
 numpy = "~=2.0"
-pandas = "~=2.0"
+pandas = "~=3.0"
 
 [requires]
 python_version = "3.13"

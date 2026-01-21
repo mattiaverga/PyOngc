@@ -41,10 +41,10 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-data = ["pandas~=2.0"]
+data = ["pandas~=3.0"]
 development = ["pytest", "pytest-cov", "pytest-doctestplus", "ruff"]
 docs = [
-    "pandas~=2.0",
+    "pandas~=3.0",
     "sphinx~=8.0",
     "sphinx_rtd_theme~=3.0"
 ]
