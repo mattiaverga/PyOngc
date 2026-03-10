@@ -9,6 +9,6 @@ from importlib.resources import files
 
 
 __version__ = version('PyOngc')
-DBDATE = 20231203  # Version of database data
+DBDATE = 20260307  # Version of database data
 
 DBPATH = str(files(__name__) / 'ongc.db')
