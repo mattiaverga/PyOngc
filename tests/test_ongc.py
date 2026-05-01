@@ -625,7 +625,7 @@ class TestDsoMethods():
         """Test the listObjects() method to list objects without size."""
         objectList = ongc.listObjects(maxsize=0)
 
-        assert len(objectList) == 1967
+        assert len(objectList) == 1962
 
     def test_list_objects_filter_mag(self):
         """Test the listObjects() method with magnitudes filters applied."""

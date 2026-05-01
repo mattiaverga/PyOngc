@@ -1212,7 +1212,7 @@ def listObjects(**kwargs) -> List[Dso]:
             >>> from pyongc.ongc import listObjects
             >>> objectList = listObjects(maxsize=0)
             >>> len(objectList)
-            1967
+            1962
 
     Args:
         catalog (string, optional): filter for catalog. [NGC|IC|M]
