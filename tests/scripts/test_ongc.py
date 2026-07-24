@@ -127,7 +127,8 @@ def test_neighbors_with_pager():
     runner = CliRunner()
     result = runner.invoke(ongc.neighbors, ['ngc1', '--radius=600'], input='y')
     assert result.exit_code == 0
-    assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
+    assert 'WARNING:' in result.output
+    assert 'the result list is long. Do you want to see it via a pager?' in result.output
     assert '\nNGC0001 neighbors from nearest to farthest:\n' not in result.output
 
 
@@ -150,7 +151,8 @@ def test_search():
     runner = CliRunner()
     result = runner.invoke(ongc.search, input='y')
     assert result.exit_code == 0
-    assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
+    assert 'WARNING:' in result.output
+    assert 'the result list is long. Do you want to see it via a pager?' in result.output
     assert result.output.endswith('UGC05470, Galaxy in Leo\n')
 
 
@@ -158,7 +160,8 @@ def test_search_with_catalog_filter():
     runner = CliRunner()
     result = runner.invoke(ongc.search, ['--catalog=M'], input='y')
     assert result.exit_code == 0
-    assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
+    assert 'WARNING:' in result.output
+    assert 'the result list is long. Do you want to see it via a pager?' in result.output
     assert result.output.endswith('NGC0205, Galaxy in And\n')
 
 
@@ -166,7 +169,8 @@ def test_search_with_type_filter():
     runner = CliRunner()
     result = runner.invoke(ongc.search, ['--type=*'], input='y')
     assert result.exit_code == 0
-    assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
+    assert 'WARNING:' in result.output
+    assert 'the result list is long. Do you want to see it via a pager?' in result.output
     assert result.output.endswith('NGC7830, Star in Psc\n')
 
 
@@ -174,7 +178,8 @@ def test_search_with_multiple_types_filter():
     runner = CliRunner()
     result = runner.invoke(ongc.search, ['--type=*,**'], input='y')
     assert result.exit_code == 0
-    assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
+    assert 'WARNING:' in result.output
+    assert 'the result list is long. Do you want to see it via a pager?' in result.output
     assert result.output.endswith('M040, Double star in UMa\n')
 
 
@@ -182,7 +187,8 @@ def test_search_with_constellation_filter():
     runner = CliRunner()
     result = runner.invoke(ongc.search, ['--constellation=aql'], input='y')
     assert result.exit_code == 0
-    assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
+    assert 'WARNING:' in result.output
+    assert 'the result list is long. Do you want to see it via a pager?' in result.output
     assert result.output.endswith('MWSC3171, Globular Cluster in Aql\n')
 
 
@@ -190,7 +196,8 @@ def test_search_with_multiple_constellations_filter():
     runner = CliRunner()
     result = runner.invoke(ongc.search, ['--constellation=aql,cyg'], input='y')
     assert result.exit_code == 0
-    assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
+    assert 'WARNING:' in result.output
+    assert 'the result list is long. Do you want to see it via a pager?' in result.output
     assert result.output.endswith('MWSC3171, Globular Cluster in Aql\n')
 
 
@@ -198,7 +205,8 @@ def test_search_with_minsize_filter():
     runner = CliRunner()
     result = runner.invoke(ongc.search, ['--minsize=5'], input='y')
     assert result.exit_code == 0
-    assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
+    assert 'WARNING:' in result.output
+    assert 'the result list is long. Do you want to see it via a pager?' in result.output
     assert result.output.endswith('UGC05470, Galaxy in Leo\n')
 
 
@@ -206,7 +214,8 @@ def test_search_with_maxsize_filter():
     runner = CliRunner()
     result = runner.invoke(ongc.search, ['--maxsize=0.5'], input='y')
     assert result.exit_code == 0
-    assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
+    assert 'WARNING:' in result.output
+    assert 'the result list is long. Do you want to see it via a pager?' in result.output
     assert result.output.endswith('NGC5457, Galaxy in UMa\n')
 
 
@@ -214,7 +223,8 @@ def test_search_with_uptobmag_filter():
     runner = CliRunner()
     result = runner.invoke(ongc.search, ['--uptobmag=8'], input='y')
     assert result.exit_code == 0
-    assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
+    assert 'WARNING:' in result.output
+    assert 'the result list is long. Do you want to see it via a pager?' in result.output
     assert result.output.endswith('Mel071, Open Cluster in Pup\n')
 
 
@@ -222,7 +232,8 @@ def test_search_with_uptovmag_filter():
     runner = CliRunner()
     result = runner.invoke(ongc.search, ['--uptovmag=6'], input='y')
     assert result.exit_code == 0
-    assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
+    assert 'WARNING:' in result.output
+    assert 'the result list is long. Do you want to see it via a pager?' in result.output
     assert result.output.endswith('Mel022, Open Cluster in Tau\n')
 
 
@@ -230,7 +241,8 @@ def test_search_with_minra_filter():
     runner = CliRunner()
     result = runner.invoke(ongc.search, ['--minra=23:52:00.00'], input='y')
     assert result.exit_code == 0
-    assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
+    assert 'WARNING:' in result.output
+    assert 'the result list is long. Do you want to see it via a pager?' in result.output
     assert result.output.endswith('H21, Open Cluster in Cas\n')
 
 
@@ -238,7 +250,8 @@ def test_search_with_maxra_filter():
     runner = CliRunner()
     result = runner.invoke(ongc.search, ['--maxra=0:8:0'], input='y')
     assert result.exit_code == 0
-    assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
+    assert 'WARNING:' in result.output
+    assert 'the result list is long. Do you want to see it via a pager?' in result.output
     assert result.output.endswith('PGC000143, Galaxy in Cet\n')
 
 
@@ -246,7 +259,8 @@ def test_search_with_minra_maxra_filter():
     runner = CliRunner()
     result = runner.invoke(ongc.search, ['--minra=23:56:0', '--maxra=0:4:0'], input='y')
     assert result.exit_code == 0
-    assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
+    assert 'WARNING:' in result.output
+    assert 'the result list is long. Do you want to see it via a pager?' in result.output
     assert result.output.endswith('PGC000143, Galaxy in Cet\n')
 
 
@@ -268,7 +282,8 @@ def test_search_with_mindec_maxdec_filter():
     runner = CliRunner()
     result = runner.invoke(ongc.search, ['--mindec=-1:00:00', '--maxdec=+1:0:0'], input='y')
     assert result.exit_code == 0
-    assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
+    assert 'WARNING:' in result.output
+    assert 'the result list is long. Do you want to see it via a pager?' in result.output
     assert result.output.endswith('NGC7787, Galaxy in Psc\n')
 
 
@@ -334,7 +349,8 @@ def test_search_with_pager():
     runner = CliRunner()
     result = runner.invoke(ongc.search, ['--catalog=M'], input='y')
     assert result.exit_code == 0
-    assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
+    assert 'WARNING:' in result.output
+    assert 'the result list is long. Do you want to see it via a pager?' in result.output
     assert result.output.endswith('NGC0205, Galaxy in And\n')
 
 
@@ -401,5 +417,6 @@ def test_nearby_with_pager():
     runner = CliRunner()
     result = runner.invoke(ongc.nearby, ['11:08:44', '-00:09:01.3', '--radius=600'], input='y')
     assert result.exit_code == 0
-    assert 'WARNING: the result list is long. Do you want to see it via a pager?' in result.output
+    assert 'WARNING:' in result.output
+    assert 'the result list is long. Do you want to see it via a pager?' in result.output
     assert '\nObjects in proximity of 11:08:44 -00:09:01.3' not in result.output
